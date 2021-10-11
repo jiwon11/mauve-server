@@ -1,6 +1,6 @@
 name: Deploy to Amazon ECS
 
-on: pull_request
+on: pull_request_target
 
 jobs:
   deploy:
