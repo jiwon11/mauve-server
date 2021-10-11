@@ -1,8 +1,6 @@
-on:
-  pull_request:
-    branches: [main]
-
 name: Deploy to Amazon ECS
+
+on: pull_request
 
 jobs:
   deploy:
