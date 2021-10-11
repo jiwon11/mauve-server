@@ -1,0 +1,64 @@
+on:
+  pull_request:
+    branches: [main]
+
+name: Deploy to Amazon ECS
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: tuning-app
+          IMAGE_TAG: latest
+        run: |
+          echo ${{ steps.login-ecr.outputs.registry }}
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker-compose build
+          docker-compose push
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Render Amazon ECS task definition for tuning app container
+        id: render-tuning-app-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: tuning-app-container
+          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest
+
+      - name: Modify Amazon ECS task definition with reverse proxy container
+        id: render-reverse-proxy-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-tuning-app-container.outputs.task-definition }}
+          container-name: reverse-proxy-container
+          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-reverse-proxy-container.outputs.task-definition }}
+          service: tuning-app-service
+          cluster: tuning-app-cluster
+          wait-for-service-stability: true

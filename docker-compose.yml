@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  aws-xray:
+    image: amazon/aws-xray-daemon
+  reverse-proxy-container:
+    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
+    build:
+      context: ./nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/logrotate.conf:/etc/logrotate.conf
+    environment:
+      TZ: Asia/Seoul
+    links:
+      - tuning-app-container
+    depends_on:
+      - tuning-app-container
+  tuning-app-container:
+    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest
+    build:
+      context: ./app
+    ports:
+      - 3000:3000
+    networks:
+      - default

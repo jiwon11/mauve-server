@@ -1,0 +1,153 @@
+{
+  "ipcMode": null,
+  "executionRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
+  "containerDefinitions": [{
+      "name": "xray-daemon",
+      "image": "amazon/aws-xray-daemon",
+      "cpu": 32,
+      "memoryReservation": 50,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "secretOptions": null,
+        "options": {
+          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [{
+        "hostPort": 0,
+        "containerPort": 2000,
+        "protocol": "udp"
+      }]
+    }, {
+      "dnsSearchDomains": null,
+      "environmentFiles": [{
+        "value": "arn:aws:s3:::tuning-app-env/config.env",
+        "type": "s3"
+      }],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "secretOptions": null,
+        "options": {
+          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "entryPoint": null,
+      "portMappings": [{
+        "hostPort": 3000,
+        "protocol": "tcp",
+        "containerPort": 3000
+      }],
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 1024,
+      "environment": [{
+        "name": "AWS_XRAY_DAEMON_ADDRESS",
+        "value": "xray-daemon:2000"
+      }],
+      "resourceRequirements": null,
+      "ulimits": null,
+      "dnsServers": null,
+      "mountPoints": [],
+      "workingDirectory": null,
+      "secrets": null,
+      "dockerSecurityOptions": null,
+      "memory": 850,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "stopTimeout": null,
+      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest",
+      "startTimeout": null,
+      "firelensConfiguration": null,
+      "dependsOn": null,
+      "disableNetworking": null,
+      "interactive": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": ["xray-daemon"],
+      "hostname": null,
+      "extraHosts": null,
+      "pseudoTerminal": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "systemControls": null,
+      "privileged": null,
+      "name": "tuning-app-container"
+    },
+    {
+      "dnsSearchDomains": null,
+      "environmentFiles": null,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "secretOptions": null,
+        "options": {
+          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "entryPoint": null,
+      "portMappings": [{
+        "hostPort": 80,
+        "protocol": "tcp",
+        "containerPort": 80
+      }],
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 900,
+      "environment": [],
+      "resourceRequirements": null,
+      "ulimits": null,
+      "dnsServers": null,
+      "mountPoints": [],
+      "workingDirectory": null,
+      "secrets": null,
+      "dockerSecurityOptions": null,
+      "memory": 50,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "stopTimeout": null,
+      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest",
+      "startTimeout": null,
+      "firelensConfiguration": null,
+      "dependsOn": [{
+        "containerName": "tuning-app-container",
+        "condition": "START"
+      }],
+      "disableNetworking": null,
+      "interactive": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": [
+        "tuning-app-container"
+      ],
+      "hostname": null,
+      "extraHosts": null,
+      "pseudoTerminal": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "systemControls": null,
+      "privileged": null,
+      "name": "reverse-proxy-container"
+    }
+  ],
+  "memory": null,
+  "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
+  "family": "tuning-app-task",
+  "pidMode": null,
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "networkMode": null,
+  "cpu": "2048",
+  "inferenceAccelerators": [],
+  "proxyConfiguration": null,
+  "volumes": [],
+  "placementConstraints": [],
+  "tags": []
+}
