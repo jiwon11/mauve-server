@@ -10,6 +10,8 @@ import logger from '../libs/logger/index';
 import jsonResult from '../middlewares/jsonResult';
 
 // application Controllers for Routes
+import authRouter from '../routes/auth';
+import userRouter from '../routes/user';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 AWSXRay.captureHTTPsGlobal(require('https'));
@@ -40,6 +42,8 @@ export default async app => {
   // custom middlewares
   app.use(jsonResult);
   // application routes
+  app.use('/auth', authRouter);
+  app.use('/user', userRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);

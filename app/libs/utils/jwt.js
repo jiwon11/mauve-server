@@ -11,7 +11,7 @@ const secret = process.env.SECRET;
 export const sign = user => {
   const payload = {
     // access token에 들어갈 payload
-    id: user.ID,
+    id: user._id,
     role: user.role
   };
 
