@@ -6,13 +6,13 @@ const Schema = mongoose.Schema;
 
 const weeklyPlanSchema = new Schema(
   {
-    url: { type: String, required: true },
-    trainer: { type: Schema.Types.ObjectId, ref: 'USER' },
+    trainer: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
     week_NUM: { type: Number, required: true },
     exercise_video: [Schema.Types.Mixed],
     description: { type: String, required: true }
   },
   {
+    collection: 'WEEKLY_PLAN',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

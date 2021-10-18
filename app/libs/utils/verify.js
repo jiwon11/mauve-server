@@ -6,12 +6,13 @@ const messagingServiceSid = process.env.TWILIO_MESSAGING_SID;
 
 const client = require('twilio')(accountSid, authToken);
 
-export const pushToken = async phoneNumber => {
+export const pushSMS = async phoneNumber => {
   const token = Math.floor(Math.random() * 1000000);
-  await PhoneVerifyModel.create({
+  const newPhoneVerify = new PhoneVerifyModel({
     token: token,
     phone_NO: phoneNumber
   });
+  await newPhoneVerify.save();
   try {
     const message = await client.messages.create({
       body: `[WECAN]인증번호 [${token}]를 입력해주세요.`,

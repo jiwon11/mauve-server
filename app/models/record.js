@@ -9,10 +9,11 @@ const recordSchema = new Schema(
     category: { type: String, required: true, enum: ['meals', 'exercise'] },
     question: { type: String, required: true },
     media: [{ type: Schema.Types.Mixed }],
-    student: { type: Schema.Types.ObjectId, ref: 'USER' },
-    class: { type: Schema.Types.ObjectId, ref: 'CLASS' }
+    student: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
+    class: { type: Schema.Types.ObjectId, ref: 'CLASS', index: true }
   },
   {
+    collection: 'RECORD',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

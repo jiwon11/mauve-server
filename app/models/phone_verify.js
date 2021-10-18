@@ -3,11 +3,16 @@ import moment from 'moment';
 
 const Schema = mongoose.Schema;
 
-const PhoneVerifySchema = new Schema({
-  phone_NO: { type: String, required: true },
-  token: { type: String, required: true },
-  createdAt: { type: Date, expires: '5m', default: moment().format() }
-});
+const PhoneVerifySchema = new Schema(
+  {
+    phone_NO: { type: String, required: true, index: true },
+    token: { type: String, required: true, index: true },
+    createdAt: { type: Date, expires: '5m', default: moment().format() }
+  },
+  {
+    collection: 'PHONE_VERIFY'
+  }
+);
 
 const PhoneVerify = mongoose.model('PHONE_VERIFY', PhoneVerifySchema);
 

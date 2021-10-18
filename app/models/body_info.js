@@ -15,9 +15,10 @@ const bodyInfoSchema = new Schema(
     focus_target: { type: String, required: true },
     trouble: { type: String, required: true },
     inbody_img: { type: Schema.Types.Mixed, required: true },
-    student: { type: Schema.Types.ObjectId, ref: 'USER' }
+    student: { type: Schema.Types.ObjectId, ref: 'USER', index: true }
   },
   {
+    collection: 'BODY_INFO',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

@@ -3,24 +3,35 @@ import mongoose_delete from 'mongoose-delete';
 
 const Schema = mongoose.Schema;
 
-const notificationConfigSchema = new Schema({
-  chat: { type: Boolean, default: true },
-  record_feedback: { type: Boolean, default: true },
-  plan_assignment: { type: Boolean, default: true },
-  mission: { type: Boolean, default: true },
-  event: { type: Boolean, default: true }
-});
-
 const userSchema = new Schema(
   {
     nickname: { type: String, required: true, unique: true },
     phone_NO: { type: String, required: true, unique: true },
-    profileImg: { type: String, required: true, default: ` ` },
+    profile_img: {
+      type: Schema.Types.Mixed,
+      default: {
+        fieldname: 'profile_img',
+        originalname: ' ',
+        mimetype: 'image/jpeg',
+        key: ' ',
+        location: ' '
+      }
+    },
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, required: true, enum: ['student', 'trainer'] },
-    notification_config: notificationConfigSchema
+    notification_config: {
+      type: Schema.Types.Mixed,
+      default: {
+        chat: true,
+        record_feedback: true,
+        plan_assignment: true,
+        mission: true,
+        event: true
+      }
+    }
   },
   {
+    collection: 'USER',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

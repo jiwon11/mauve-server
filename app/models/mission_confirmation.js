@@ -7,10 +7,11 @@ const Schema = mongoose.Schema;
 const classConfirmationSchema = new Schema(
   {
     url: { type: String, required: true },
-    class_mission: { type: Schema.Types.ObjectId, ref: 'CLASS_MISSION' },
-    student: { type: Schema.Types.ObjectId, ref: 'USER' }
+    class_mission: { type: Schema.Types.ObjectId, ref: 'CLASS_MISSION', index: true },
+    student: { type: Schema.Types.ObjectId, ref: 'USER', index: true }
   },
   {
+    collection: 'CLASS_CONFIRMATION',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
