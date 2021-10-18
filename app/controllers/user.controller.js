@@ -1,6 +1,7 @@
 import userService from '../services/user.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
+import UserService from '../services/user.service';
 
 export const signAccount = async (req, res) => {
   try {
@@ -28,5 +29,16 @@ export const signAccount = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
+
+export const getUserData = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const { userRecord } = await UserService.findById(userID);
+    return res.jsonResult(200, userRecord);
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User not founded', err });
   }
 };
