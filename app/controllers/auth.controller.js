@@ -1,16 +1,16 @@
-import { pushToken, verifyToken } from '../libs/utils/verify';
+import { pushSMS, verifyToken } from '../libs/utils/verify';
 
 export const pushTokenToUser = async (req, res) => {
   try {
     const phoneNumber = req.body.phone_NO;
-    const pushTokenResult = await pushToken(phoneNumber);
+    const pushTokenResult = await pushSMS(phoneNumber);
     let statusCode;
-    if (pushTokenResult.success) {
+    if (pushTokenResult) {
       statusCode = 200;
     } else {
       statusCode = 500;
     }
-    return res.jsonResult(statusCode, pushTokenResult.body);
+    return res.jsonResult(statusCode, pushTokenResult);
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, err);

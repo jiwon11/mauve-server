@@ -11,12 +11,7 @@ export default (req, res, next) => {
   if (req.headers.authorization) {
     const token = req.headers.authorization.split('Bearer ')[1]; // header에서 access token을 가져옵니다.
     const result = verify(token); // token을 검증합니다.
-    const userRecord = UserModel.findOne({
-      where: {
-        ID: result.id
-      }
-    });
-    if (result.ok && userRecord) {
+    if (result.ok) {
       // token이 검증되었으면 req에 값을 세팅하고, 다음 콜백함수로 갑니다.
       req.user = { ID: result.id, role: result.role };
       next();

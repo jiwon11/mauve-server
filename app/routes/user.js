@@ -1,11 +1,13 @@
 import express from 'express';
+import { upload } from '../middlewares/multer';
+
 const router = express.Router();
 
 // custom utils And middlewares
 import * as userController from '../controllers/user.controller';
 import jwtAuth from '../middlewares/authJWT';
 
-router.post('/sign', userController.signAccount);
-router.get('/user', jwtAuth, userController.getUserData);
+router.post('/sign', upload.single('profile_img'), userController.signAccount);
+router.get('/:id', jwtAuth, userController.getUserData);
 
 export default router;

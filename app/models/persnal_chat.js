@@ -11,6 +11,7 @@ const personalChatSchema = new Schema(
     media: Schema.Types.Mixed
   },
   {
+    collection: 'PERSONAL_CHAT',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

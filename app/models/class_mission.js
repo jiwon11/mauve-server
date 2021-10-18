@@ -9,10 +9,11 @@ const classMissionSchema = new Schema(
     end_date: { type: Date, required: true, default: moment().tz('Asia/Seoul').format('YYYY-MM-DD') },
     point_NUM: { type: Number, required: true },
     description: { type: String, required: true },
-    class: { type: Schema.Types.ObjectId, ref: 'CLASS' },
+    class: { type: Schema.Types.ObjectId, ref: 'CLASS', index: true },
     fulfill_students: [{ type: Schema.Types.ObjectId, ref: 'STUDENT' }]
   },
   {
+    collection: 'CLASS_MISSION',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

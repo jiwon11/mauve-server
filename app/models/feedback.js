@@ -8,10 +8,11 @@ const feedbackSchema = new Schema(
   {
     answer: { type: String, required: true },
     feedback_media: [{ type: Schema.Types.Mixed }],
-    trainer: { type: Schema.Types.ObjectId, ref: 'USER' },
-    record: { type: Schema.Types.ObjectId, ref: 'RECORD' }
+    trainer: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
+    record: { type: Schema.Types.ObjectId, ref: 'RECORD', index: true }
   },
   {
+    collection: 'FEEDBACK',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;

@@ -9,10 +9,11 @@ const notificationSchema = new Schema(
     title: String,
     body: String,
     data: { any: Object },
-    sender: { type: Schema.Types.ObjectId, ref: 'USER' },
-    notified_user: { type: Schema.Types.ObjectId, ref: 'USER' }
+    sender: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
+    notified_user: { type: Schema.Types.ObjectId, ref: 'USER', index: true }
   },
   {
+    collection: 'NOTIFICATION',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
