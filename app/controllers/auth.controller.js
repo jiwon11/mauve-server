@@ -5,12 +5,12 @@ export const pushTokenToUser = async (req, res) => {
     const phoneNumber = req.body.phone_NO;
     const pushTokenResult = await pushSMS(phoneNumber);
     let statusCode;
-    if (pushTokenResult) {
+    if (pushTokenResult.success) {
       statusCode = 200;
     } else {
       statusCode = 500;
     }
-    return res.jsonResult(statusCode, pushTokenResult);
+    return res.jsonResult(statusCode, pushTokenResult.body);
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, err);

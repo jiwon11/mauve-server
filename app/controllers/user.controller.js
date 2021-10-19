@@ -7,7 +7,9 @@ export const signAccount = async (req, res) => {
   try {
     const userDTO = req.body;
     const profileImgDTO = req.file;
-    ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+    if (profileImgDTO) {
+      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+    }
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.sign(userDTO, profileImgDTO);
@@ -27,7 +29,7 @@ export const signAccount = async (req, res) => {
       };
       return res.jsonResult(statusCode, userToken);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(body.statusCode, body.err);
     }
   } catch (err) {
     console.log(err);
