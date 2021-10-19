@@ -18,7 +18,7 @@ const userSchema = new Schema(
       }
     },
     fcm_token: { type: String, required: true, default: ` ` },
-    role: { type: String, required: true, enum: ['student', 'trainer'] },
+    role: { type: String, required: true, enum: { values: ['student', 'trainer'], message: '{VALUE} is not supported' } },
     notification_config: {
       type: Schema.Types.Mixed,
       default: {

@@ -1,4 +1,8 @@
 import PhoneVerifyModel from '../../models/phone_verify';
+import UserModel from '../../models/user';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -51,13 +55,17 @@ export const verifyToken = async (userPhoneNumber, token) => {
   const verifies = await PhoneVerifyModel.findOne({
     phone_NO: userPhoneNumber,
     token: token
-  }).exec();
+  });
   if (verifies) {
+    const existedUser = await UserModel.findOne({
+      phone_NO: userPhoneNumber
+    });
     await PhoneVerifyModel.deleteOne({ _id: verifies._id }).exec();
     return {
       success: true,
       body: {
-        message: '인증되었습니다.'
+        message: '인증되었습니다.',
+        existedUser: existedUser ? true : false
       }
     };
   } else {

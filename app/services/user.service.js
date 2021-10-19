@@ -5,7 +5,7 @@ export default class UserService {
   static async sign(userDTO, profileImgDTO) {
     try {
       let userRecord, created;
-      const existUser = await UserModel.findOne(userDTO);
+      const existUser = await UserModel.findOne({ phone_no: userDTO.phone_NO });
       if (existUser) {
         userRecord = existUser;
         created = false;
@@ -18,7 +18,16 @@ export default class UserService {
       return { success: true, body: { userRecord, created } };
     } catch (err) {
       console.log(err);
-      return { success: false, body: err };
+      if (err.name === 'ValidationError') {
+        let errors = {};
+
+        Object.keys(err.errors).forEach(key => {
+          errors[key] = err.errors[key].message;
+        });
+
+        return { success: false, body: { statusCode: 400, err: errors } };
+      }
+      return { success: false, body: { statusCode: 500, err } };
     }
   }
 

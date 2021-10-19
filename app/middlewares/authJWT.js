@@ -5,7 +5,6 @@
  case4: access token과 refresh token 모두가 유효한 경우 -> 바로 다음 미들웨어로 넘긴다.
  */
 import { verify } from '../libs/utils/jwt.js';
-import UserModel from '../models/user';
 
 export default (req, res, next) => {
   if (req.headers.authorization) {
