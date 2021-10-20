@@ -55,11 +55,11 @@ export const verifyToken = async (userPhoneNumber, token) => {
   const verifies = await PhoneVerifyModel.findOne({
     phone_NO: userPhoneNumber,
     token: token
-  });
+  }).lean();
   if (verifies) {
     const existedUser = await UserModel.findOne({
       phone_NO: userPhoneNumber
-    });
+    }).lean();
     await PhoneVerifyModel.deleteOne({ _id: verifies._id }).exec();
     return {
       success: true,

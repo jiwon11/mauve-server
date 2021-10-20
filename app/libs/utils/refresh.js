@@ -33,9 +33,9 @@ export default async (req, res) => {
           // 2. access token이 만료되고, refresh token은 만료되지 않은 경우 => 새로운 access token을 발급
           const user = await UserModel.findOne({
             where: {
-              ID: decoded.id
+              _id: decoded.id
             }
-          });
+          }).lean();
           if (!user) {
             return res.jsonResult(404, '사용자가 존재하지 않습니다.');
           }
