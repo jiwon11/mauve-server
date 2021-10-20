@@ -5,14 +5,13 @@ export default class UserService {
   static async sign(userDTO, profileImgDTO) {
     try {
       let userRecord, created;
-      const existUser = await UserModel.findOne({ phone_no: userDTO.phone_NO });
+      const existUser = await UserModel.findOne({ phone_no: userDTO.phone_NO }).lean();
       if (existUser) {
         userRecord = existUser;
         created = false;
       } else {
-        const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
-        const saveUser = await newUser.save();
-        userRecord = saveUser;
+        const newUser = UserModel.create({ ...userDTO, ...{ profile_img: profileImgDTO } });
+        userRecord = newUser;
         created = true;
       }
       return { success: true, body: { userRecord, created } };
@@ -47,7 +46,7 @@ export default class UserService {
       }
     } catch (err) {
       console.log(err);
-      return { result: 'fail', body: err };
+      return { result: 'fail', body: err.message };
     }
   }
 }
