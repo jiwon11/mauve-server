@@ -23,9 +23,8 @@ export const sign = user => {
 };
 
 export const verify = token => {
-  let decoded = null;
   try {
-    decoded = jwt.verify(token, secret);
+    const decoded = jwt.verify(token, secret);
     return {
       ok: true,
       id: decoded.id,
@@ -34,7 +33,7 @@ export const verify = token => {
   } catch (err) {
     return {
       ok: false,
-      message: err.message
+      message: err
     };
   }
 };
