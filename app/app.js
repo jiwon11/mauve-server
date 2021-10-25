@@ -1,4 +1,5 @@
 import loaders from './loaders';
+import webSocket from './socket/socket';
 import express from 'express';
 
 async function startServer() {
@@ -7,22 +8,14 @@ async function startServer() {
 
     await loaders(app);
 
-    app.listen(process.env.PORT || 3000, '0.0.0.0', err => {
+    const server = app.listen(process.env.PORT || 3000, '0.0.0.0', err => {
       if (err) {
         return console.log(err);
       }
       console.log(`Server is ready !`);
     });
 
-    if (process.env.PM2) {
-      process.on('SIGINT', function () {
-        isDisableKeepAlive = true;
-        app.close(function () {
-          console.log('> 😢 Server closed');
-          process.exit(0);
-        });
-      });
-    }
+    webSocket(server, app);
   } catch (err) {
     console.log(err);
   }
