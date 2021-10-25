@@ -5,13 +5,14 @@ export default class UserService {
   static async sign(userDTO, profileImgDTO) {
     try {
       let userRecord, created;
-      const existUser = await UserModel.findOne({ phone_no: userDTO.phone_NO }).lean();
+      const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
       if (existUser) {
         userRecord = existUser;
         created = false;
       } else {
-        const newUser = UserModel.create({ ...userDTO, ...{ profile_img: profileImgDTO } });
-        userRecord = newUser;
+        const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
+        const saveUser = await newUser.save();
+        userRecord = saveUser;
         created = true;
       }
       return { success: true, body: { userRecord, created } };
@@ -34,13 +35,7 @@ export default class UserService {
     try {
       const userRecord = await UserModel.findOne({ _id: ID }).select({ nickname: 1, phone_NO: 1, role: 1, profile_img: 1 }).lean();
       if (userRecord) {
-        let classInfo;
-        if (userRecord.role === 'student') {
-          classInfo = await ClassModel.find({ students: { $in: [userRecord._id] } }).lean();
-        } else {
-          classInfo = await ClassModel.find({ trainer: userRecord._id }).lean();
-        }
-        return { success: true, body: { userRecord, classInfo } };
+        return { success: true, body: { userRecord } };
       } else {
         return { success: false, body: { message: `User not founded by ID : ${ID}` } };
       }

@@ -1,7 +1,7 @@
 import userService from '../services/user.service';
+import roomService from '../services/room.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
-import UserService from '../services/user.service';
 
 export const signAccount = async (req, res) => {
   try {
@@ -15,6 +15,10 @@ export const signAccount = async (req, res) => {
     const { success, body } = await userService.sign(userDTO, profileImgDTO);
     if (success) {
       const { userRecord, created } = body;
+      if (created) {
+        // 추후 결제 후 로직으로 이동
+        await roomService.create(req, { title: `${userRecord.nickname} CHAT ROOM`, member: [userRecord] });
+      }
       const accessToken = sign(userRecord);
       const refreshToken = refresh();
 
@@ -41,7 +45,7 @@ export const getUserData = async (req, res) => {
   try {
     const targetUserId = req.params.id;
     const userID = req.user.ID;
-    const { success, body } = await UserService.findById(targetUserId);
+    const { success, body } = await userService.findById(targetUserId);
     if (success) {
       return res.jsonResult(200, body);
     } else {
