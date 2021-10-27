@@ -14,14 +14,14 @@ export default (server, app) => {
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     path: '/socket.io',
-    //transports: ['websocket'],
+    transports: ['websocket'],
     cors: {
       origin: ['https://admin.socket.io'],
       credentials: true
     }
   }); // socket.io 패키지와 express 서버 연결
 
-  setupWorker(io);
+  //setupWorker(io);
 
   instrument(io, {
     auth: false,

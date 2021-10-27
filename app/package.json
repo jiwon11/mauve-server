@@ -46,13 +46,8 @@
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
     "slack-node": "^0.1.8",
-<<<<<<< HEAD
-    "socket.io": "^2.4.1",
-    "socket.io-redis": "^5.4.0",
-=======
     "socket.io": "^4.3.1",
     "socket.io-redis": "^6.1.1",
->>>>>>> upstream/main
     "socketio-jwt-auth": "^0.2.1",
     "twilio": "^3.69.0",
     "typedi": "^0.10.0",
