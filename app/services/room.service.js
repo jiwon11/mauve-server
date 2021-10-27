@@ -29,11 +29,9 @@ export default class roomService {
       const roomRecord = await RoomModel.findOne({ _id: roomId }).lean();
       const io = await req.app.get('io');
       if (roomRecord) {
-        const sids = io.of('/chat').sids;
-        console.log('sids', sids);
-        const currentRoom = io.of('/chat').adapter.rooms.get(roomId);
-        const userCount = currentRoom ? currentRoom.size : 0;
-        console.log('currentRoom', currentRoom);
+        const clients = await io.of('/chat').in(roomId).allSockets();
+        console.log('clients', clients);
+        const userCount = clients ? clients.size : 0;
         console.log('userCount', userCount);
         const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
         return { success: true, body: { room: roomRecord, chats: chatRecords } };

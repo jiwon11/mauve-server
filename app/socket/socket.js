@@ -2,7 +2,6 @@ import { verify } from '../libs/utils/jwt.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import socketIoRedisAdapter from 'socket.io-redis';
-const { setupWorker } = require('@socket.io/sticky');
 const { instrument } = require('@socket.io/admin-ui');
 import redis from 'redis';
 import dotenv from 'dotenv';
@@ -21,11 +20,10 @@ export default (server, app) => {
     }
   }); // socket.io 패키지와 express 서버 연결
 
-  //setupWorker(io);
-
   instrument(io, {
     auth: false,
-    namespaceName: '/chat'
+    namespaceName: '/chat',
+    readonly: true
   });
 
   io.use((socket, next) => {
