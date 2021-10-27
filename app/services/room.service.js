@@ -27,11 +27,12 @@ export default class roomService {
   static async findById(req, roomId) {
     try {
       const roomRecord = await RoomModel.findOne({ _id: roomId }).lean();
-      const io = req.app.get('io');
+      const io = await req.app.get('io');
       if (roomRecord) {
-        console.log(io.of('/chat'));
-        const currentRoom = io.of('/chat').adapter.rooms[roomId];
-        const userCount = currentRoom ? currentRoom.length : 0;
+        const sids = io.of('/chat').sids;
+        console.log('sids', sids);
+        const currentRoom = io.of('/chat').adapter.rooms.get(roomId);
+        const userCount = currentRoom ? currentRoom.size : 0;
         console.log('currentRoom', currentRoom);
         console.log('userCount', userCount);
         const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
