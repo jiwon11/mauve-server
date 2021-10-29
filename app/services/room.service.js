@@ -1,6 +1,5 @@
 import RoomModel from '../models/chat_room';
-import ChatModel from '../models/chat';
-
+import mongoose from 'mongoose';
 export default class roomService {
   static async create(req, roomDTO) {
     try {
@@ -24,21 +23,22 @@ export default class roomService {
     }
   }
 
-  static async findById(req, roomId) {
+  static async findById(roomId) {
     try {
-      const roomRecord = await RoomModel.findOne({ _id: roomId }).lean();
-      const io = await req.app.get('io');
+      const roomRecord = await RoomModel.aggregate([
+        { $match: { _id: mongoose.Types.ObjectId(roomId) } },
+        {
+          $lookup: {
+            from: 'USER',
+            localField: 'member',
+            foreignField: '_id',
+            as: 'member'
+          }
+        },
+        { $project: { _id: 1, title: 1, createdAt: 1, 'member.nickname': 1, 'member._id': 1, 'member.profile_img.location': 1 } }
+      ]);
       if (roomRecord) {
-        const clients = await io.of('/chat').in(roomId).allSockets();
-        const sockets = await io.of('/chat').in(roomId).fetchSockets();
-        sockets.forEach(socket => {
-          console.log(`socket:${sockets.indexOf(socket)} connected`, socket.connected);
-          console.log(`socket:${sockets.indexOf(socket)} user`, socket.handshake.auth);
-        });
-        const userCount = clients ? clients.size : 0;
-        console.log('userCount', userCount);
-        const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
-        return { success: true, body: { room: roomRecord, chats: chatRecords } };
+        return { success: true, body: { room: roomRecord[0] } };
       } else {
         return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };
       }
@@ -78,30 +78,6 @@ export default class roomService {
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
-    }
-  }
-
-  static async chat(req, senderId, targetRoomId, chatDTO) {
-    try {
-      const chat = new ChatModel({ room: targetRoomId, sender: senderId, chat: chatDTO });
-      await chat.save();
-      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatDTO);
-      return { success: true, body: 'ok' };
-    } catch (err) {
-      console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
-    }
-  }
-
-  static async media(req, senderId, targetRoomId, chatMediaDTO) {
-    try {
-      const chat = new ChatModel({ room: targetRoomId, sender: senderId, media: chatMediaDTO });
-      await chat.save();
-      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatMediaDTO);
-      return { success: true, body: 'ok' };
-    } catch (err) {
-      console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
     }
   }
 }
