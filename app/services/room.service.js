@@ -30,7 +30,11 @@ export default class roomService {
       const io = await req.app.get('io');
       if (roomRecord) {
         const clients = await io.of('/chat').in(roomId).allSockets();
-        console.log('clients', clients);
+        const sockets = await io.of('/chat').in(roomId).fetchSockets();
+        sockets.forEach(socket => {
+          console.log(`socket:${sockets.indexOf(socket)} connected`, socket.connected);
+          console.log(`socket:${sockets.indexOf(socket)} user`, socket.handshake.auth);
+        });
         const userCount = clients ? clients.size : 0;
         console.log('userCount', userCount);
         const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');

@@ -8,6 +8,20 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const verifyMiddleware = (socket, next) => {
+  const token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  const result = verify(token);
+  if (result.ok) {
+    // token이 검증되었으면 req에 값을 세팅하고, 다음 콜백함수로 갑니다.
+    socket.handshake.auth = { ID: result.id, role: result.role };
+    next();
+  } else {
+    socket.on('disconnect', () => {
+      console.log(result.message);
+    });
+  }
+};
+
 export default (server, app) => {
   console.log('CONNECT SOCKET.IO');
   const httpServer = createServer(app);
@@ -24,20 +38,6 @@ export default (server, app) => {
     auth: false,
     namespaceName: '/chat',
     readonly: true
-  });
-
-  io.use((socket, next) => {
-    const token = socket.handshake.headers.authorization.split('Bearer ')[1];
-    const result = verify(token);
-    if (result.ok) {
-      // token이 검증되었으면 req에 값을 세팅하고, 다음 콜백함수로 갑니다.
-      socket.user = { ID: result.id, role: result.role };
-      next();
-    } else {
-      socket.on('disconnect', () => {
-        console.log(result.message);
-      });
-    }
   });
 
   const pubClient = redis.createClient({
@@ -62,9 +62,12 @@ export default (server, app) => {
   const roomNamespace = io.of('/room'); // io.of : 네임스페이스를 만들어 접속
   const chatNamespace = io.of('/chat'); // 같은 네임스페이스끼리만 데이터 전달
 
+  io.of('/room').use(verifyMiddleware);
+  io.of('/chat').use(verifyMiddleware);
+
   roomNamespace.on('connection', socket => {
     console.log('connect room namespace');
-    console.log('user', socket.user);
+    console.log('user', socket.handshake.auth);
     socket.on('disconnect', () => {
       console.log('break connection room namespace');
     });
@@ -73,11 +76,10 @@ export default (server, app) => {
   chatNamespace.on('connection', async socket => {
     try {
       console.log('connect chat namespace');
-      //console.log('user', socket.user);
+      console.log('user', socket.handshake.auth);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
       await socket.join(roomId);
-      console.log(socket.rooms);
 
       socket.to(roomId).emit('join', {
         sender: 'system',
