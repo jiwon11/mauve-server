@@ -10,6 +10,9 @@ const userSchema = new Schema(
       required: true
     },
     phone_NO: { type: String, required: true, unique: true },
+    birthdate: { type: Date, required: true },
+    height: { type: Number, required: true },
+    tendency: { type: String, required: true },
     profile_img: {
       type: Schema.Types.Mixed,
       default: {
@@ -20,18 +23,12 @@ const userSchema = new Schema(
         location: ' '
       }
     },
-    detail_info: {
-      height: Number,
-      tendency: String,
-      diseases: [String],
-      job: String
-    },
     weight_info: {
-      now: Number,
-      avg_over_last_5y: Number,
-      min_since_age20: Number,
-      max_since_age20: Number,
-      goal: Number
+      now: { type: Number, required: true },
+      avg_over_last_5y: { type: Number, required: true },
+      min_since_age20: { type: Number, required: true },
+      max_since_age20: { type: Number, required: true },
+      goal: { type: Number, required: true }
     },
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'user' },

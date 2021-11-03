@@ -3,7 +3,7 @@ import roomService from '../services/room.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IMPORT from '../libs/utils/import';
-
+import moment from 'moment-timezone';
 export const signAccount = async (req, res) => {
   try {
     const userDTO = req.body;
@@ -11,6 +11,8 @@ export const signAccount = async (req, res) => {
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
     }
+    userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
+    userDTO.weight_info = JSON.parse(userDTO.weight_info);
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.sign(userDTO, profileImgDTO);
