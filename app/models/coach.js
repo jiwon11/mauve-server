@@ -33,7 +33,7 @@ const coachSchema = new Schema(
       }
     ],
     level_of_education: {
-      level: { type: String, enum: { value: ['university', 'graduate school'], message: '{VALUE} is not supported' } },
+      level: { type: String, enum: { values: ['university', 'graduate school'], message: '{VALUE} is not supported' } },
       name: String,
       major: String,
       period: [Date]
@@ -69,6 +69,6 @@ const coachSchema = new Schema(
 
 coachSchema.plugin(mongoose_delete);
 
-const Coach = mongoose.model('COACH', userSchema);
+const Coach = mongoose.model('COACH', coachSchema);
 
 export default Coach;
