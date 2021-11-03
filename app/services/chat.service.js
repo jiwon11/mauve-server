@@ -47,7 +47,7 @@ export default class roomService {
             as: 'sender'
           }
         },
-        { $project: { _id: 1, chat: 1, readers: 1, readersNum: { $size: '$readers' }, 'sender.nickname': 1, 'sender._id': 1, 'sender.profile_img.location': 1 } },
+        { $project: { _id: 1, chat: 1, readers: 1, readersNum: { $size: '$readers' }, 'sender.name': 1, 'sender._id': 1, 'sender.profile_img.location': 1 } },
         { $sort: { createdAt: -1 } },
         { $limit: limit },
         { $skip: offset }

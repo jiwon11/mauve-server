@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
-    bills: [{ type: Schema.Types.Mixed, required: true }],
+    item: { type: Schema.Types.ObjectId, ref: 'ITEM', index: true },
+    bills: { type: Schema.Types.Mixed, required: true },
     customer_uid: { type: String, index: true },
     merchant_uid: { type: String, index: true }
   },

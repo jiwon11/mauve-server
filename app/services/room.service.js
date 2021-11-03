@@ -35,7 +35,7 @@ export default class roomService {
             as: 'member'
           }
         },
-        { $project: { _id: 1, title: 1, createdAt: 1, 'member.nickname': 1, 'member._id': 1, 'member.profile_img.location': 1 } }
+        { $project: { _id: 1, title: 1, createdAt: 1, 'member.name': 1, 'member._id': 1, 'member.profile_img.location': 1 } }
       ]);
       if (roomRecord) {
         return { success: true, body: { room: roomRecord[0] } };
@@ -68,7 +68,7 @@ export default class roomService {
           .to(roomId)
           .emit('join', {
             sender: 'system',
-            chat: `${user.nickname}님이 매니저로 입장하셨습니다.`
+            chat: `${user.name}님이 매니저로 입장하셨습니다.`
           });
         // const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
         return { success: true, body: { room: roomRecord } };

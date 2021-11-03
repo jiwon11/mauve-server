@@ -5,5 +5,6 @@ const router = express.Router();
 import jwtAuth from '../middlewares/authJWT';
 import * as importController from '../controllers/import.controller';
 
-router.post('/billings', jwtAuth, importController);
+router.post('/billings', jwtAuth, importController.billing);
+router.post('/callback/schedule', jwtAuth, importController.callbackSchedule);
 export default router;

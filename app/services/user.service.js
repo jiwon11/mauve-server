@@ -1,5 +1,4 @@
 import UserModel from '../models/user';
-import ClassModel from '../models/class';
 
 export default class UserService {
   static async sign(userDTO, profileImgDTO) {

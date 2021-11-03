@@ -83,9 +83,9 @@ export const requestPayment = async function (access_token, userId, customer_uid
 };
 
 // 결제 예약 등록
-export const bookingPayments = async function (customer_uid, userId, paymentDTO) {
+export const bookingPayments = async function (access_token, customer_uid, userId, itemDTO) {
   try {
-    const { amount, payment_name } = paymentDTO;
+    const { amount, payment_name } = itemDTO;
     const booking = await axios({
       url: 'https://api.iamport.kr/subscribe/payments/schedule',
       method: 'post',
@@ -112,7 +112,7 @@ export const bookingPayments = async function (customer_uid, userId, paymentDTO)
   }
 };
 
-export const getPayment = async function (imp_uid) {
+export const getPayment = async function (access_token, imp_uid) {
   try {
     const getPaymentData = await axios({
       url: `https://api.iamport.kr/payments/${imp_uid}`, // imp_uid 전달
