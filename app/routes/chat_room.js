@@ -9,6 +9,4 @@ import jwtAuth from '../middlewares/authJWT';
 
 router.get('/:id', jwtAuth, roomController.getRoom);
 router.post('/:id/charge', jwtAuth, roomController.charge);
-router.post('/:id/chat', jwtAuth, upload.none(), roomController.chat);
-router.post('/:id/chat/media', jwtAuth, upload.single('media_file'), roomController.media);
 export default router;

@@ -1,20 +1,30 @@
-import { verify } from '../libs/utils/jwt.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import socketIoRedisAdapter from 'socket.io-redis';
 const { instrument } = require('@socket.io/admin-ui');
 import redis from 'redis';
 import dotenv from 'dotenv';
+import { verify } from '../libs/utils/jwt.js';
+import UserService from '../services/user.service.js';
 
 dotenv.config();
 
-const verifyMiddleware = (socket, next) => {
+const verifyMiddleware = async (socket, next) => {
   const token = socket.handshake.headers.authorization.split('Bearer ')[1];
   const result = verify(token);
   if (result.ok) {
-    // token이 검증되었으면 req에 값을 세팅하고, 다음 콜백함수로 갑니다.
-    socket.handshake.auth = { ID: result.id, role: result.role };
-    next();
+    const {
+      success,
+      body: { userRecord }
+    } = await UserService.findById(result.id);
+    if (success) {
+      socket.handshake.auth = userRecord;
+      next();
+    } else {
+      socket.on('disconnect', () => {
+        console.log(body);
+      });
+    }
   } else {
     socket.on('disconnect', () => {
       console.log(result.message);
@@ -67,7 +77,7 @@ export default (server, app) => {
 
   roomNamespace.on('connection', socket => {
     console.log('connect room namespace');
-    console.log('user', socket.handshake.auth);
+    console.log('user nickname :', socket.handshake.auth.nickname);
     socket.on('disconnect', () => {
       console.log('break connection room namespace');
     });
@@ -76,32 +86,24 @@ export default (server, app) => {
   chatNamespace.on('connection', async socket => {
     try {
       console.log('connect chat namespace');
-      console.log('user', socket.handshake.auth);
+      console.log('user nickname :', socket.handshake.auth.nickname);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
       await socket.join(roomId);
 
       socket.to(roomId).emit('join', {
         sender: 'system',
-        chat: `${socket.id}님이 입장하셨습니다.`
+        connect: true,
+        userId: socket.handshake.auth._id
       });
       socket.on('disconnect', async () => {
-        const currentRoom = socket.adapter.rooms.get(roomId);
-        const userCount = currentRoom ? currentRoom.size : 0;
-        console.log(userCount);
         console.log('break connection chat namespace');
         await socket.leave(roomId);
-        if (userCount === 0) {
-          socket.to(roomId).emit('exit', {
-            sender: 'system',
-            chat: `${socket.id}님이 퇴장하셨습니다.`
-          });
-        } else {
-          socket.to(roomId).emit('exit', {
-            sender: 'system',
-            chat: `${socket.id}님이 퇴장하셨습니다.`
-          });
-        }
+        socket.to(roomId).emit('exit', {
+          sender: 'system',
+          connect: false,
+          userId: socket.handshake.auth._id
+        });
       });
     } catch (err) {
       console.log(err);

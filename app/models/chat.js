@@ -21,6 +21,10 @@ const ChatSchema = new Schema(
   }
 );
 
+ChatSchema.virtual('readersNum').get(function () {
+  return this.readers.length;
+});
+
 ChatSchema.plugin(mongoose_delete);
 
 const ChatRoom = mongoose.model('CHAT', ChatSchema);

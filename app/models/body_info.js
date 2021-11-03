@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import mongoose_delete from 'mongoose-delete';
-import moment from 'moment';
 
 const Schema = mongoose.Schema;
 
