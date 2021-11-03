@@ -2,6 +2,7 @@ import userService from '../services/user.service';
 import roomService from '../services/room.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
+import IMPORT from '../libs/utils/import';
 
 export const signAccount = async (req, res) => {
   try {
@@ -54,5 +55,26 @@ export const getUserData = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
+
+export const addCustomerUid = async (req, res) => {
+  try {
+    const { customer_uid } = req.body; // req의 body에서 customer_uid 추출
+    const userId = req.user.ID;
+    const billingKeyResult = await IMPORT.getBillingKeyInfo(customer_uid);
+    if (billingKeyResult.success) {
+      const userCuidResult = await userService.addCustomerUid(userId, customer_uid);
+      if (userCuidResult) {
+        return res.jsonResult(201, { body: userCuidResult.body });
+      } else {
+        return res.jsonResult(404, { body: userCuidResult.body });
+      }
+    } else {
+      return res.jsonResult(500, { message: billingKeyResult.message });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Import Controller Error', err });
   }
 };

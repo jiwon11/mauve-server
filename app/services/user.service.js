@@ -33,7 +33,25 @@ export default class UserService {
 
   static async findById(ID) {
     try {
-      const userRecord = await UserModel.findOne({ _id: ID }).select({ nickname: 1, phone_NO: 1, role: 1, profile_img: 1 }).lean();
+      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: 1 }).lean();
+      if (userRecord) {
+        return { success: true, body: { userRecord } };
+      } else {
+        return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { result: 'fail', body: err.message };
+    }
+  }
+
+  static async addCustomerUid(ID, customer_uid) {
+    try {
+      const userRecord = await ChatModel.findByIdAndUpdate(ID, {
+        $push: {
+          customer_uid: { $each: [customer_uid] }
+        }
+      });
       if (userRecord) {
         return { success: true, body: { userRecord } };
       } else {
