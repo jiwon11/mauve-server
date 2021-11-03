@@ -77,7 +77,7 @@ export default (server, app) => {
 
   roomNamespace.on('connection', socket => {
     console.log('connect room namespace');
-    console.log('user nickname :', socket.handshake.auth.nickname);
+    console.log('user name :', socket.handshake.auth.name);
     socket.on('disconnect', () => {
       console.log('break connection room namespace');
     });
@@ -86,7 +86,7 @@ export default (server, app) => {
   chatNamespace.on('connection', async socket => {
     try {
       console.log('connect chat namespace');
-      console.log('user nickname :', socket.handshake.auth.nickname);
+      console.log('user name :', socket.handshake.auth.name);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
       await socket.join(roomId);
