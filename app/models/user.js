@@ -5,7 +5,10 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
   {
-    nickname: { type: String, required: true, unique: true },
+    name: {
+      type: String,
+      required: true
+    },
     phone_NO: { type: String, required: true, unique: true },
     profile_img: {
       type: Schema.Types.Mixed,
@@ -17,8 +20,23 @@ const userSchema = new Schema(
         location: ' '
       }
     },
+    detail_info: {
+      height: Number,
+      tendency: String,
+      diseases: [String],
+      job: String
+    },
+    weight_info: {
+      now: Number,
+      avg_over_last_5y: Number,
+      min_since_age20: Number,
+      max_since_age20: Number,
+      goal: Number
+    },
     fcm_token: { type: String, required: true, default: ` ` },
-    role: { type: String, required: true, enum: { values: ['student', 'trainer'], message: '{VALUE} is not supported' } },
+    role: { type: String, default: 'user' },
+    customer_uid: [{ type: String }],
+    has_paid: { type: Boolean },
     notification_config: {
       type: Schema.Types.Mixed,
       default: {

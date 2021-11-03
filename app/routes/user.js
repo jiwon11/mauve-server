@@ -9,5 +9,6 @@ import jwtAuth from '../middlewares/authJWT';
 
 router.post('/sign', upload.single('profile_img'), userController.signAccount);
 router.get('/:id', jwtAuth, userController.getUserData);
+router.post('/customer_uid', jwtAuth, userController.addCustomerUid);
 
 export default router;
