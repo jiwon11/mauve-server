@@ -40,7 +40,7 @@ export default class UserService {
       }
     } catch (err) {
       console.log(err);
-      return { result: 'fail', body: err.message };
+      return { success: false, body: err.message };
     }
   }
 
@@ -58,7 +58,7 @@ export default class UserService {
       }
     } catch (err) {
       console.log(err);
-      return { result: 'fail', body: err.message };
+      return { success: false, body: err.message };
     }
   }
 }

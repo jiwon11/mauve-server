@@ -8,7 +8,7 @@ const feedbackSchema = new Schema(
   {
     answer: { type: String, required: true },
     feedback_media: [{ type: Schema.Types.Mixed }],
-    coach: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
+    coach: { type: Schema.Types.ObjectId, ref: 'COACH', index: true },
     record: { type: Schema.Types.ObjectId, ref: 'RECORD', index: true }
   },
   {
