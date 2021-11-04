@@ -42,7 +42,7 @@ export const postMedia = async (req, res) => {
     const senderId = req.user.id;
     const { success, body } = await ChatService.postMedia(req, senderId, targetRoomId, chatMediaDTO);
     if (success) {
-      return res.jsonResult(200, body);
+      return res.jsonResult(201, body);
     } else {
       return res.jsonResult(500, { message: 'User Service Error', body });
     }

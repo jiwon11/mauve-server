@@ -12,6 +12,7 @@ import jsonResult from '../middlewares/jsonResult';
 // application Controllers for Routes
 import authRouter from '../routes/auth';
 import userRouter from '../routes/user';
+import couchRouter from '../routes/couch';
 import chatRoomRouter from '../routes/chat_room';
 import chatRouter from '../routes/chat';
 import importRouter from '../routes/import';
@@ -47,6 +48,7 @@ export default async app => {
   // application routes
   app.use('/auth', authRouter);
   app.use('/user', userRouter);
+  app.use('/couch', couchRouter);
   app.use('/room', chatRoomRouter);
   app.use('/chat', chatRouter);
   app.use('/import', importRouter);

@@ -5,7 +5,8 @@ const { instrument } = require('@socket.io/admin-ui');
 import redis from 'redis';
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
-import UserService from '../services/user.service.js';
+import UserService from '../services/user.service';
+import CouchService from '../services/couch.service';
 
 dotenv.config();
 
@@ -13,12 +14,18 @@ const verifyMiddleware = async (socket, next) => {
   const token = socket.handshake.headers.authorization.split('Bearer ')[1];
   const result = verify(token);
   if (result.ok) {
-    const {
-      success,
-      body: { userRecord }
-    } = await UserService.findById(result.id);
+    let success, clientRecord;
+    if (result.role === 'user') {
+      const findUserResult = await UserService.findById(result.id);
+      success = findUserResult.success;
+      clientRecord = findUserResult.body.userRecord;
+    } else {
+      const findCouchResult = await CouchService.findById(result.id);
+      success = findCouchResult.success;
+      clientRecord = findCouchResult.body.couchRecord;
+    }
     if (success) {
-      socket.handshake.auth = userRecord;
+      socket.handshake.auth = clientRecord;
       next();
     } else {
       socket.on('disconnect', () => {
@@ -94,7 +101,8 @@ export default (server, app) => {
       socket.to(roomId).emit('join', {
         sender: 'system',
         connect: true,
-        userId: socket.handshake.auth._id
+        userId: socket.handshake.auth._id,
+        name: socket.handshake.auth.name
       });
       socket.on('disconnect', async () => {
         console.log('break connection chat namespace');
