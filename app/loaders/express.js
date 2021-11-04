@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import compression from 'compression';
 import AWSXRay from 'aws-xray-sdk';
+const readme = require('readmeio');
 
 // custom utils And middlewares
 import logger from '../libs/logger/index';
@@ -30,6 +31,20 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
+  app.use(
+    readme.metrics(
+      'iDp7dyk8mtbDWEyybtY8IHL4gDvE6Ojx',
+      req => ({
+        apiKey: req.headers.authorization
+        //label: req.<userNameToShowInDashboard>,
+        //email: req.<userEmailAddress>,
+      }),
+      {
+        development: true // optional, sends logs to Development Data
+      }
+    )
+  );
+
   AWSXRay.config([AWSXRay.plugins.EC2Plugin, AWSXRay.plugins.ECSPlugin]);
   var rules = {
     rules: [{ description: 'Player moves.', service_name: '*', http_method: '*', url_path: '/*', fixed_target: 0, rate: 0.05 }],
