@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const ChatRoomSchema = new Schema(
   {
     title: { type: String, unique: true },
-    member: [{ type: Schema.Types.ObjectId, ref: 'USER' }]
+    user: { type: Schema.Types.ObjectId, ref: 'USER' },
+    coach: { type: Schema.Types.ObjectId, ref: 'COACH' }
   },
   {
     collection: 'CHAT_ROOM',

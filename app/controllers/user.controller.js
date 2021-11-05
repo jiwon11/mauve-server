@@ -20,7 +20,7 @@ export const signAccount = async (req, res) => {
       const { userRecord, created } = body;
       if (created) {
         // 추후 결제 후 로직으로 이동
-        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, member: [userRecord] });
+        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, user: userRecord._id });
       }
       const accessToken = sign(userRecord);
       const refreshToken = refresh();

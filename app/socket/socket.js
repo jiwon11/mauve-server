@@ -6,7 +6,7 @@ import redis from 'redis';
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
 import UserService from '../services/user.service';
-import CouchService from '../services/couch.service';
+import CoachService from '../services/coach.service';
 
 dotenv.config();
 
@@ -20,9 +20,9 @@ const verifyMiddleware = async (socket, next) => {
       success = findUserResult.success;
       clientRecord = findUserResult.body.userRecord;
     } else {
-      const findCouchResult = await CouchService.findById(result.id);
-      success = findCouchResult.success;
-      clientRecord = findCouchResult.body.couchRecord;
+      const findCoachResult = await CoachService.findById(result.id);
+      success = findCoachResult.success;
+      clientRecord = findCoachResult.body.coachRecord;
     }
     if (success) {
       socket.handshake.auth = clientRecord;
