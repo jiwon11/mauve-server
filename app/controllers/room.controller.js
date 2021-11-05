@@ -1,6 +1,23 @@
 import RoomService from '../services/room.service';
 import UserService from '../services/user.service';
+import CoachService from '../services/coach.service';
 import ChatService from '../services/chat.service';
+
+export const getAll = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
+    const { success, body } = await RoomService.findAll(limit, offset);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'Room Service Error', body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
 
 export const getRoom = async (req, res) => {
   try {
@@ -22,15 +39,19 @@ export const charge = async (req, res) => {
   try {
     const targetRoomId = req.params.id;
     const managerId = req.user.ID;
-    const { success: getUserSuccess, body: manager } = await UserService.findById(managerId);
-    const { success, body } = await RoomService.setCharge(req, targetRoomId, manager.userRecord);
-    if (success) {
-      return res.jsonResult(201, body);
+    const getCoachResult = await CoachService.findById(managerId);
+    if (getCoachResult.success) {
+      const setChargeResult = await RoomService.setCharge(req, targetRoomId, getCoachResult.body.coachRecord);
+      if (setChargeResult.success) {
+        return res.jsonResult(201, setChargeResult.body);
+      } else {
+        return res.jsonResult(500, { message: 'Room Service Error', body: setChargeResult.body });
+      }
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'Coach Service Error', body: getCoachResult.body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Room Controller Error', err });
   }
 };

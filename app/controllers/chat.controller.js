@@ -23,7 +23,8 @@ export const postChat = async (req, res) => {
     const targetRoomId = req.params.roomId;
     const chatDTO = req.body.chat;
     const senderId = req.user.ID;
-    const { success, body } = await ChatService.postChat(req, senderId, targetRoomId, chatDTO);
+    const senderRole = req.user.role;
+    const { success, body } = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatDTO);
     if (success) {
       return res.jsonResult(201, body);
     } else {
@@ -40,7 +41,8 @@ export const postMedia = async (req, res) => {
     const targetRoomId = req.params.roomId;
     const chatMediaDTO = req.file;
     const senderId = req.user.id;
-    const { success, body } = await ChatService.postMedia(req, senderId, targetRoomId, chatMediaDTO);
+    const senderRole = req.user.role;
+    const { success, body } = await ChatService.postMedia(req, senderId, senderRole, targetRoomId, chatMediaDTO);
     if (success) {
       return res.jsonResult(201, body);
     } else {

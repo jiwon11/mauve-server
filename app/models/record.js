@@ -10,7 +10,7 @@ const recordSchema = new Schema(
     question: { type: String, required: true },
     media: [{ type: Schema.Types.Mixed }],
     user: { type: Schema.Types.ObjectId, ref: 'USER', index: true },
-    coach: { type: Schema.Types.ObjectId, ref: 'USER', index: true }
+    coach: { type: Schema.Types.ObjectId, ref: 'COACH', index: true }
   },
   {
     collection: 'RECORD',

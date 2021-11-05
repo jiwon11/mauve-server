@@ -1,14 +1,22 @@
 import ChatModel from '../models/chat';
+import UserModel from '../models/user';
+import CoachModel from '../models/coach';
 import mongoose from 'mongoose';
 
 export default class roomService {
-  static async postChat(req, senderId, targetRoomId, chatDTO) {
+  static async postChat(req, senderId, senderRole, targetRoomId, chatDTO) {
     try {
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
       console.log('connectedUser', connectedUser);
-      const chat = new ChatModel({ room: targetRoomId, sender: senderId, readers: connectedUser, chat: chatDTO });
+      const chat = new ChatModel({
+        room: targetRoomId,
+        sender: senderId,
+        senderModel: senderRole === 'user' ? 'USER' : 'COACH',
+        readers: connectedUser,
+        chat: chatDTO
+      });
       await chat.save();
       req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatDTO);
       return { success: true, body: 'ok' };
@@ -18,13 +26,19 @@ export default class roomService {
     }
   }
 
-  static async postMedia(req, senderId, targetRoomId, chatMediaDTO) {
+  static async postMedia(req, senderId, senderRole, targetRoomId, chatMediaDTO) {
     try {
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
       console.log(connectedUser);
-      const chat = new ChatModel({ room: targetRoomId, sender: senderId, readers: connectedUser, media: chatMediaDTO });
+      const chat = new ChatModel({
+        room: targetRoomId,
+        sender: senderId,
+        senderModel: senderRole === 'user' ? 'USER' : 'COACH',
+        readers: connectedUser,
+        media: chatMediaDTO
+      });
       await chat.save();
       req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatMediaDTO);
       return { success: true, body: 'ok' };
@@ -37,21 +51,12 @@ export default class roomService {
   static async getChatsByRoomId(targetRoomId, userId, limit = 20, offset = 0) {
     try {
       console.time('Find Chat');
-      const chatRecords = await ChatModel.aggregate([
-        { $match: { room: mongoose.Types.ObjectId(targetRoomId) } },
-        {
-          $lookup: {
-            from: 'USER',
-            localField: 'sender',
-            foreignField: '_id',
-            as: 'sender'
-          }
-        },
-        { $project: { _id: 1, chat: 1, readers: 1, readersNum: { $size: '$readers' }, 'sender.name': 1, 'sender._id': 1, 'sender.profile_img.location': 1 } },
-        { $sort: { createdAt: -1 } },
-        { $limit: limit },
-        { $skip: offset }
-      ]);
+      const chatRecords = await ChatModel.find({ room: targetRoomId })
+        .populate('sender', '_id name profile_img.location')
+        .select({ _id: 1, chat: 1, sender: 1, senderModel: 1, readers: 1, nonReadersNum: 2 - { $size: '$readers' } })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(offset);
       console.timeEnd('Find Chat');
       if (chatRecords[0].readers.indexOf(userId) === -1) {
         console.time('Update Chat Readers');
@@ -65,6 +70,12 @@ export default class roomService {
           }
         );
         console.timeEnd('Update Chat Readers');
+        const updatedChatRecords = await ChatModel.find({ _id: chatRecordIds })
+          .populate('sender', '_id name profile_img.location')
+          .select({ _id: 1, chat: 1, sender: 1, senderModel: 1, readers: 1, readersNum: { $size: '$readers' } })
+          .sort({ createdAt: -1 })
+          .lean();
+        return { success: true, body: { chats: updatedChatRecords } };
       }
       return { success: true, body: { chats: chatRecords } };
     } catch (err) {

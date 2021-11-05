@@ -23,6 +23,36 @@ export default class roomService {
     }
   }
 
+  static async findAll(limit = 20, offset = 0) {
+    try {
+      const roomRecords = await RoomModel.aggregate([
+        {
+          $lookup: {
+            from: 'USER',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $lookup: {
+            from: 'COACH',
+            localField: 'coach',
+            foreignField: '_id',
+            as: 'coach'
+          }
+        },
+        { $project: { _id: 1, title: 1, createdAt: 1, 'user.name': 1, 'user._id': 1, 'user.profile_img.location': 1, 'coach.name': 1, 'coach._id': 1, 'coach.profile_img.location': 1 } },
+        { $limit: limit },
+        { $skip: offset }
+      ]);
+      return { success: true, body: { room: roomRecords } };
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
   static async findById(roomId) {
     try {
       const roomRecord = await RoomModel.aggregate([
@@ -30,12 +60,20 @@ export default class roomService {
         {
           $lookup: {
             from: 'USER',
-            localField: 'member',
+            localField: 'user',
             foreignField: '_id',
-            as: 'member'
+            as: 'user'
           }
         },
-        { $project: { _id: 1, title: 1, createdAt: 1, 'member.name': 1, 'member._id': 1, 'member.profile_img.location': 1 } }
+        {
+          $lookup: {
+            from: 'COACH',
+            localField: 'coach',
+            foreignField: '_id',
+            as: 'coach'
+          }
+        },
+        { $project: { _id: 1, title: 1, createdAt: 1, 'user.name': 1, 'user._id': 1, 'user.profile_img.location': 1, 'coach.name': 1, 'coach._id': 1, 'coach.profile_img.location': 1 } }
       ]);
       if (roomRecord) {
         return { success: true, body: { room: roomRecord[0] } };
@@ -48,30 +86,26 @@ export default class roomService {
     }
   }
 
-  static async setCharge(req, roomId, user) {
+  static async setCharge(req, roomId, coach) {
     try {
       const roomRecord = await RoomModel.findOne({ _id: roomId });
       if (roomRecord) {
-        if (roomRecord.member.length > 3) {
-          return { success: false, body: { message: `허용 인원을 초과하였습니다.` } };
+        if (roomRecord.coach) {
+          return { success: false, body: { message: '해당 사용자는 이미 코치가 배정되어 있습니다.' } };
         } else {
-          if (roomRecord.member.indexOf(user._id) !== -1) {
-            return { success: false, body: { message: `매니저는 이미 해당 유저의 담당입니다.` } };
-          } else {
-            roomRecord.member.push(user);
-            await roomRecord.save();
-          }
+          roomRecord.coach = coach._id;
+          await roomRecord.save();
+          req.app
+            .get('io')
+            .of('/chat')
+            .to(roomId)
+            .emit('join', {
+              sender: 'system',
+              chat: `${coach.name}님이 매니저로 입장하셨습니다.`
+            });
+          // const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
+          return { success: true, body: { room: roomRecord } };
         }
-        req.app
-          .get('io')
-          .of('/chat')
-          .to(roomId)
-          .emit('join', {
-            sender: 'system',
-            chat: `${user.name}님이 매니저로 입장하셨습니다.`
-          });
-        // const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
-        return { success: true, body: { room: roomRecord } };
       } else {
         return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };
       }

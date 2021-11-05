@@ -7,6 +7,7 @@ const router = express.Router();
 import * as roomController from '../controllers/room.controller';
 import jwtAuth from '../middlewares/authJWT';
 
+router.get('/', jwtAuth, roomController.getAll);
 router.get('/:id', jwtAuth, roomController.getRoom);
 router.post('/:id/charge', jwtAuth, roomController.charge);
 export default router;

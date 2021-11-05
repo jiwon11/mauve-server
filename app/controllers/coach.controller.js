@@ -1,32 +1,32 @@
-import couchService from '../services/couch.service';
+import coachService from '../services/coach.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 
 export const signAccount = async (req, res) => {
   try {
-    const couchDTO = req.body;
+    const coachDTO = req.body;
     const profileImgDTO = req.file;
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
     }
-    console.log('couchData', couchDTO);
+    console.log('coachData', coachDTO);
     console.log('userProfileImgData', profileImgDTO);
-    const { success, body } = await couchService.sign(couchDTO, profileImgDTO);
+    const { success, body } = await coachService.sign(coachDTO, profileImgDTO);
     if (success) {
-      const { couchRecord, created } = body;
-      const accessToken = sign(couchRecord);
+      const { coachRecord, created } = body;
+      const accessToken = sign(coachRecord);
       const refreshToken = refresh();
 
-      redisClient.set(couchRecord._id.toString(), refreshToken, (err, result) => {
+      redisClient.set(coachRecord._id.toString(), refreshToken, (err, result) => {
         console.log(err);
       });
       const statusCode = created ? 201 : 200;
-      const couchToken = {
+      const coachToken = {
         created: created,
         accessToken: accessToken,
         refreshToken: refreshToken
       };
-      return res.jsonResult(statusCode, couchToken);
+      return res.jsonResult(statusCode, coachToken);
     } else {
       return res.jsonResult(body.statusCode, body.err);
     }
@@ -38,9 +38,9 @@ export const signAccount = async (req, res) => {
 
 export const getUserData = async (req, res) => {
   try {
-    const targetCouchId = req.params.id;
+    const targetCoachId = req.params.id;
     const userID = req.user.ID;
-    const { success, body } = await couchService.findById(targetCouchId);
+    const { success, body } = await coachService.findById(targetCoachId);
     if (success) {
       return res.jsonResult(200, body);
     } else {
