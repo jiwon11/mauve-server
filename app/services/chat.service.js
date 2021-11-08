@@ -1,7 +1,4 @@
 import ChatModel from '../models/chat';
-import UserModel from '../models/user';
-import CoachModel from '../models/coach';
-import mongoose from 'mongoose';
 
 export default class roomService {
   static async postChat(req, senderId, senderRole, targetRoomId, chatDTO) {

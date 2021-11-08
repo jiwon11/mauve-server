@@ -23,7 +23,7 @@ export default class roomService {
     }
   }
 
-  static async findAll(limit = 20, offset = 0) {
+  static async findAll(userId, limit = 20, offset = 0) {
     try {
       const roomRecords = await RoomModel.aggregate([
         {
@@ -42,7 +42,50 @@ export default class roomService {
             as: 'coach'
           }
         },
-        { $project: { _id: 1, title: 1, createdAt: 1, 'user.name': 1, 'user._id': 1, 'user.profile_img.location': 1, 'coach.name': 1, 'coach._id': 1, 'coach.profile_img.location': 1 } },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { readers: '$readers' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $not: {
+                      $in: [userId, '$readers']
+                    }
+                  }
+                }
+              }
+            ],
+            as: 'non_read_chats'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unwind: {
+            path: '$coach',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            createdAt: 1,
+            'user.name': 1,
+            'user._id': 1,
+            'user.profile_img.location': 1,
+            'coach.name': 1,
+            'coach._id': 1,
+            'coach.profile_img.location': 1,
+            non_read_chats_num: { $size: '$non_read_chats' }
+          }
+        },
         { $limit: limit },
         { $skip: offset }
       ]);
@@ -71,6 +114,18 @@ export default class roomService {
             localField: 'coach',
             foreignField: '_id',
             as: 'coach'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unwind: {
+            path: '$coach',
+            preserveNullAndEmptyArrays: true
           }
         },
         { $project: { _id: 1, title: 1, createdAt: 1, 'user.name': 1, 'user._id': 1, 'user.profile_img.location': 1, 'coach.name': 1, 'coach._id': 1, 'coach.profile_img.location': 1 } }
