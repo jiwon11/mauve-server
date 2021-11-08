@@ -1,0 +1,13 @@
+import express from 'express';
+import { upload } from '../middlewares/multer';
+
+const router = express.Router();
+
+// custom utils And middlewares
+import * as coachController from '../controllers/coach.controller';
+import jwtAuth from '../middlewares/authJWT';
+
+router.post('/sign', upload.single('profile_img'), coachController.signAccount);
+router.get('/:id', jwtAuth, coachController.getUserData);
+
+export default router;

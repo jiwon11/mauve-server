@@ -12,6 +12,7 @@ import jsonResult from '../middlewares/jsonResult';
 // application Controllers for Routes
 import authRouter from '../routes/auth';
 import userRouter from '../routes/user';
+import coachRouter from '../routes/coach';
 import chatRoomRouter from '../routes/chat_room';
 import chatRouter from '../routes/chat';
 import importRouter from '../routes/import';
@@ -29,6 +30,7 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
+
   AWSXRay.config([AWSXRay.plugins.EC2Plugin, AWSXRay.plugins.ECSPlugin]);
   var rules = {
     rules: [{ description: 'Player moves.', service_name: '*', http_method: '*', url_path: '/*', fixed_target: 0, rate: 0.05 }],
@@ -47,6 +49,7 @@ export default async app => {
   // application routes
   app.use('/auth', authRouter);
   app.use('/user', userRouter);
+  app.use('/coach', coachRouter);
   app.use('/room', chatRoomRouter);
   app.use('/chat', chatRouter);
   app.use('/import', importRouter);

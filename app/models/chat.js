@@ -5,11 +5,12 @@ const Schema = mongoose.Schema;
 
 const ChatSchema = new Schema(
   {
-    sender: { type: Schema.Types.ObjectId, ref: 'USER' },
+    sender: { type: Schema.Types.ObjectId, refPath: 'senderModel' },
+    senderModel: { type: String, required: true, enum: ['USER', 'COACH'] },
     chat: String,
     media: Schema.Types.Mixed,
-    room: { type: Schema.Types.ObjectId, ref: 'CHAT_ROOM' },
-    readers: [{ type: Schema.Types.ObjectId, ref: 'USER' }]
+    room: { type: Schema.Types.ObjectId, index: true, ref: 'CHAT_ROOM' },
+    readers: [{ type: Schema.Types.ObjectId, refPath: 'readerModel' }]
   },
   {
     collection: 'CHAT',

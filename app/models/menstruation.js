@@ -3,14 +3,14 @@ import mongoose_delete from 'mongoose-delete';
 
 const Schema = mongoose.Schema;
 
-const ChatRoomSchema = new Schema(
+const MenstruationSchema = new Schema(
   {
-    title: { type: String, unique: true },
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
-    coach: { type: Schema.Types.ObjectId, ref: 'COACH' }
+    start: { type: Date, required: true },
+    end: { type: Date, required: true }
   },
   {
-    collection: 'CHAT_ROOM',
+    collection: 'MENSTRUATION',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
@@ -19,8 +19,8 @@ const ChatRoomSchema = new Schema(
   }
 );
 
-ChatRoomSchema.plugin(mongoose_delete);
+MenstruationSchema.plugin(mongoose_delete);
 
-const ChatRoom = mongoose.model('CHAT_ROOM', ChatRoomSchema);
+const Menstruation = mongoose.model('MENSTRUATION', MenstruationSchema);
 
-export default ChatRoom;
+export default Menstruation;
