@@ -4,6 +4,7 @@ import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IMPORT from '../libs/utils/import';
 import moment from 'moment-timezone';
+
 export const signAccount = async (req, res) => {
   try {
     const userDTO = req.body;

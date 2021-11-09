@@ -46,7 +46,7 @@ export default class UserService {
 
   static async addCustomerUid(ID, customer_uid) {
     try {
-      const userRecord = await ChatModel.findByIdAndUpdate(ID, {
+      const userRecord = await UserModel.findByIdAndUpdate(ID, {
         $push: {
           customer_uid: { $each: [customer_uid] }
         }
