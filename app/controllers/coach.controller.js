@@ -1,6 +1,4 @@
 import coachService from '../services/coach.service';
-import { sign, refresh } from '../libs/utils/jwt';
-import redisClient from '../libs/utils/redis';
 
 export const signAccount = async (req, res) => {
   try {
@@ -9,24 +7,27 @@ export const signAccount = async (req, res) => {
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
     }
+    coachDTO.pass_code = Math.random().toString(20).substr(2, 11);
     console.log('coachData', coachDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await coachService.sign(coachDTO, profileImgDTO);
     if (success) {
-      const { coachRecord, created } = body;
-      const accessToken = sign(coachRecord);
-      const refreshToken = refresh();
+      return res.jsonResult(201, body);
+    } else {
+      return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
 
-      redisClient.set(coachRecord._id.toString(), refreshToken, (err, result) => {
-        console.log(err);
-      });
-      const statusCode = created ? 201 : 200;
-      const coachToken = {
-        created: created,
-        accessToken: accessToken,
-        refreshToken: refreshToken
-      };
-      return res.jsonResult(statusCode, coachToken);
+export const login = async (req, res) => {
+  try {
+    const pass_code = req.body.pass_code;
+    const { success, body } = await coachService.loginByPassCode(pass_code);
+    if (success) {
+      return res.jsonResult(200, body);
     } else {
       return res.jsonResult(body.statusCode, body.err);
     }
