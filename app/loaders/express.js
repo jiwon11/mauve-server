@@ -16,6 +16,7 @@ import coachRouter from '../routes/coach';
 import chatRoomRouter from '../routes/chat_room';
 import chatRouter from '../routes/chat';
 import importRouter from '../routes/import';
+import periodRouter from '../routes/period';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 AWSXRay.captureHTTPsGlobal(require('https'));
@@ -53,6 +54,7 @@ export default async app => {
   app.use('/room', chatRoomRouter);
   app.use('/chat', chatRouter);
   app.use('/import', importRouter);
+  app.use('/period', periodRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
