@@ -1,20 +1,15 @@
 import CoachModel from '../models/coach';
-
+import { sign, refresh } from '../libs/utils/jwt';
+import redisClient from '../libs/utils/redis';
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
       let coachRecord, created;
-      const existCoach = await CoachModel.findOne({ phone_NO: coachDTO.phone_NO });
-      if (existCoach) {
-        coachRecord = existCoach;
-        created = false;
-      } else {
-        const newCoach = new CoachModel({ ...coachDTO, ...{ profile_img: profileImgDTO } });
-        const saveCoach = await newCoach.save();
-        coachRecord = saveCoach;
-        created = true;
-      }
-      return { success: true, body: { coachRecord, created } };
+      const newCoach = new CoachModel({ ...coachDTO, ...{ profile_img: profileImgDTO } });
+      const saveCoach = await newCoach.save();
+      coachRecord = saveCoach;
+      created = true;
+      return { success: true, body: { pass_code: coachRecord.pass_code, created } };
     } catch (err) {
       console.log(err);
       if (err.name === 'ValidationError') {
@@ -30,9 +25,33 @@ export default class CoachService {
     }
   }
 
+  static async loginByPassCode(passCode) {
+    try {
+      const coachRecord = await CoachModel.findOne({ pass_code: passCode }).select({ _id: 1, role: 1 }).lean();
+      if (coachRecord) {
+        const accessToken = sign(coachRecord);
+        const refreshToken = refresh();
+
+        redisClient.set(coachRecord._id.toString(), refreshToken, (err, result) => {
+          console.log(err);
+        });
+        const coachToken = {
+          accessToken: accessToken,
+          refreshToken: refreshToken
+        };
+        return { success: true, body: coachToken };
+      } else {
+        return { success: false, body: { message: `Coach not founded by passCode : ${passCode}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
   static async findById(ID) {
     try {
-      const coachRecord = await CoachModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: 1, career: 1, level_of_education: 1, certificate: 1 }).lean();
+      const coachRecord = await CoachModel.findOne({ _id: ID }).select({ name: 1, role: 1, profile_img: 1, career: 1, level_of_education: 1, certificate: 1 }).lean();
       if (coachRecord) {
         return { success: true, body: { coachRecord } };
       } else {

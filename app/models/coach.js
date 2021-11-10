@@ -14,7 +14,7 @@ const coachSchema = new Schema(
         message: props => `이름은 반드시 한글이어야 합니다. 입력한 이름 : ${props.value}`
       }
     },
-    phone_NO: { type: String, required: true, unique: true },
+    pass_code: { type: String, required: true, unique: true },
     profile_img: {
       type: Schema.Types.Mixed,
       default: {
@@ -45,7 +45,7 @@ const coachSchema = new Schema(
     ],
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'coach' },
-    active: { type: Boolean, default: false },
+    active: { type: Boolean, default: true },
     notification_config: {
       type: Schema.Types.Mixed,
       default: {

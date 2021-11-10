@@ -3,14 +3,14 @@ import mongoose_delete from 'mongoose-delete';
 
 const Schema = mongoose.Schema;
 
-const MenstruationSchema = new Schema(
+const PeriodSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
     start: { type: Date, required: true },
-    end: { type: Date, required: true }
+    end: { type: Date, required: false }
   },
   {
-    collection: 'MENSTRUATION',
+    collection: 'PERIOD',
     timestamps: {
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
@@ -19,8 +19,8 @@ const MenstruationSchema = new Schema(
   }
 );
 
-MenstruationSchema.plugin(mongoose_delete);
+PeriodSchema.plugin(mongoose_delete);
 
-const Menstruation = mongoose.model('MENSTRUATION', MenstruationSchema);
+const Period = mongoose.model('PERIOD', PeriodSchema);
 
-export default Menstruation;
+export default Period;
