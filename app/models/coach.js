@@ -15,6 +15,7 @@ const coachSchema = new Schema(
       }
     },
     pass_code: { type: String, required: true, unique: true },
+    possible_time: { type: String, required: true },
     profile_img: {
       type: Schema.Types.Mixed,
       default: {

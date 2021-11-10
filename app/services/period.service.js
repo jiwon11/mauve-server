@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 export default class PeriodService {
   static async add(periodDTO) {
     try {
-      const periodRecord = await PeriodModel.create(periodDTO);
+      const periodRecord = await PeriodModel.insertMany(periodDTO);
       return { success: true, body: { periodRecord } };
     } catch (err) {
       console.log(err);
@@ -43,6 +43,7 @@ export default class PeriodService {
         },
         {
           $project: {
+            ovulation_day: { $dateToString: { format: '%Y-%m-%d', date: '$ovulation_day', timezone: 'Asia/Seoul' } },
             start: { $dateToString: { format: '%Y-%m-%d', date: '$start', timezone: 'Asia/Seoul' } },
             end: { $dateToString: { format: '%Y-%m-%d', date: '$end', timezone: 'Asia/Seoul' } }
           }
@@ -54,7 +55,7 @@ export default class PeriodService {
         }
       ]);
       const periodLen = periodRecord.length;
-      let cycleLen = 1;
+      let cycleLen = 0;
       let cycleSum = 0;
       let termSum = 0;
       for (let i = 0; i < periodLen; i++) {
@@ -65,15 +66,18 @@ export default class PeriodService {
         if (periodRecord[i + 1]) {
           const thisMonth = moment(periodRecord[i].start);
           const lastMonth = moment(periodRecord[i + 1].start);
-          const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays() + 1;
+          const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
           cycleSum += cycleDiff;
           cycleLen++;
         }
       }
-      console.log(cycleLen);
       const cycleAvg = parseFloat(cycleSum / cycleLen).toFixed(0);
       const termAvg = parseFloat(termSum / periodLen).toFixed(0);
-      return { success: true, body: { cycleAvg, termAvg, periodRecord } };
+      const predictStartDate = moment(periodRecord[0].start, 'YYYY-MM-DD').add(cycleAvg, 'days').format('YYYY-MM-DD');
+      const predictEndDate = moment(predictStartDate, 'YYYY-MM-DD')
+        .add(termAvg - 1, 'days')
+        .format('YYYY-MM-DD');
+      return { success: true, body: { cycleAvg, termAvg, predict: { start: predictStartDate, end: predictEndDate }, periodRecord } };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
