@@ -7,6 +7,7 @@ export const add = async (req, res) => {
     const userId = req.user.ID;
     const periodDTO = req.body.map(period => {
       period.start = moment(period.start).tz('Asia/seoul').format('YYYY-MM-DD');
+      period.ovulation_day = moment(period.start).tz('Asia/seoul').subtract(14, 'days').format('YYYY-MM-DD');
       period.end = period.hasOwnProperty('end') ? (period.end = moment(period.end).tz('Asia/seoul').format('YYYY-MM-DD')) : null;
       period.user = userId;
       return period;
@@ -28,6 +29,9 @@ export const update = async (req, res) => {
     const userId = req.user.ID;
     const periodId = req.params.id;
     const periodDTO = req.body;
+    periodDTO.start = moment(periodDTO.start).tz('Asia/seoul').format('YYYY-MM-DD');
+    periodDTO.ovulation_day = moment(periodDTO.start).tz('Asia/seoul').subtract(14, 'days').format('YYYY-MM-DD');
+    periodDTO.end = periodDTO.hasOwnProperty('end') ? (periodDTO.end = moment(periodDTO.end).tz('Asia/seoul').format('YYYY-MM-DD')) : null;
     const { success, body } = await PeriodService.update(periodId, userId, periodDTO);
     if (success) {
       return res.jsonResult(201, body);

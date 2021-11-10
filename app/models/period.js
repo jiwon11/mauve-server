@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const PeriodSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
+    ovulation_day: { type: Date, required: true },
     start: { type: Date, required: true },
     end: { type: Date, required: false }
   },
