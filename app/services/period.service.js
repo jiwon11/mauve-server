@@ -43,8 +43,8 @@ export default class PeriodService {
         },
         {
           $project: {
-            start: 1,
-            end: 1
+            start: { $dateToString: { format: '%Y-%m-%d', date: '$start', timezone: 'Asia/Seoul' } },
+            end: { $dateToString: { format: '%Y-%m-%d', date: '$end', timezone: 'Asia/Seoul' } }
           }
         },
         {
@@ -54,7 +54,7 @@ export default class PeriodService {
         }
       ]);
       const periodLen = periodRecord.length;
-      let cycleLen = 0;
+      let cycleLen = 1;
       let cycleSum = 0;
       let termSum = 0;
       for (let i = 0; i < periodLen; i++) {
@@ -70,6 +70,7 @@ export default class PeriodService {
           cycleLen++;
         }
       }
+      console.log(cycleLen);
       const cycleAvg = parseFloat(cycleSum / cycleLen).toFixed(0);
       const termAvg = parseFloat(termSum / periodLen).toFixed(0);
       return { success: true, body: { cycleAvg, termAvg, periodRecord } };
