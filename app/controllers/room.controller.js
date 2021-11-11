@@ -24,7 +24,7 @@ export const getRoom = async (req, res) => {
   try {
     const targetRoomId = req.params.id;
     const userId = req.user.ID;
-    const { success, body } = await RoomService.findById(targetRoomId);
+    const { success, body } = await RoomService.findById(userId, targetRoomId);
     if (success) {
       return res.jsonResult(200, body);
     } else {

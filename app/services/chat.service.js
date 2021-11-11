@@ -1,6 +1,6 @@
 import ChatModel from '../models/chat';
 
-export default class roomService {
+export default class chatService {
   static async postChat(req, senderId, senderRole, targetRoomId, chatDTO) {
     try {
       const io = await req.app.get('io');
