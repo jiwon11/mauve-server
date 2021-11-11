@@ -8,6 +8,7 @@ export const signAccount = async (req, res) => {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
     }
     coachDTO.pass_code = Math.random().toString(20).substr(2, 11);
+    coachDTO.possible_time = JSON.parse(coachDTO.possible_time);
     console.log('coachData', coachDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await coachService.sign(coachDTO, profileImgDTO);
