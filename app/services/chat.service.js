@@ -43,7 +43,7 @@ export default class roomService {
       console.log(err);
       return { success: false, body: { statusCode: 500, err } };
     }
-  }
+  } 
 
   static async getChatsByRoomId(targetRoomId, userId, limit = 20, offset = 0) {
     try {
