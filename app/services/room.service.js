@@ -1,5 +1,6 @@
 import RoomModel from '../models/chat_room';
 import mongoose from 'mongoose';
+import moment from 'moment-timezone';
 export default class roomService {
   static async create(req, roomDTO) {
     try {
@@ -96,8 +97,10 @@ export default class roomService {
     }
   }
 
-  static async findById(roomId) {
+  static async findById(userId, roomId) {
     try {
+      const dayOfWeek = moment().tz('Asia/seoul').day() - 1;
+      console.log(dayOfWeek);
       const roomRecord = await RoomModel.aggregate([
         { $match: { _id: mongoose.Types.ObjectId(roomId) } },
         {
@@ -117,6 +120,27 @@ export default class roomService {
           }
         },
         {
+          $lookup: {
+            from: 'CHAT',
+            let: { readers: '$readers' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $not: {
+                      $in: [userId, '$readers']
+                    }
+                  }
+                }
+              },
+              { $project: { chat: 1, _id: 1 } },
+              { $sort: { createdAt: -1 } },
+              { $limit: 1 }
+            ],
+            as: 'recent_non_read_chats'
+          }
+        },
+        {
           $unwind: {
             path: '$user',
             preserveNullAndEmptyArrays: true
@@ -128,7 +152,86 @@ export default class roomService {
             preserveNullAndEmptyArrays: true
           }
         },
-        { $project: { _id: 1, title: 1, createdAt: 1, 'user.name': 1, 'user._id': 1, 'user.profile_img.location': 1, 'coach.name': 1, 'coach._id': 1, 'coach.profile_img.location': 1 } }
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            'user.name': 1,
+            'user._id': 1,
+            'user.profile_img.location': 1,
+            'coach.name': 1,
+            'coach._id': 1,
+            'coach.profile_img.location': 1,
+            coach_chat_possible_time_start: {
+              $arrayElemAt: [
+                {
+                  $arrayElemAt: ['$coach.possible_time', dayOfWeek]
+                },
+                0
+              ]
+            },
+            coach_chat_possible_time_end: {
+              $arrayElemAt: [
+                {
+                  $arrayElemAt: ['$coach.possible_time', dayOfWeek]
+                },
+                1
+              ]
+            },
+            coach_chat_possible: {
+              $cond: {
+                if: {
+                  $and: [
+                    {
+                      $ne: [moment().tz('Asia/seoul').day(), 0]
+                    },
+                    {
+                      $ne: [moment().tz('Asia/seoul').day(), 6]
+                    }
+                  ]
+                },
+                then: {
+                  $cond: {
+                    if: {
+                      $and: [
+                        {
+                          $lte: [
+                            {
+                              $arrayElemAt: [
+                                {
+                                  $arrayElemAt: ['$coach.possible_time', dayOfWeek]
+                                },
+                                0
+                              ]
+                            },
+                            moment().tz('Asia/seoul').hour()
+                          ]
+                        },
+                        {
+                          $gte: [
+                            {
+                              $arrayElemAt: [
+                                {
+                                  $arrayElemAt: ['$coach.possible_time', dayOfWeek]
+                                },
+                                1
+                              ]
+                            },
+                            moment().tz('Asia/seoul').hour()
+                          ]
+                        }
+                      ]
+                    },
+                    then: true,
+                    else: false
+                  }
+                },
+                else: false
+              }
+            },
+            recent_non_read_chats: '$recent_non_read_chats'
+          }
+        }
       ]);
       if (roomRecord) {
         return { success: true, body: { room: roomRecord[0] } };
