@@ -39,10 +39,11 @@ export const postChat = async (req, res) => {
 export const postMedia = async (req, res) => {
   try {
     const targetRoomId = req.params.roomId;
+    const media_tag = req.params.tag;
     const chatMediaDTO = req.file;
     const senderId = req.user.id;
     const senderRole = req.user.role;
-    const { success, body } = await ChatService.postMedia(req, senderId, senderRole, targetRoomId, chatMediaDTO);
+    const { success, body } = await ChatService.postMedia(req, media_tag, senderId, senderRole, targetRoomId, chatMediaDTO);
     if (success) {
       return res.jsonResult(201, body);
     } else {

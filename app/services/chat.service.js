@@ -9,6 +9,7 @@ export default class chatService {
       console.log('connectedUser', connectedUser);
       const chat = new ChatModel({
         room: targetRoomId,
+        tag: 'chat',
         sender: senderId,
         senderModel: senderRole === 'user' ? 'USER' : 'COACH',
         readers: connectedUser,
@@ -23,7 +24,7 @@ export default class chatService {
     }
   }
 
-  static async postMedia(req, senderId, senderRole, targetRoomId, chatMediaDTO) {
+  static async postMedia(req, media_tag, senderId, senderRole, targetRoomId, chatMediaDTO) {
     try {
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
@@ -31,6 +32,7 @@ export default class chatService {
       console.log(connectedUser);
       const chat = new ChatModel({
         room: targetRoomId,
+        tag: media_tag,
         sender: senderId,
         senderModel: senderRole === 'user' ? 'USER' : 'COACH',
         readers: connectedUser,

@@ -7,6 +7,7 @@ const ChatSchema = new Schema(
   {
     sender: { type: Schema.Types.ObjectId, refPath: 'senderModel' },
     senderModel: { type: String, required: true, enum: ['USER', 'COACH'] },
+    tag: { type: String, required: true, enum: ['chat', 'picture', 'breakfast', 'lunch', 'dinner'] },
     chat: String,
     media: Schema.Types.Mixed,
     room: { type: Schema.Types.ObjectId, index: true, ref: 'CHAT_ROOM' },
