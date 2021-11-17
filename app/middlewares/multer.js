@@ -20,8 +20,9 @@ export const upload = multer(
       ACL: 'public-read-write',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: function (req, file, cb) {
+        console.log(req.params.tag);
         const splitPath = req.baseUrl.split('/');
-        cb(null, `${splitPath[1]}/${file.fieldname}/${+Date.now()}${path.basename(file.originalname.replace(/ /gi, ''))}`);
+        cb(null, `${splitPath[1]}/${file.fieldname}/${req.params.tag}/${+Date.now()}${path.basename(file.originalname.replace(/ /gi, ''))}`);
       }
     })
   },
