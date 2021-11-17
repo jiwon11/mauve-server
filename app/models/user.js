@@ -33,7 +33,7 @@ const userSchema = new Schema(
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'user' },
     customer_uid: [{ type: String }],
-    has_paid: { type: Boolean },
+    has_paid: { type: Boolean, default: false },
     notification_config: {
       type: Schema.Types.Mixed,
       default: {
