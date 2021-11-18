@@ -15,6 +15,8 @@ const recordSchema = new Schema(
   {
     collection: 'RECORD',
     timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
       }

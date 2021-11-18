@@ -44,6 +44,8 @@ const coachSchema = new Schema(
   {
     collection: 'COACH',
     timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
       }

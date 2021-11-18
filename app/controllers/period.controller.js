@@ -20,7 +20,7 @@ export const add = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
   }
 };
 
@@ -40,7 +40,7 @@ export const update = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
   }
 };
 
@@ -60,7 +60,7 @@ export const statistic = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
   }
 };
 
@@ -86,6 +86,6 @@ export const phase = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'Period Controller Error', err });
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
   }
 };

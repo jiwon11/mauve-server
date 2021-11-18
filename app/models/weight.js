@@ -3,15 +3,17 @@ import mongoose_delete from 'mongoose-delete';
 
 const Schema = mongoose.Schema;
 
-const BodyInfoSchema = new Schema(
+const WeightSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
     time: { type: String, required: true, enum: ['morning', 'night'] },
     kilograms: { type: Number, required: true }
   },
   {
-    collection: 'BODY_INFO',
+    collection: 'WEIGHT',
     timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
       }
@@ -19,8 +21,8 @@ const BodyInfoSchema = new Schema(
   }
 );
 
-BodyInfoSchema.plugin(mongoose_delete);
+WeightSchema.plugin(mongoose_delete);
 
-const BodyInfo = mongoose.model('BODY_INFO', BodyInfoSchema);
+const Weight = mongoose.model('WEIGHT', WeightSchema);
 
-export default BodyInfo;
+export default Weight;

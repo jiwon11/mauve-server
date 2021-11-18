@@ -52,8 +52,8 @@ export default class chatService {
       console.time('Find Chat');
       const chatRecords = await ChatModel.find({ room: targetRoomId })
         .populate('sender', '_id name profile_img.location')
-        .select({ _id: 1, chat: 1, sender: 1, senderModel: 1, readers: 1, nonReadersNum: 2 - { $size: '$readers' } })
-        .sort({ createdAt: -1 })
+        .select({ _id: 1, tag: 1, chat: 1, media: { location: 1 }, sender: 1, senderModel: 1, readers: 1, nonReadersNum: { $subtract: [2, { $size: '$readers' }] } })
+        .sort({ created_at: -1 })
         .limit(limit)
         .skip(offset);
       console.timeEnd('Find Chat');
@@ -72,7 +72,7 @@ export default class chatService {
         const updatedChatRecords = await ChatModel.find({ _id: chatRecordIds })
           .populate('sender', '_id name profile_img.location')
           .select({ _id: 1, chat: 1, sender: 1, senderModel: 1, readers: 1, readersNum: { $size: '$readers' } })
-          .sort({ createdAt: -1 })
+          .sort({ created_at: -1 })
           .lean();
         return { success: true, body: { chats: updatedChatRecords } };
       }
