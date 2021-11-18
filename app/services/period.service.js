@@ -1,6 +1,7 @@
 import PeriodModel from '../models/period';
 import moment from 'moment-timezone';
 import mongoose from 'mongoose';
+import { calPhase, adjustEffortDate, calPeriodSchedule } from '../libs/utils/moment';
 
 export default class PeriodService {
   static async add(periodDTO) {
@@ -32,13 +33,12 @@ export default class PeriodService {
     }
   }
 
-  static async statistic(userId) {
+  static async getAll(userId, limit) {
     try {
-      const periodRecord = await PeriodModel.aggregate([
+      const pipeline = [
         {
           $match: {
-            user: mongoose.Types.ObjectId(userId),
-            end: { $ne: null }
+            user: mongoose.Types.ObjectId(userId)
           }
         },
         {
@@ -53,31 +53,70 @@ export default class PeriodService {
             end: -1
           }
         }
-      ]);
+      ];
+      if (limit) {
+        pipeline.push({ $limit: limit });
+      }
+      const periodRecord = await PeriodModel.aggregate(pipeline);
+      return { success: true, body: periodRecord };
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async statistic(periodRecord) {
+    try {
       const periodLen = periodRecord.length;
       let cycleLen = 0;
       let cycleSum = 0;
       let termSum = 0;
       for (let i = 0; i < periodLen; i++) {
-        const termStart = moment(periodRecord[i].start);
-        const termEnd = moment(periodRecord[i].end);
-        const termDiff = moment.duration(termEnd.diff(termStart)).asDays() + 1;
-        termSum += termDiff;
-        if (periodRecord[i + 1]) {
-          const thisMonth = moment(periodRecord[i].start);
-          const lastMonth = moment(periodRecord[i + 1].start);
-          const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
-          cycleSum += cycleDiff;
-          cycleLen++;
+        if (periodRecord[i].end !== null) {
+          const termStart = moment(periodRecord[i].start);
+          const termEnd = moment(periodRecord[i].end);
+          const termDiff = moment.duration(termEnd.diff(termStart)).asDays() + 1;
+          termSum += termDiff;
+          if (periodRecord[i + 1]) {
+            const thisMonth = moment(periodRecord[i].start);
+            const lastMonth = moment(periodRecord[i + 1].start);
+            const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
+            cycleSum += cycleDiff;
+            cycleLen++;
+          }
         }
       }
-      const cycleAvg = parseFloat(cycleSum / cycleLen).toFixed(0);
-      const termAvg = parseFloat(termSum / periodLen).toFixed(0);
+      const cycleAvg = parseFloat((cycleSum / cycleLen).toFixed(0));
+      const termAvg = parseFloat((termSum / periodLen).toFixed(0));
       const predictStartDate = moment(periodRecord[0].start, 'YYYY-MM-DD').add(cycleAvg, 'days').format('YYYY-MM-DD');
+      const predictOvulationDate = moment(predictStartDate, 'YYYY-MM-DD').subtract(14, 'days').format('YYYY-MM-DD');
       const predictEndDate = moment(predictStartDate, 'YYYY-MM-DD')
         .add(termAvg - 1, 'days')
         .format('YYYY-MM-DD');
-      return { success: true, body: { cycleAvg, termAvg, predict: { start: predictStartDate, end: predictEndDate }, periodRecord } };
+      return { success: true, body: { cycleAvg, termAvg, predict: { start: predictStartDate, ovulation_day: predictOvulationDate, end: predictEndDate } } };
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async phase(periodRecord, statistic, step) {
+    try {
+      const duringPeriod = periodRecord;
+      duringPeriod.end = periodRecord.end ? periodRecord.end : moment(periodRecord.start).tz('Asia/Seoul').add(statistic.termAvg, 'days').format('YYYY-MM-DD');
+      const thisMonthPhase = calPhase(duringPeriod, 'this');
+      const nextMonthPhase = calPhase(statistic.predict, 'next');
+      const adjustNextMonthPhase = adjustEffortDate(thisMonthPhase, nextMonthPhase);
+      const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
+      const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
+      if (step === 'current') {
+        const currentPhase = monthPhase.filter(phase => phase.is_between === true)[0];
+        const periodPhase = monthPhase.filter(phase => phase.phase === 'period')[0];
+        const periodSchedule = calPeriodSchedule(monthPhase, periodPhase, statistic.predict);
+        return { success: true, body: { period_schedule: periodSchedule, current_phase: currentPhase } };
+      } else {
+        return { success: true, body: thisMonthPhase.concat(nextMonthPhase) };
+      }
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };

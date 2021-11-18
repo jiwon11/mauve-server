@@ -26,24 +26,7 @@ const coachSchema = new Schema(
         location: ' '
       }
     },
-    career: [
-      {
-        corporation: String,
-        task: String,
-        period: [Date]
-      }
-    ],
-    level_of_education: {
-      level: { type: String, enum: { values: ['university', 'graduate school'], message: '{VALUE} is not supported' } },
-      name: String,
-      major: String,
-      period: [Date]
-    },
-    certificate: [
-      {
-        name: String
-      }
-    ],
+    introduce: { type: String, required: true }, // 학력, 경력, 자격증 설명
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'coach' },
     active: { type: Boolean, default: true },
