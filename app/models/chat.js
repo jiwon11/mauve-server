@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const ChatSchema = new Schema(
   {
     sender: { type: Schema.Types.ObjectId, refPath: 'senderModel' },
-    senderModel: { type: String, required: true, enum: ['USER', 'COACH'] },
+    senderModel: { type: String, required: true, enum: ['USER', 'COACH', 'SYSTEM'] },
     tag: { type: String, required: true, enum: ['chat', 'picture', 'breakfast', 'lunch', 'dinner'] },
     chat: String,
     media: Schema.Types.Mixed,
@@ -16,6 +16,8 @@ const ChatSchema = new Schema(
   {
     collection: 'CHAT',
     timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
       currentTime: () => {
         return new Date().getTime() + 9 * 3600000;
       }

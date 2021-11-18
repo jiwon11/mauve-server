@@ -77,7 +77,7 @@ export default class roomService {
           $project: {
             _id: 1,
             title: 1,
-            createdAt: 1,
+            created_at: 1,
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
@@ -155,7 +155,7 @@ export default class roomService {
         {
           $project: {
             _id: 1,
-            createdAt: 1,
+            created_at: 1,
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
@@ -261,7 +261,7 @@ export default class roomService {
               sender: 'system',
               chat: `${coach.name}님이 매니저로 입장하셨습니다.`
             });
-          // const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('createdAt');
+          // const chatRecords = await ChatModel.find({ room: roomRecord._id }).sort('created_at');
           return { success: true, body: { room: roomRecord } };
         }
       } else {

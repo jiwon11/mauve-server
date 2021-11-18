@@ -7,7 +7,7 @@ const PhoneVerifySchema = new Schema(
   {
     phone_NO: { type: String, required: true, index: true },
     token: { type: String, required: true, index: true },
-    createdAt: { type: Date, expires: '5m', default: moment().format() }
+    created_at: { type: Date, expires: '5m', default: moment().format() }
   },
   {
     collection: 'PHONE_VERIFY'
