@@ -15,6 +15,7 @@ const verifyMiddleware = async (socket, next) => {
   const result = verify(token);
   if (result.ok) {
     let success, clientRecord;
+    console.log(result.role);
     if (result.role === 'user') {
       const findUserResult = await UserService.findById(result.id);
       success = findUserResult.success;
