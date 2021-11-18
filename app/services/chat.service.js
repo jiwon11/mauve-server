@@ -1,63 +1,140 @@
 import ChatModel from '../models/chat';
+import mongoose from 'mongoose';
+
+const chatAggregatePipeline = (matchId, limit, offset) => {
+  let match;
+  if (Array.isArray(matchId)) {
+    match = {
+      $match: {
+        _id: { $in: matchId }
+      }
+    };
+  } else {
+    if (limit !== 1) {
+      match = {
+        $match: {
+          room: mongoose.Types.ObjectId(matchId)
+        }
+      };
+    } else {
+      match = {
+        $match: {
+          _id: mongoose.Types.ObjectId(matchId)
+        }
+      };
+    }
+  }
+  return [
+    match,
+    {
+      $lookup: {
+        from: 'USER',
+        //localField: 'sender_user',
+        //foreignField: '_id',
+        let: { user: '$sender_user' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$_id', '$$user'] }
+            }
+          },
+          { $project: { _id: 1, name: 1, profile_img: { location: 1 } } }
+        ],
+        as: 'sender_user'
+      }
+    },
+    {
+      $lookup: {
+        from: 'COACH',
+        //localField: 'sender_coach',
+        //foreignField: '_id',
+        let: { coach: '$sender_coach' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$_id', '$$coach'] }
+            }
+          },
+          { $project: { _id: 1, name: 1, profile_img: { location: 1 } } }
+        ],
+        as: 'sender_coach'
+      }
+    },
+    { $unwind: { path: '$sender_user', preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: '$sender_coach', preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        tag: 1,
+        chat: 1,
+        media: { location: 1 },
+        weight: 1,
+        sender: { $ifNull: ['$sender_user', '$sender_coach'] },
+        readers: 1,
+        nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
+        created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
+      }
+    },
+    { $limit: limit },
+    { $skip: offset },
+    {
+      $sort: {
+        created_at: -1
+      }
+    }
+  ];
+};
 
 export default class chatService {
-  static async postChat(req, senderId, senderRole, targetRoomId, chatDTO) {
+  static async postChat(req, senderId, senderRole, targetRoomId, chatBody, tag = 'chat') {
     try {
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
       console.log('connectedUser', connectedUser);
-      const chat = new ChatModel({
-        room: targetRoomId,
-        tag: 'chat',
-        sender: senderId,
-        senderModel: senderRole === 'user' ? 'USER' : 'COACH',
-        readers: connectedUser,
-        chat: chatDTO
-      });
-      await chat.save();
-      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatDTO);
-      return { success: true, body: 'ok' };
+      const chatDTO = { room: targetRoomId, tag: tag, readers: connectedUser };
+      if (senderRole === 'user') {
+        chatDTO.sender_user = senderId;
+      } else if (senderRole === 'coach') {
+        chatDTO.sender_coach = senderId;
+      } else {
+        return { success: false, body: '유효하지 않는 role입니다.' };
+      }
+      if (tag === 'chat') {
+        chatDTO.chat = chatBody;
+      } else if (tag === 'weight') {
+        chatDTO.weight = chatBody;
+      } else {
+        chatDTO.media = chatBody;
+      }
+      const chat = await ChatModel.create(chatDTO);
+      const chatRecord = await this.getById(chat._id);
+      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatRecord);
+      return { success: true, body: chatRecord };
     } catch (err) {
       console.log(err);
       return { success: false, body: { statusCode: 500, err } };
     }
   }
 
-  static async postMedia(req, media_tag, senderId, senderRole, targetRoomId, chatMediaDTO) {
+  static async getById(chatId) {
     try {
-      const io = await req.app.get('io');
-      const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
-      console.log(connectedUser);
-      const chat = new ChatModel({
-        room: targetRoomId,
-        tag: media_tag,
-        sender: senderId,
-        senderModel: senderRole === 'user' ? 'USER' : 'COACH',
-        readers: connectedUser,
-        media: chatMediaDTO
-      });
-      await chat.save();
-      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatMediaDTO);
-      return { success: true, body: 'ok' };
+      const aggregatePipeline = chatAggregatePipeline(chatId, 1, 0);
+      const chatRecords = await ChatModel.aggregate(aggregatePipeline);
+      return chatRecords[0];
     } catch (err) {
       console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
+      return { success: false, body: err.message };
     }
   }
 
   static async getChatsByRoomId(targetRoomId, userId, limit = 20, offset = 0) {
     try {
       console.time('Find Chat');
-      const chatRecords = await ChatModel.find({ room: targetRoomId })
-        .populate('sender', '_id name profile_img.location')
-        .select({ _id: 1, tag: 1, chat: 1, media: { location: 1 }, sender: 1, senderModel: 1, readers: 1, nonReadersNum: { $subtract: [2, { $size: '$readers' }] } })
-        .sort({ created_at: -1 })
-        .limit(limit)
-        .skip(offset);
+      const aggregatePipeline = chatAggregatePipeline(targetRoomId, limit, offset);
+      const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       console.timeEnd('Find Chat');
-      if (chatRecords[0].readers.indexOf(userId) === -1) {
+      const recentRead = chatRecords[0].readers.findIndex(chat => chat._id.toString() === userId);
+      if (recentRead === -1) {
         console.time('Update Chat Readers');
         const chatRecordIds = chatRecords.map(chat => chat._id);
         await ChatModel.updateMany(
@@ -69,11 +146,8 @@ export default class chatService {
           }
         );
         console.timeEnd('Update Chat Readers');
-        const updatedChatRecords = await ChatModel.find({ _id: chatRecordIds })
-          .populate('sender', '_id name profile_img.location')
-          .select({ _id: 1, chat: 1, sender: 1, senderModel: 1, readers: 1, readersNum: { $size: '$readers' } })
-          .sort({ created_at: -1 })
-          .lean();
+        const aggregatePipeline = chatAggregatePipeline(chatRecordIds, chatRecordIds.length, 0);
+        const updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
         return { success: true, body: { chats: updatedChatRecords } };
       }
       return { success: true, body: { chats: chatRecords } };

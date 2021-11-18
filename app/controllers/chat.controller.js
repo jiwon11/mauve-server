@@ -21,18 +21,18 @@ export const getChatsByRoomId = async (req, res) => {
 export const postChat = async (req, res) => {
   try {
     const targetRoomId = req.params.roomId;
-    const chatDTO = req.body.chat;
+    const chatBody = req.body.chat;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
-    const { success, body } = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatDTO);
-    if (success) {
-      return res.jsonResult(201, body);
+    const postChatResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatBody);
+    if (postChatResult.success) {
+      return res.jsonResult(201, postChatResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'Chat Service Error', err: postChatResult.body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Chat Controller Error', err: err.message });
   }
 };
 
@@ -43,14 +43,14 @@ export const postMedia = async (req, res) => {
     const chatMediaDTO = req.file;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
-    const { success, body } = await ChatService.postMedia(req, media_tag, senderId, senderRole, targetRoomId, chatMediaDTO);
-    if (success) {
-      return res.jsonResult(201, body);
+    const postChatMediaResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
+    if (postChatMediaResult.success) {
+      return res.jsonResult(201, postChatMediaResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'User Service Error', err: postChatMediaResult.body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'User Controller Error', err: err.message });
   }
 };

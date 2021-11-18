@@ -6,7 +6,6 @@ const router = express.Router();
 // custom utils And middlewares
 import * as chatController from '../controllers/chat.controller';
 import jwtAuth from '../middlewares/authJWT';
-import { ChainableTemporaryCredentials } from 'aws-sdk';
 
 router.get('/:roomId', jwtAuth, chatController.getChatsByRoomId);
 router.post('/:roomId', jwtAuth, upload.none(), chatController.postChat);

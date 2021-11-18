@@ -1,11 +1,25 @@
 import WeightModel from '../models/weight';
 import mongoose from 'mongoose';
-
+import moment from 'moment-timezone';
 export default class WeightService {
   static async create(weightDTO) {
     try {
       const newWeight = await WeightModel.create(weightDTO);
-      return { success: true, body: newWeight };
+      const weightRecord = await WeightModel.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(newWeight._id)
+          }
+        },
+        {
+          $project: {
+            kilograms: 1,
+            time: 1,
+            created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
+          }
+        }
+      ]);
+      return { success: true, body: weightRecord[0] };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };

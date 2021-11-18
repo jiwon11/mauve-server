@@ -97,6 +97,31 @@ export default class roomService {
     }
   }
 
+  static async getRoomIdByUserId(userId) {
+    try {
+      const roomRecord = await RoomModel.aggregate([
+        {
+          $match: {
+            user: mongoose.Types.ObjectId(userId)
+          }
+        },
+        {
+          $project: {
+            _id: 1
+          }
+        }
+      ]);
+      if (roomRecord) {
+        return { success: true, body: roomRecord[0] };
+      } else {
+        return { success: false, body: { message: `Room not founded by User ID : ${userId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
   static async findById(userId, roomId) {
     try {
       const dayOfWeek = moment().tz('Asia/seoul').day() - 1;
