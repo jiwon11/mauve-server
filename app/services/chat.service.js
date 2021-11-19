@@ -71,18 +71,31 @@ const chatAggregatePipeline = (matchId, limit, offset) => {
         sender: { $ifNull: ['$sender_user', '$sender_coach'] },
         readers: 1,
         nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
-        created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
+        //created_date_time: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } },
+        created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] },
+        created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
       }
     },
     { $limit: limit },
     { $skip: offset },
     {
       $sort: {
-        created_at: -1
+        created_date_time: -1
       }
     }
   ];
 };
+
+function groupBy(objectArray, property) {
+  return objectArray.reduce(function (acc, obj) {
+    var key = obj[property];
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(obj);
+    return acc;
+  }, {});
+}
 
 export default class chatService {
   static async postChat(req, senderId, senderRole, targetRoomId, chatBody, tag = 'chat') {
@@ -134,6 +147,7 @@ export default class chatService {
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       console.timeEnd('Find Chat');
       const recentRead = chatRecords[0].readers.findIndex(chat => chat._id.toString() === userId);
+      let updatedChatRecords;
       if (recentRead === -1) {
         console.time('Update Chat Readers');
         const chatRecordIds = chatRecords.map(chat => chat._id);
@@ -147,10 +161,18 @@ export default class chatService {
         );
         console.timeEnd('Update Chat Readers');
         const aggregatePipeline = chatAggregatePipeline(chatRecordIds, chatRecordIds.length, 0);
-        const updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
-        return { success: true, body: { chats: updatedChatRecords } };
+        updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
       }
-      return { success: true, body: { chats: chatRecords } };
+      let returnChatRecords = updatedChatRecords ? updatedChatRecords : chatRecords;
+      const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
+      /*
+      const groupByChatRecords = Object.keys(groupByDateChatRecords).map(date => {
+        const result = {};
+        result[date] = groupBy(groupByDateChatRecords[date], 'created_at_time');
+        return result;
+      });
+      */
+      return { success: true, body: { chats: groupByDateChatRecords } };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
