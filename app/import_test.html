@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMPORT TEST</title>
+  </head>
+  <body>
+    <input type="button" id="addCard" value="Add Card" />
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <!-- iamport.payment.js -->
+    <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <script type="text/javascript">
+      document.getElementById('addCard').addEventListener('click', function () {
+        IMP.init('imp68328079');
+        IMP.request_pay(
+          {
+            pg: 'danal_tpay',
+            pay_method: 'card', // 'card'만 지원됩니다.
+            merchant_uid: 'order_monthly_' + Date.now(), // 상점에서 관리하는 주문 번호
+            name: '최초인증결제',
+            amount: 0, // 빌링키 발급만 진행하며 결제승인을 하지 않습니다.
+            customer_uid: '6188e48a9c10dd00179b767d_' + Date.now(), // 필수 입력.
+            buyer_email: 'iamport@siot.do',
+            buyer_name: '아임포트',
+            buyer_tel: '02-1234-1234'
+          },
+          function (rsp) {
+            console.log(rsp);
+            if (rsp.success) {
+              console.log(rsp);
+              alert('빌링키 발급 성공');
+            } else {
+              alert('빌링키 발급 실패');
+            }
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

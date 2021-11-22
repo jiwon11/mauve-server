@@ -6,5 +6,5 @@ import jwtAuth from '../middlewares/authJWT';
 import * as importController from '../controllers/import.controller';
 
 router.post('/billings', jwtAuth, importController.billing);
-router.post('/callback/schedule', jwtAuth, importController.callbackSchedule);
+router.post('/callback/schedule', importController.callbackSchedule);
 export default router;

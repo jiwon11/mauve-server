@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import UserModel from '../models/user';
 
 export default class UserService {
@@ -55,6 +56,30 @@ export default class UserService {
         return { success: true, body: { userRecord } };
       } else {
         return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async getCustomerUid(userId) {
+    try {
+      const userRecord = await UserModel.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(userId)
+          },
+          $project: {
+            _id: 1,
+            customer_uid: 1
+          }
+        }
+      ])[0];
+      if (userRecord) {
+        return { success: true, body: userRecord };
+      } else {
+        return { success: false, body: { message: `User not founded by ID : ${userId}` } };
       }
     } catch (err) {
       console.log(err);
