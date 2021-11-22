@@ -1,9 +1,10 @@
-import importService from '../services/import.service';
+import ImportService from '../services/import.service';
+import UserService from '../services/user.service';
 
 export const getUserCardInfo = async (req, res) => {
   try {
     const userId = req.user.ID;
-    const billingKeyResult = await importService.getUserCards(userId);
+    const billingKeyResult = await ImportService.getUserCards(userId);
     if (billingKeyResult.success) {
       return res.jsonResult(200, billingKeyResult.body);
     } else {
@@ -19,9 +20,14 @@ export const billing = async function (req, res) {
   try {
     const { customer_uid, itemId } = req.body;
     const userId = req.user.ID;
-    const requestPayment = await importService.requestPayment(userId, customer_uid, itemId);
+    const requestPayment = await ImportService.requestPayment(userId, customer_uid, itemId);
     if (requestPayment.success) {
-      return res.jsonResult(201, requestPayment.body);
+      const userPaidUpdate = await UserService.updatePaid(userId);
+      if (userPaidUpdate.success) {
+        return res.jsonResult(201, requestPayment.body);
+      } else {
+        return res.jsonResult(404, userPaidUpdate.body);
+      }
     } else {
       return res.jsonResult(requestPayment.body.statusCode, requestPayment.body.message);
     }
@@ -34,7 +40,7 @@ export const billing = async function (req, res) {
 export const callbackSchedule = async function (req, res) {
   try {
     const { imp_uid, merchant_uid } = req.body;
-    const schedulePayment = await importService.callbackSchedule(imp_uid, merchant_uid);
+    const schedulePayment = await ImportService.callbackSchedule(imp_uid, merchant_uid);
     if (schedulePayment.success) {
       return res.jsonResult(201, schedulePayment.body);
     } else {
