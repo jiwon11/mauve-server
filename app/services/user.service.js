@@ -45,6 +45,22 @@ export default class UserService {
     }
   }
 
+  static async updatePaid(ID) {
+    try {
+      const userRecord = await UserModel.findByIdAndUpdate(ID, {
+        paid: true
+      }).exec();
+      if (userRecord) {
+        return { success: true, body: { userRecord } };
+      } else {
+        return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
   static async addCustomerUid(ID, customer_uid) {
     try {
       const userRecord = await UserModel.findByIdAndUpdate(ID, {
