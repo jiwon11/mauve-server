@@ -49,11 +49,11 @@ export const getUserData = async (req, res) => {
   try {
     const targetUserId = req.params.id;
     const userID = req.user.ID;
-    const { success, body } = await userService.findById(targetUserId);
-    if (success) {
-      return res.jsonResult(200, body);
+    const userDataResult = await userService.findById(targetUserId);
+    if (userDataResult.success) {
+      return res.jsonResult(200, userDataResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'User Service Error', body: userDataResult.body });
     }
   } catch (err) {
     console.log(err);
