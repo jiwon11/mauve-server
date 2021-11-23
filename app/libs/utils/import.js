@@ -138,6 +138,61 @@ export const bookingPayments = async function (access_token, customer_uid, userI
   }
 };
 
+//결제요청예약 취소
+export const unschedule = async function (access_token, customer_uid) {
+  try {
+    const unscheduleResult = await axios({
+      url: `https://api.iamport.kr/subscribe/payments/unschedule`,
+      method: 'post',
+      headers: { Authorization: access_token }, // 인증 토큰 Authorization header에 추가
+      data: {
+        customer_uid: customer_uid
+      }
+    });
+    const { code, message, response } = unscheduleResult.data;
+    if (code === 0) {
+      return { success: true, body: response };
+    } else {
+      return { success: false, body: message };
+    }
+  } catch (err) {
+    console.log(err);
+    return { success: false, body: { message: err } };
+  }
+};
+
+//결제 취소
+export const paymentCancel = async function (access_token, paymentData, reason) {
+  try {
+    const { merchant_uid, imp_uid, amount, cancel_amount, paid_at } = paymentData;
+    const paidAtDiffWeeks = Math.ceil(moment.duration(moment().diff(moment.unix(paid_at))).asWeeks()) > 4 ? 4 : Math.ceil(moment.duration(moment().diff(moment.unix(paid_at))).asWeeks());
+    const cancelableAmount = (amount - cancel_amount) * ((4 - paidAtDiffWeeks) / 4);
+    const paymentCancelResult = await axios({
+      url: 'https://api.iamport.kr/payments/cancel',
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: access_token // 아임포트 서버로부터 발급받은 엑세스 토큰
+      },
+      data: {
+        reason, // 가맹점 클라이언트로부터 받은 환불사유
+        merchant_uid,
+        amount: cancelableAmount, // 가맹점 클라이언트로부터 받은 환불금액
+        checksum: cancelableAmount // [권장] 환불 가능 금액 입력
+      }
+    });
+    const { code, message, response } = paymentCancelResult.data;
+    if (code === 0) {
+      return { success: true, body: response };
+    } else {
+      return { success: false, body: message };
+    }
+  } catch (err) {
+    console.log(err);
+    return { success: false, body: { message: err } };
+  }
+};
+
 export const getPayment = async function (access_token, imp_uid) {
   try {
     const getPaymentData = await axios({
@@ -148,6 +203,26 @@ export const getPayment = async function (access_token, imp_uid) {
     const response = getPaymentData.data.response;
     const { code, message, status } = response;
     if (status === 'paid') {
+      return { success: true, body: response };
+    } else {
+      return { success: false, body: message };
+    }
+  } catch (err) {
+    console.log(err);
+    return { success: false, body: { message: err } };
+  }
+};
+
+export const deleteBillingKey = async function (access_token, customer_uid) {
+  try {
+    const deleteBillingKeyResult = await axios({
+      url: `https://api.iamport.kr/subscribe/customers/${customer_uid}`,
+      method: 'delete',
+      headers: { Authorization: access_token } // 인증 토큰 Authorization header에 추가
+    });
+    const deleteBillingKeyResultBody = deleteBillingKeyResult.data;
+    const { code, message, response } = deleteBillingKeyResultBody;
+    if (code === 0) {
       return { success: true, body: response };
     } else {
       return { success: false, body: message };
