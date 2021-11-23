@@ -29,8 +29,10 @@ export default class ImportService {
 
   static async requestPayment(userId, customer_uid, itemId) {
     try {
+      console.time('getToken');
       const getTokenResult = await IMPORT.getToken();
       let accessToken;
+      console.timeEnd('getToken');
       if (getTokenResult.success) {
         accessToken = getTokenResult.body.access_token;
         const itemRecord = await ItemModel.aggregate([
@@ -47,7 +49,9 @@ export default class ImportService {
             }
           }
         ]);
+        console.time('requestPayment');
         const requestPaymentResult = await IMPORT.requestPayment(accessToken, userId, customer_uid, itemRecord[0].amount, `${itemRecord[0]._id.toString()}_${itemRecord[0].name}`);
+        console.timeEnd('requestPayment');
         if (requestPaymentResult.success) {
           return { success: true, body: requestPaymentResult.body };
         } else {
@@ -94,18 +98,22 @@ export default class ImportService {
     }
   }
 
-  static async unschedule(customer_uid) {
+  static async unschedule(paymentData, reason) {
     try {
       const getTokenResult = await IMPORT.getToken();
       if (!getTokenResult.success) {
         return { success: false, body: { statusCode: 400, error: `import access_token 취득에 실패하였습니다. ` } };
       }
       const accessToken = getTokenResult.body.access_token;
-      const unscheduleResult = await IMPORT.unschedule(accessToken, customer_uid);
+      const paymentCancel = await IMPORT.paymentCancel(accessToken, paymentData, reason);
+      if (!paymentCancel.success) {
+        return { success: false, body: { statusCode: 400, error: `import 결제 취소에 실패하였습니다.`, message: paymentCancel.body } };
+      }
+      const unscheduleResult = await IMPORT.unschedule(accessToken, paymentCancel.body.customer_uid, reason);
       if (!unscheduleResult.success) {
         return { success: false, body: { statusCode: 400, error: `import 결제 요청예약 취소에 실패하였습니다.`, message: unscheduleResult.body } };
       }
-      return { success: true, body: unscheduleResult.success };
+      return { success: true, body: { cancel: paymentCancel, unschedule: unscheduleResult } };
     } catch (err) {
       console.log(err);
       return { success: false, body: { statusCode: 500, err } };
