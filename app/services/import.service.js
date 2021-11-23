@@ -49,14 +49,7 @@ export default class ImportService {
         ]);
         const requestPaymentResult = await IMPORT.requestPayment(accessToken, userId, customer_uid, itemRecord[0].amount, `${itemRecord[0]._id.toString()}_${itemRecord[0].name}`);
         if (requestPaymentResult.success) {
-          const newOrder = await OrderModel.create({
-            user: userId,
-            item: itemId,
-            bills: requestPaymentResult.body.response,
-            customer_uid: customer_uid,
-            merchant_uid: requestPaymentResult.body.response.merchant_uid
-          });
-          return { success: true, body: { order: newOrder } };
+          return { success: true, body: requestPaymentResult.body };
         } else {
           return { success: false, body: { statusCode: 400, message: `import 결제 요청에 실패하였습니다.`, error: requestPaymentResult.body } };
         }
@@ -77,7 +70,6 @@ export default class ImportService {
         accessToken = getTokenResult.body.access_token;
         const getPaymentResult = await IMPORT.getPayment(accessToken, imp_uid);
         if (getPaymentResult.success) {
-          console.log(getPaymentResult.body);
           const bookingPaymentResult = await IMPORT.bookingPayments(
             accessToken,
             getPaymentResult.body.customer_uid,
@@ -86,7 +78,7 @@ export default class ImportService {
             getPaymentResult.body.name
           );
           if (bookingPaymentResult.success) {
-            return { success: true, body: { schedule: bookingPaymentResult.body.schedule_status } };
+            return { success: true, body: { payment: getPaymentResult.body, schedule: bookingPaymentResult.body.schedule_status } };
           } else {
             return { success: false, body: { statusCode: 400, message: `import 결제 예약 등록에 실패하였습니다.`, error: bookingPaymentResult.body } };
           }
@@ -96,6 +88,24 @@ export default class ImportService {
       } else {
         return { success: false, body: { statusCode: 400, message: `import access_token 취득에 실패하였습니다. ` } };
       }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async unschedule(customer_uid) {
+    try {
+      const getTokenResult = await IMPORT.getToken();
+      if (!getTokenResult.success) {
+        return { success: false, body: { statusCode: 400, error: `import access_token 취득에 실패하였습니다. ` } };
+      }
+      const accessToken = getTokenResult.body.access_token;
+      const unscheduleResult = await IMPORT.unschedule(accessToken, customer_uid);
+      if (!unscheduleResult.success) {
+        return { success: false, body: { statusCode: 400, error: `import 결제 요청예약 취소에 실패하였습니다.`, message: unscheduleResult.body } };
+      }
+      return { success: true, body: unscheduleResult.success };
     } catch (err) {
       console.log(err);
       return { success: false, body: { statusCode: 500, err } };
