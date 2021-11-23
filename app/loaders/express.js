@@ -15,7 +15,7 @@ import userRouter from '../routes/user';
 import coachRouter from '../routes/coach';
 import chatRoomRouter from '../routes/chat_room';
 import chatRouter from '../routes/chat';
-import importRouter from '../routes/import';
+import paymentRouter from '../routes/payment';
 import periodRouter from '../routes/period';
 import weightRouter from '../routes/weight';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
@@ -54,7 +54,7 @@ export default async app => {
   app.use('/coach', coachRouter);
   app.use('/room', chatRoomRouter);
   app.use('/chat', chatRouter);
-  app.use('/import', importRouter);
+  app.use('/payment', paymentRouter);
   app.use('/period', periodRouter);
   app.use('/weight', weightRouter);
   // custom Error controllers

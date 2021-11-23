@@ -123,7 +123,7 @@ export const bookingPayments = async function (access_token, customer_uid, userI
         schedules: [
           {
             merchant_uid: createMerchantUid(userId, 1), // 주문 번호
-            schedule_at: moment.tz('Asia/Seoul').add(1, 'minute').unix(), // 결제 시도 시각 Unix Time Stamp + 다음 달
+            schedule_at: moment.tz('Asia/Seoul').add(10, 'second').unix(), // 결제 시도 시각 Unix Time Stamp + 다음 달
             amount: amount,
             currency: 'KRW',
             name: name,
@@ -182,7 +182,6 @@ export const paymentCancel = async function (access_token, paymentData, reason) 
       },
       data: {
         reason, // 가맹점 클라이언트로부터 받은 환불사유
-        imp_uid, // imp_uid를 환불 `unique key`로 입력
         merchant_uid,
         amount: cancelableAmount, // 가맹점 클라이언트로부터 받은 환불금액
         checksum: cancelableAmount // [권장] 환불 가능 금액 입력

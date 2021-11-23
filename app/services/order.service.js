@@ -23,7 +23,8 @@ export default class OrderService {
       const orderRecord = await OrderModel.aggregate([
         {
           $match: {
-            user: mongoose.Types.ObjectId(userId)
+            user: mongoose.Types.ObjectId(userId),
+            'bills.status': 'paid'
           }
         },
         {
@@ -32,7 +33,8 @@ export default class OrderService {
             item: 1,
             bills: 1,
             customer_uid: 1,
-            merchant_uid: 1
+            merchant_uid: 1,
+            created_at: 1
           }
         },
         {
