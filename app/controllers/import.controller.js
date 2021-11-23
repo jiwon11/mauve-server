@@ -42,7 +42,12 @@ export const callbackSchedule = async function (req, res) {
     const { imp_uid, merchant_uid } = req.body;
     const schedulePayment = await ImportService.callbackSchedule(imp_uid, merchant_uid);
     if (schedulePayment.success) {
-      return res.jsonResult(201, schedulePayment.body);
+      const userPaidUpdate = await UserService.updatePaid(userId);
+      if (userPaidUpdate.success) {
+        return res.jsonResult(201, schedulePayment.body);
+      } else {
+        return res.jsonResult(404, userPaidUpdate.body);
+      }
     } else {
       return res.jsonResult(schedulePayment.body.statusCode, schedulePayment.body.message);
     }
