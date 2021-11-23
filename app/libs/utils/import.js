@@ -1,7 +1,13 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import moment from 'moment-timezone';
+import Iamport from 'iamport';
 dotenv.config();
+
+const iamport = new Iamport({
+  impKey: process.env.IMPORT_KEY,
+  impSecret: process.env.IMPORT_SECRET
+});
 
 const createMerchantUid = (userId, nextMonth = 0) => {
   /*
@@ -117,7 +123,7 @@ export const bookingPayments = async function (access_token, customer_uid, userI
         schedules: [
           {
             merchant_uid: createMerchantUid(userId, 1), // 주문 번호
-            schedule_at: moment.tz('Asia/Seoul').add(10, 'second').unix(), // 결제 시도 시각 Unix Time Stamp + 다음 달
+            schedule_at: moment.tz('Asia/Seoul').add(1, 'minute').unix(), // 결제 시도 시각 Unix Time Stamp + 다음 달
             amount: amount,
             currency: 'KRW',
             name: name,
@@ -135,6 +141,30 @@ export const bookingPayments = async function (access_token, customer_uid, userI
   } catch (err) {
     console.log(err);
     return { success: false, body: { message: err.message } };
+  }
+};
+
+//결제요청예약 취소
+export const unschedule = async function (access_token, customer_uid) {
+  try {
+    const unscheduleResult = await axios({
+      url: `https://api.iamport.kr/subscribe/payments/unschedule`,
+      method: 'post',
+      headers: { Authorization: access_token }, // 인증 토큰 Authorization header에 추가
+      data: {
+        customer_uid: customer_uid
+      }
+    });
+    const unscheduleResultBody = unscheduleResult.data;
+    const { code, message, response } = unscheduleResultBody;
+    if (code === 0) {
+      return { success: true, body: response };
+    } else {
+      return { success: false, body: message };
+    }
+  } catch (err) {
+    console.log(err);
+    return { success: false, body: { message: err } };
   }
 };
 

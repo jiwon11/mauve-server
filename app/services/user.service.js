@@ -45,10 +45,10 @@ export default class UserService {
     }
   }
 
-  static async updatePaid(ID) {
+  static async updatePaid(ID, paid) {
     try {
       const userRecord = await UserModel.findByIdAndUpdate(ID, {
-        paid: true
+        paid: paid
       }).exec();
       if (userRecord) {
         return { success: true, body: { userRecord } };
@@ -91,7 +91,7 @@ export default class UserService {
             customer_uid: 1
           }
         }
-      ])[0];
+      ]);
       if (userRecord) {
         return { success: true, body: userRecord };
       } else {
