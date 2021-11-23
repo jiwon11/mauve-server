@@ -28,8 +28,11 @@ export default class OrderService {
         },
         {
           $project: {
-            _id: 1,
-            customer_uid: 1
+            user: 1,
+            item: 1,
+            bills: 1,
+            customer_uid: 1,
+            merchant_uid: 1
           }
         },
         {
@@ -43,6 +46,18 @@ export default class OrderService {
       } else {
         return { success: false, body: { message: `User not founded by ID : ${userId}` } };
       }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async update(id, paymentData) {
+    try {
+      const updateOrder = await OrderModel.findByIdAndUpdate(id, {
+        bills: paymentData
+      });
+      return { success: true, body: updateOrder };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };

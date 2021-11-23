@@ -21,24 +21,16 @@ export const billing = async function (req, res) {
   try {
     const { customer_uid, itemId } = req.body;
     const userId = req.user.ID;
-    console.time('requestPayment');
     const requestPayment = await ImportService.requestPayment(userId, customer_uid, itemId);
-    console.timeEnd('requestPayment');
     if (requestPayment.success) {
       const paymentDTO = requestPayment.body.response;
-      console.time('createOrder');
-      const createOrderResult = await OrderService.create(paymentDTO.customer_uid.split('_')[0], paymentDTO.name.split('_')[0], paymentDTO, paymentDTO.customer_uid, paymentDTO.merchant_uid);
-      console.timeEnd('createOrder');
-      if (!createOrderResult.success) {
-        return res.jsonResult(500, createOrderResult.body);
-      }
       console.time('updatePaid');
       const userPaidUpdate = await UserService.updatePaid(userId, true);
       console.timeEnd('updatePaid');
       if (!userPaidUpdate.success) {
         return res.jsonResult(404, userPaidUpdate.body);
       }
-      return res.jsonResult(201, createOrderResult.body);
+      return res.jsonResult(201, paymentDTO);
     } else {
       return res.jsonResult(requestPayment.body.statusCode, requestPayment.body.message);
     }
@@ -75,16 +67,21 @@ export const callbackSchedule = async function (req, res) {
 export const unschedule = async (req, res) => {
   try {
     const userId = req.user.ID;
+    const reason = req.body.reason;
     const recentOrderResult = await OrderService.getRecentOrder(userId);
     if (!recentOrderResult.success) {
       return res.jsonResult(500, { message: 'Order Service Error', body: recentOrderResult.body });
     }
-    const unscheduleResult = await ImportService.unschedule(recentOrderResult.body.customer_uid);
+    const unscheduleResult = await ImportService.unschedule(recentOrderResult.body, reason);
     if (!unscheduleResult.success) {
-      return res.jsonResult(500, { error: 'Import Service Error', message: unscheduleResult.body.message });
+      return res.jsonResult(500, { error: `Import Service Error - ${unscheduleResult.body.error}`, message: unscheduleResult.body.message });
     }
     const userPaidUpdate = await UserService.updatePaid(userId, false);
     if (!userPaidUpdate.success) {
+      return res.jsonResult(404, userPaidUpdate.body);
+    }
+    const orderUpdate = await OrderService.update(recentOrderResult.body._id, unscheduleResult.body.cancel.body);
+    if (!orderUpdate.success) {
       return res.jsonResult(404, userPaidUpdate.body);
     }
     return res.jsonResult(200, unscheduleResult.body);
@@ -97,6 +94,5 @@ export const unschedule = async (req, res) => {
 /**
  * ** 추가 API
  * 결제 취소
- * 결제 환불
  * 구매자의 빌링키 정보 삭제
  */
