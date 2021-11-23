@@ -1,4 +1,4 @@
-import PaymentService from '../services/import.service';
+import PaymentService from '../services/payment.service';
 import UserService from '../services/user.service';
 import OrderService from '../services/order.service';
 
