@@ -11,6 +11,7 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <!-- iamport.payment.js -->
     <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
       document.getElementById('addCard').addEventListener('click', function () {
         IMP.init('imp68328079');
@@ -30,6 +31,22 @@
             console.log(rsp);
             if (rsp.success) {
               console.log(rsp);
+              axios({
+                url: `http://localhost:3000/user/card`,
+                method: 'post',
+                headers: {
+                  authorization:
+                    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxODhlNDhhOWMxMGRkMDAxNzliNzY3ZCIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNjM2NDQwMDY5LCJleHAiOjE2Njc5OTc2Njl9.za0OaU2iJ5MswR_peFWjfxOYQ44A7uXvt4Ag1WveULk',
+                  Refresh: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzY0NDAwNjksImV4cCI6MTY2Nzk5NzY2OX0.HVCkqPZ-HKFp6OYKOuMdU9oIGx9vBEHDkr-m-SeI2rw'
+                },
+                data: rsp
+              })
+                .then(function (response) {
+                  console.log(response);
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
               alert('빌링키 발급 성공');
             } else {
               alert('빌링키 발급 실패');

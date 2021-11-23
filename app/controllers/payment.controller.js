@@ -1,11 +1,11 @@
-import ImportService from '../services/import.service';
+import PaymentService from '../services/payment.service';
 import UserService from '../services/user.service';
 import OrderService from '../services/order.service';
 
 export const getUserCardInfo = async (req, res) => {
   try {
     const userId = req.user.ID;
-    const billingKeyResult = await ImportService.getUserCards(userId);
+    const billingKeyResult = await PaymentService.getUserCards(userId);
     if (billingKeyResult.success) {
       return res.jsonResult(200, billingKeyResult.body);
     } else {
@@ -21,16 +21,15 @@ export const billing = async function (req, res) {
   try {
     const { customer_uid, itemId } = req.body;
     const userId = req.user.ID;
-    const requestPayment = await ImportService.requestPayment(userId, customer_uid, itemId);
+    const requestPayment = await PaymentService.requestPayment(userId, customer_uid, itemId);
     if (requestPayment.success) {
-      const paymentDTO = requestPayment.body.response;
       console.time('updatePaid');
       const userPaidUpdate = await UserService.updatePaid(userId, true);
       console.timeEnd('updatePaid');
       if (!userPaidUpdate.success) {
         return res.jsonResult(404, userPaidUpdate.body);
       }
-      return res.jsonResult(201, paymentDTO);
+      return res.jsonResult(201, { billing: requestPayment.success });
     } else {
       return res.jsonResult(requestPayment.body.statusCode, requestPayment.body.message);
     }
@@ -43,7 +42,7 @@ export const billing = async function (req, res) {
 export const callbackSchedule = async function (req, res) {
   try {
     const { imp_uid, merchant_uid } = req.body;
-    const schedulePayment = await ImportService.callbackSchedule(imp_uid, merchant_uid);
+    const schedulePayment = await PaymentService.callbackSchedule(imp_uid, merchant_uid);
     if (schedulePayment.success) {
       const userPaidUpdate = await UserService.updatePaid(merchant_uid.split('_')[0], true);
       if (!userPaidUpdate.success) {
@@ -72,7 +71,7 @@ export const unschedule = async (req, res) => {
     if (!recentOrderResult.success) {
       return res.jsonResult(500, { message: 'Order Service Error', body: recentOrderResult.body });
     }
-    const unscheduleResult = await ImportService.unschedule(recentOrderResult.body, reason);
+    const unscheduleResult = await PaymentService.unschedule(recentOrderResult.body, reason);
     if (!unscheduleResult.success) {
       return res.jsonResult(500, { error: `Import Service Error - ${unscheduleResult.body.error}`, message: unscheduleResult.body.message });
     }
@@ -84,7 +83,7 @@ export const unschedule = async (req, res) => {
     if (!orderUpdate.success) {
       return res.jsonResult(404, userPaidUpdate.body);
     }
-    return res.jsonResult(200, unscheduleResult.body);
+    return res.jsonResult(200, { cancel: unscheduleResult.body.cancel.success, unschedule: unscheduleResult.body.unschedule.success });
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, { message: 'User Controller Error', err });
@@ -93,6 +92,5 @@ export const unschedule = async (req, res) => {
 
 /**
  * ** 추가 API
- * 결제 취소
  * 구매자의 빌링키 정보 삭제
  */
