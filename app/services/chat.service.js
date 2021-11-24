@@ -1,19 +1,22 @@
 import ChatModel from '../models/chat';
 import mongoose from 'mongoose';
+import moment from 'moment';
+import 'moment-timezone';
 
-const chatAggregatePipeline = (matchId, limit, offset) => {
+const chatAggregatePipeline = (byRoom, matchId, from, to) => {
   let match;
-  if (Array.isArray(matchId)) {
+  if (byRoom === true) {
     match = {
       $match: {
-        _id: { $in: matchId }
+        room: mongoose.Types.ObjectId(matchId),
+        created_at: { $gte: moment(moment.utc(from).toDate()).tz('Asia/Seoul').toDate(), $lte: moment(moment.utc(to).toDate()).tz('Asia/Seoul').toDate() }
       }
     };
   } else {
-    if (limit !== 1) {
+    if (Array.isArray(matchId)) {
       match = {
         $match: {
-          room: mongoose.Types.ObjectId(matchId)
+          _id: { $in: matchId }
         }
       };
     } else {
@@ -71,16 +74,15 @@ const chatAggregatePipeline = (matchId, limit, offset) => {
         sender: { $ifNull: ['$sender_user', '$sender_coach'] },
         readers: 1,
         nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
+        created_at: 1,
         //created_date_time: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } },
         created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] },
         created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
       }
     },
-    { $limit: limit },
-    { $skip: offset },
     {
       $sort: {
-        created_date_time: -1
+        created_at: -1
       }
     }
   ];
@@ -131,7 +133,7 @@ export default class chatService {
 
   static async getById(chatId) {
     try {
-      const aggregatePipeline = chatAggregatePipeline(chatId, 1, 0);
+      const aggregatePipeline = chatAggregatePipeline(false, chatId);
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       return chatRecords[0];
     } catch (err) {
@@ -140,12 +142,15 @@ export default class chatService {
     }
   }
 
-  static async getChatsByRoomId(targetRoomId, userId, limit = 20, offset = 0) {
+  static async getChatsByRoomId(targetRoomId, userId, from, to) {
     try {
       console.time('Find Chat');
-      const aggregatePipeline = chatAggregatePipeline(targetRoomId, limit, offset);
+      const aggregatePipeline = chatAggregatePipeline(true, targetRoomId, from, to);
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       console.timeEnd('Find Chat');
+      if (chatRecords.length == 0) {
+        return { success: true, body: chatRecords };
+      }
       const recentRead = chatRecords[0].readers.findIndex(chat => chat._id.toString() === userId);
       let updatedChatRecords;
       if (recentRead === -1) {
@@ -160,19 +165,19 @@ export default class chatService {
           }
         );
         console.timeEnd('Update Chat Readers');
-        const aggregatePipeline = chatAggregatePipeline(chatRecordIds, chatRecordIds.length, 0);
+        const aggregatePipeline = chatAggregatePipeline(false, chatRecordIds);
         updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
       }
       let returnChatRecords = updatedChatRecords ? updatedChatRecords : chatRecords;
-      const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       /*
+      const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       const groupByChatRecords = Object.keys(groupByDateChatRecords).map(date => {
         const result = {};
         result[date] = groupBy(groupByDateChatRecords[date], 'created_at_time');
         return result;
       });
       */
-      return { success: true, body: { chats: groupByDateChatRecords } };
+      return { success: true, body: returnChatRecords };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };

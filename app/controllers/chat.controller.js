@@ -4,9 +4,9 @@ export const getChatsByRoomId = async (req, res) => {
   try {
     const targetRoomId = req.params.roomId;
     const userId = req.user.ID;
-    const limit = parseInt(req.query.limit);
-    const offset = parseInt(req.query.offset);
-    const { success, body } = await ChatService.getChatsByRoomId(targetRoomId, userId, limit, offset);
+    const from = req.query.from;
+    const to = req.query.to;
+    const { success, body } = await ChatService.getChatsByRoomId(targetRoomId, userId, from, to);
     if (success) {
       return res.jsonResult(200, body);
     } else {
