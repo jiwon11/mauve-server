@@ -18,6 +18,7 @@ import chatRouter from '../routes/chat';
 import paymentRouter from '../routes/payment';
 import periodRouter from '../routes/period';
 import weightRouter from '../routes/weight';
+import mainPhraseRouter from '../routes/mainPhrase';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 AWSXRay.captureHTTPsGlobal(require('https'));
@@ -57,6 +58,7 @@ export default async app => {
   app.use('/payment', paymentRouter);
   app.use('/period', periodRouter);
   app.use('/weight', weightRouter);
+  app.use('/mainPhrase', mainPhraseRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
