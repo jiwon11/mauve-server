@@ -34,6 +34,7 @@ export const verify = token => {
   } catch (err) {
     return {
       ok: false,
+      secret: secret,
       message: err
     };
   }
