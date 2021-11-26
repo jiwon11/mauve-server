@@ -33,7 +33,7 @@ export default class UserService {
 
   static async findById(ID) {
     try {
-      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: 1 }).lean();
+      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: '$profile_img.location' }).lean();
       if (userRecord) {
         return { success: true, body: { userRecord } };
       } else {

@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 import ChatService from '../services/chat.service';
 
 export const getChatsByRoomId = async (req, res) => {
@@ -24,7 +25,7 @@ export const postChat = async (req, res) => {
     const chatBody = req.body.chat;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
-    const postChatResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatBody);
+    const postChatResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, { text: chatBody });
     if (postChatResult.success) {
       return res.jsonResult(201, postChatResult.body);
     } else {

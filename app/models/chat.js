@@ -10,9 +10,10 @@ const ChatSchema = new Schema(
     //sender: { type: Schema.Types.ObjectId, refPath: 'senderModel' },
     //senderModel: { type: String, required: true, enum: ['USER', 'COACH', 'SYSTEM'] },
     tag: { type: String, required: true, enum: ['chat', 'picture', 'breakfast', 'lunch', 'dinner', 'snack', 'weight'] },
-    chat: String,
-    media: Schema.Types.Mixed,
-    weight: Schema.Types.Mixed,
+    body: Schema.Types.Mixed,
+    //chat: String,
+    //media: Schema.Types.Mixed,
+    //weight: Schema.Types.Mixed,
     room: { type: Schema.Types.ObjectId, index: true, ref: 'CHAT_ROOM' },
     readers: [{ type: Schema.Types.ObjectId, refPath: 'readerModel' }]
   },
