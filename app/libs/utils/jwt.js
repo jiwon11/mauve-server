@@ -24,7 +24,8 @@ export const sign = user => {
 
 export const verify = token => {
   try {
-    console.log(secret);
+    console.log('secret', secret);
+    console.log('token', secret);
     const decoded = jwt.verify(token, secret);
     return {
       ok: true,
@@ -34,7 +35,6 @@ export const verify = token => {
   } catch (err) {
     return {
       ok: false,
-      secret: secret,
       message: err
     };
   }
