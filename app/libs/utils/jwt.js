@@ -24,6 +24,7 @@ export const sign = user => {
 
 export const verify = token => {
   try {
+    console.log(secret);
     const decoded = jwt.verify(token, secret);
     return {
       ok: true,
