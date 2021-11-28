@@ -8,7 +8,6 @@ import { verify } from '../libs/utils/jwt.js';
 
 export default (req, res, next) => {
   if (req.headers.authorization) {
-    console.log('header', req.headers);
     const token = req.headers.authorization.split('Bearer ')[1]; // header에서 access token을 가져옵니다.
     const result = verify(token); // token을 검증합니다.
     if (result.ok) {

@@ -11,8 +11,9 @@ import CoachService from '../services/coach.service';
 dotenv.config();
 
 const verifyMiddleware = async (socket, next) => {
-  const token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  const token = socket.handshake.auth.authorization.split('Bearer ')[1];
   const result = verify(token);
+  console.log(result);
   if (result.ok) {
     let success, clientRecord;
     console.log(result.role);
@@ -65,7 +66,12 @@ export default (server, app) => {
     password: process.env.REDIS_PW
   });
   const subClient = pubClient.duplicate();
-  const redisAdapter = socketIoRedisAdapter({ pubClient, subClient });
+  const redisAdapter = socketIoRedisAdapter({
+    pubClient,
+    subClient,
+    requestsTimeout: 3000,
+    key: 'chat-socket'
+  });
   io.adapter(redisAdapter);
 
   pubClient.on('connect', () => {
