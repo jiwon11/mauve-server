@@ -11,7 +11,13 @@ import CoachService from '../services/coach.service';
 dotenv.config();
 
 const verifyMiddleware = async (socket, next) => {
-  const token = socket.handshake.auth.authorization.split('Bearer ')[1];
+  let token;
+  console.log(socket.handshake);
+  if (socket.handshake.auth.authorization) {
+    token = socket.handshake.auth.authorization.split('Bearer ')[1];
+  } else {
+    token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  }
   const result = verify(token);
   console.log(result);
   if (result.ok) {
@@ -103,6 +109,7 @@ export default (server, app) => {
       console.log('user name :', socket.handshake.auth.name);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
+      // socket.join & socket.to(roomId).emit('join', {}) 이벤트를 connection외 다른 곳에서 on이 되도록
       await socket.join(roomId);
 
       socket.to(roomId).emit('join', {
