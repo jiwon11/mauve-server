@@ -1,5 +1,6 @@
 import userService from '../services/user.service';
 import roomService from '../services/room.service';
+import CardService from '../services/card.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IMPORT from '../libs/utils/import';
@@ -41,7 +42,7 @@ export const signAccount = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
   }
 };
 
@@ -49,15 +50,15 @@ export const getUserData = async (req, res) => {
   try {
     const targetUserId = req.params.id;
     const userID = req.user.ID;
-    const { success, body } = await userService.findById(targetUserId);
-    if (success) {
-      return res.jsonResult(200, body);
+    const userDataResult = await userService.findById(targetUserId);
+    if (userDataResult.success) {
+      return res.jsonResult(200, userDataResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'User Service Error', body: userDataResult.body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
   }
 };
 
@@ -78,6 +79,53 @@ export const addCustomerUid = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'Import Controller Error', err });
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const addCard = async (req, res) => {
+  try {
+    const billingKeyData = req.body;
+    const userId = req.user.ID;
+    const addCardResult = await CardService.createBillingKey(userId, billingKeyData);
+    if (addCardResult.success) {
+      return res.jsonResult(201, { body: addCardResult.body });
+    } else {
+      return res.jsonResult(500, { message: addCardResult.message });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const getAllCard = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    console.log(userId);
+    const getAllCardResult = await CardService.getAll(userId);
+    if (getAllCardResult.success) {
+      return res.jsonResult(200, { body: getAllCardResult.body });
+    } else {
+      return res.jsonResult(500, { message: getAllCardResult.message });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const deleteCard = async (req, res) => {
+  try {
+    const customer_uid = req.body.customer_uid;
+    const deleteCardResult = await CardService.deleteBillingKey(customer_uid);
+    if (deleteCardResult.success) {
+      return res.jsonResult(200, deleteCardResult.body);
+    } else {
+      return res.jsonResult(500, { message: deleteCardResult.body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
   }
 };

@@ -122,9 +122,24 @@ export default class roomService {
     }
   }
 
-  static async findById(userId, roomId) {
+  static async findById(userId, userRole, roomId) {
     try {
-      const dayOfWeek = moment().tz('Asia/seoul').day() - 1;
+      const dayOfWeek = moment().tz('Asia/seoul').day() - 1; // 0:일 ~ 6:토요일 --> 코치의 상담시간 array : 0:월요일 ~ 4:금요일
+      const nonReadChatRole =
+        userRole === 'user'
+          ? [
+              {
+                $in: [userId, '$readers']
+              },
+              {
+                $ne: ['$type', 'weight']
+              }
+            ]
+          : [
+              {
+                $in: [userId, '$readers']
+              }
+            ];
       console.log(dayOfWeek);
       const roomRecord = await RoomModel.aggregate([
         { $match: { _id: mongoose.Types.ObjectId(roomId) } },
@@ -152,13 +167,11 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $not: {
-                      $in: [userId, '$readers']
-                    }
+                    $and: nonReadChatRole
                   }
                 }
               },
-              { $project: { chat: 1, _id: 1 } },
+              { $project: { chat: 1, _id: 1, type: 1 } },
               { $sort: { createdAt: -1 } },
               { $limit: 1 }
             ],

@@ -1,0 +1,8 @@
+authtoken: 1dLQUHUtp7GmARaCzm515HGtTHv_27KPzwBFGNP6S8D9yehYz
+tunnels:
+  app:
+    addr: 3000
+    proto: http
+  websocket:
+    addr: 3030
+    proto: http

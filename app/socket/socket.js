@@ -11,8 +11,15 @@ import CoachService from '../services/coach.service';
 dotenv.config();
 
 const verifyMiddleware = async (socket, next) => {
-  const token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  let token;
+  console.log(socket.handshake);
+  if (socket.handshake.auth.authorization) {
+    token = socket.handshake.auth.authorization.split('Bearer ')[1];
+  } else {
+    token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  }
   const result = verify(token);
+  console.log(result);
   if (result.ok) {
     let success, clientRecord;
     console.log(result.role);
@@ -65,7 +72,12 @@ export default (server, app) => {
     password: process.env.REDIS_PW
   });
   const subClient = pubClient.duplicate();
-  const redisAdapter = socketIoRedisAdapter({ pubClient, subClient });
+  const redisAdapter = socketIoRedisAdapter({
+    pubClient,
+    subClient,
+    requestsTimeout: 3000,
+    key: 'chat-socket'
+  });
   io.adapter(redisAdapter);
 
   pubClient.on('connect', () => {
@@ -97,6 +109,7 @@ export default (server, app) => {
       console.log('user name :', socket.handshake.auth.name);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
+      // socket.join & socket.to(roomId).emit('join', {}) 이벤트를 connection외 다른 곳에서 on이 되도록
       await socket.join(roomId);
 
       socket.to(roomId).emit('join', {

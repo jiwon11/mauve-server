@@ -1,19 +1,24 @@
 import ChatModel from '../models/chat';
 import mongoose from 'mongoose';
+import moment from 'moment';
+import 'moment-timezone';
 
-const chatAggregatePipeline = (matchId, limit, offset) => {
+const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
   let match;
-  if (Array.isArray(matchId)) {
+  const fromQuery = moment(moment.utc(from).toDate()).tz('Asia/Seoul').toDate(); // moment.utc(moment.tz('Asia/Seoul').subtract(1, 'days').format('YYYY-MM-DDTHH:mm:ss')).toDate();
+  const toQuery = moment(moment.utc(to).toDate()).tz('Asia/Seoul').toDate(); //moment.utc(moment.tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss')).toDate();
+  if (byRoom === true) {
     match = {
       $match: {
-        _id: { $in: matchId }
+        room: mongoose.Types.ObjectId(matchId),
+        created_at: { $gte: fromQuery, $lte: toQuery }
       }
     };
   } else {
-    if (limit !== 1) {
+    if (Array.isArray(matchId)) {
       match = {
         $match: {
-          room: mongoose.Types.ObjectId(matchId)
+          _id: { $in: matchId }
         }
       };
     } else {
@@ -38,7 +43,7 @@ const chatAggregatePipeline = (matchId, limit, offset) => {
               $expr: { $eq: ['$_id', '$$user'] }
             }
           },
-          { $project: { _id: 1, name: 1, profile_img: { location: 1 } } }
+          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
         ],
         as: 'sender_user'
       }
@@ -55,7 +60,7 @@ const chatAggregatePipeline = (matchId, limit, offset) => {
               $expr: { $eq: ['$_id', '$$coach'] }
             }
           },
-          { $project: { _id: 1, name: 1, profile_img: { location: 1 } } }
+          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
         ],
         as: 'sender_coach'
       }
@@ -64,23 +69,32 @@ const chatAggregatePipeline = (matchId, limit, offset) => {
     { $unwind: { path: '$sender_coach', preserveNullAndEmptyArrays: true } },
     {
       $project: {
-        tag: 1,
+        /*
         chat: 1,
         media: { location: 1 },
-        weight: 1,
+        weight: { time: 1, kilograms: 1 },
+        */
+        tag: 1,
+        body: {
+          text: 1,
+          time: 1,
+          kilograms: 1,
+          location: 1,
+          contentType: 1,
+          key: 1
+        },
         sender: { $ifNull: ['$sender_user', '$sender_coach'] },
         readers: 1,
         nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
+        created_at: 1,
         //created_date_time: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } },
         created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] },
         created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
       }
     },
-    { $limit: limit },
-    { $skip: offset },
     {
       $sort: {
-        created_date_time: -1
+        created_at: -1
       }
     }
   ];
@@ -112,6 +126,8 @@ export default class chatService {
       } else {
         return { success: false, body: '유효하지 않는 role입니다.' };
       }
+      chatDTO.body = chatBody;
+      /*
       if (tag === 'chat') {
         chatDTO.chat = chatBody;
       } else if (tag === 'weight') {
@@ -119,8 +135,9 @@ export default class chatService {
       } else {
         chatDTO.media = chatBody;
       }
+      */
       const chat = await ChatModel.create(chatDTO);
-      const chatRecord = await this.getById(chat._id);
+      const chatRecord = await this.getById(chat._id, senderId);
       req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatRecord);
       return { success: true, body: chatRecord };
     } catch (err) {
@@ -129,9 +146,9 @@ export default class chatService {
     }
   }
 
-  static async getById(chatId) {
+  static async getById(chatId, userId) {
     try {
-      const aggregatePipeline = chatAggregatePipeline(chatId, 1, 0);
+      const aggregatePipeline = chatAggregatePipeline(false, chatId, userId);
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       return chatRecords[0];
     } catch (err) {
@@ -140,12 +157,15 @@ export default class chatService {
     }
   }
 
-  static async getChatsByRoomId(targetRoomId, userId, limit = 20, offset = 0) {
+  static async getChatsByRoomId(targetRoomId, userId, from, to) {
     try {
       console.time('Find Chat');
-      const aggregatePipeline = chatAggregatePipeline(targetRoomId, limit, offset);
+      const aggregatePipeline = chatAggregatePipeline(true, targetRoomId, userId, from, to);
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
       console.timeEnd('Find Chat');
+      if (chatRecords.length == 0) {
+        return { success: true, body: chatRecords };
+      }
       const recentRead = chatRecords[0].readers.findIndex(chat => chat._id.toString() === userId);
       let updatedChatRecords;
       if (recentRead === -1) {
@@ -160,19 +180,19 @@ export default class chatService {
           }
         );
         console.timeEnd('Update Chat Readers');
-        const aggregatePipeline = chatAggregatePipeline(chatRecordIds, chatRecordIds.length, 0);
+        const aggregatePipeline = chatAggregatePipeline(false, chatRecordIds, userId);
         updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
       }
       let returnChatRecords = updatedChatRecords ? updatedChatRecords : chatRecords;
-      const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       /*
+      const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       const groupByChatRecords = Object.keys(groupByDateChatRecords).map(date => {
         const result = {};
         result[date] = groupBy(groupByDateChatRecords[date], 'created_at_time');
         return result;
       });
       */
-      return { success: true, body: { chats: groupByDateChatRecords } };
+      return { success: true, body: returnChatRecords };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
