@@ -11,7 +11,13 @@ import CoachService from '../services/coach.service';
 dotenv.config();
 
 const verifyMiddleware = async (socket, next) => {
-  const token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  let token;
+  console.log(socket.handshake);
+  if (socket.handshake.auth.authorization) {
+    token = socket.handshake.auth.authorization.split('Bearer ')[1];
+  } else {
+    token = socket.handshake.headers.authorization.split('Bearer ')[1];
+  }
   const result = verify(token);
   if (result.ok) {
     let success, clientRecord;
@@ -54,7 +60,7 @@ export default (server, app) => {
 
   instrument(io, {
     auth: false,
-    namespaceName: '/chat',
+    namespaceName: '/admin',
     readonly: true
   });
 
@@ -65,7 +71,12 @@ export default (server, app) => {
     password: process.env.REDIS_PW
   });
   const subClient = pubClient.duplicate();
-  const redisAdapter = socketIoRedisAdapter({ pubClient, subClient });
+  const redisAdapter = socketIoRedisAdapter({
+    pubClient,
+    subClient,
+    requestsTimeout: 3000,
+    key: 'chat-socket'
+  });
   io.adapter(redisAdapter);
 
   pubClient.on('connect', () => {
@@ -79,6 +90,7 @@ export default (server, app) => {
 
   const roomNamespace = io.of('/room'); // io.of : 네임스페이스를 만들어 접속
   const chatNamespace = io.of('/chat'); // 같은 네임스페이스끼리만 데이터 전달
+  const adminNamespace = io.of('/admin');
 
   io.of('/room').use(verifyMiddleware);
   io.of('/chat').use(verifyMiddleware);
@@ -97,6 +109,7 @@ export default (server, app) => {
       console.log('user name :', socket.handshake.auth.name);
       console.log('socket id', socket.id);
       const roomId = socket.handshake.query.roomId;
+      // socket.join & socket.to(roomId).emit('join', {}) 이벤트를 connection외 다른 곳에서 on이 되도록
       await socket.join(roomId);
 
       socket.to(roomId).emit('join', {
@@ -119,5 +132,10 @@ export default (server, app) => {
     }
   });
 
-  httpServer.listen(3030);
+  httpServer.listen(3030, '0.0.0.0', err => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
 };

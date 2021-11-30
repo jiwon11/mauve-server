@@ -15,7 +15,8 @@ export default async () => {
         user: process.env.MONGO_USER,
         pass: process.env.MONGO_PASSWORD,
         autoCreate: true,
-        autoIndex: true
+        autoIndex: true,
+        bufferCommands: false
       });
       console.log('The MONGODB is connected');
     } catch (error) {

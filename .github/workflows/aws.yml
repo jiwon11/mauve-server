@@ -26,7 +26,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tuning-app
+          ECR_REPOSITORY: mauve-app
           IMAGE_TAG: latest
         run: |
           echo ${{ steps.login-ecr.outputs.registry }}
@@ -37,19 +37,19 @@ jobs:
           docker-compose push
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: Render Amazon ECS task definition for tuning app container
-        id: render-tuning-app-container
+      - name: Render Amazon ECS task definition for mauve app container
+        id: render-mauve-app-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: tuning-app-container
-          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest
+          container-name: mauve-app-container
+          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-app:latest
 
       - name: Modify Amazon ECS task definition with reverse proxy container
         id: render-reverse-proxy-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ steps.render-tuning-app-container.outputs.task-definition }}
+          task-definition: ${{ steps.render-mauve-app-container.outputs.task-definition }}
           container-name: reverse-proxy-container
           image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
 
