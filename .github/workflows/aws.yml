@@ -37,7 +37,7 @@ jobs:
           docker-compose push
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: Render Amazon ECS task definition for tuning app container
+      - name: Render Amazon ECS task definition for mauve app container
         id: render-mauve-app-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
