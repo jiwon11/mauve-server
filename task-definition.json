@@ -10,7 +10,7 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-group": "/ecs/mauve-app-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -30,7 +30,7 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-group": "/ecs/mauve-app-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -59,7 +59,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest",
+      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-app:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -76,7 +76,7 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "tuning-app-container"
+      "name": "mauve-app-container"
     },
     {
       "dnsSearchDomains": null,
@@ -85,7 +85,7 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/tuning-app-task",
+          "awslogs-group": "/ecs/mauve-app-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -115,7 +115,7 @@
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": [{
-        "containerName": "tuning-app-container",
+        "containerName": "mauve-app-container",
         "condition": "START"
       }],
       "disableNetworking": null,
@@ -123,7 +123,7 @@
       "healthCheck": null,
       "essential": true,
       "links": [
-        "tuning-app-container"
+        "mauve-app-container"
       ],
       "hostname": null,
       "extraHosts": null,
