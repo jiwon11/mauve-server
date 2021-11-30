@@ -15,14 +15,15 @@ services:
     environment:
       TZ: Asia/Seoul
     links:
-      - tuning-app-container
+      - mauve-app-container
     depends_on:
-      - tuning-app-container
-  tuning-app-container:
-    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/tuning-app:latest
+      - mauve-app-container
+  mauve-app-container:
+    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-app:latest
     build:
       context: ./app
     ports:
-      - 3000:3000
+      - '3000:3000'
+      - '3030:3030'
     networks:
       - default
