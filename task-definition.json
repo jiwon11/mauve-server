@@ -138,7 +138,7 @@
   ],
   "memory": null,
   "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
-  "family": "tuning-app-task",
+  "family": "mauve-app-task",
   "pidMode": null,
   "requiresCompatibilities": [
     "EC2"
