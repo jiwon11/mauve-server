@@ -26,7 +26,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tuning-app
+          ECR_REPOSITORY: mauve-app
           IMAGE_TAG: latest
         run: |
           echo ${{ steps.login-ecr.outputs.registry }}
