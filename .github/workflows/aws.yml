@@ -49,7 +49,7 @@ jobs:
         id: render-reverse-proxy-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ steps.render-tuning-app-container.outputs.task-definition }}
+          task-definition: ${{ steps.render-mauve-app-container.outputs.task-definition }}
           container-name: reverse-proxy-container
           image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
 
