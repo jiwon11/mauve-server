@@ -19,7 +19,6 @@ const verifyMiddleware = async (socket, next) => {
     token = socket.handshake.headers.authorization.split('Bearer ')[1];
   }
   const result = verify(token);
-  console.log(result);
   if (result.ok) {
     let success, clientRecord;
     console.log(result.role);
@@ -61,7 +60,7 @@ export default (server, app) => {
 
   instrument(io, {
     auth: false,
-    namespaceName: '/chat',
+    namespaceName: '/admin',
     readonly: true
   });
 
@@ -91,6 +90,7 @@ export default (server, app) => {
 
   const roomNamespace = io.of('/room'); // io.of : 네임스페이스를 만들어 접속
   const chatNamespace = io.of('/chat'); // 같은 네임스페이스끼리만 데이터 전달
+  const adminNamespace = io.of('/admin');
 
   io.of('/room').use(verifyMiddleware);
   io.of('/chat').use(verifyMiddleware);
@@ -132,5 +132,10 @@ export default (server, app) => {
     }
   });
 
-  httpServer.listen(3030);
+  httpServer.listen(3030, '0.0.0.0', err => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
 };
