@@ -41,15 +41,15 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker-compose --file docker-compose.test.yml build
-          docker-compose --file docker-compose.test.yml push
+          docker-compose build
+          docker-compose push
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Render Amazon ECS task definition for mauve app test container
         id: render-mauve-test-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task-definition.test.json
+          task-definition: task-definition.json
           container-name: mauve-test-container
           image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest
 
