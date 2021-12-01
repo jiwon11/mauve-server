@@ -4,12 +4,14 @@
  case3: access token은 유효하지만, refresh token은 만료된 경우 ->  refresh token 재발급
  case4: access token과 refresh token 모두가 유효한 경우 -> 바로 다음 미들웨어로 넘긴다.
  */
-import { verify } from '../libs/utils/jwt.js';
+import { verify } from '../libs/utils/jwt';
 
 export default (req, res, next) => {
   if (req.headers.authorization) {
+    console.log(req.headers);
     const token = req.headers.authorization.split('Bearer ')[1]; // header에서 access token을 가져옵니다.
     const result = verify(token); // token을 검증합니다.
+    console.log(result);
     if (result.ok) {
       // token이 검증되었으면 req에 값을 세팅하고, 다음 콜백함수로 갑니다.
       req.user = { ID: result.id, role: result.role };
