@@ -2,8 +2,8 @@
   "containerDefinitions": [{
       "name": "mauve-test-container",
       "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest",
-      "cpu": 0,
-      "links": [],
+      "cpu": 200,
+      "memoryReservation": 400,
       "portMappings": [{
           "containerPort": 3000,
           "hostPort": 3000,
@@ -16,8 +16,6 @@
         }
       ],
       "essential": true,
-      "entryPoint": [],
-      "command": [],
       "environment": [],
       "environmentFiles": [{
         "value": "arn:aws:s3:::mauve-app-config/config.env",
@@ -25,13 +23,6 @@
       }],
       "mountPoints": [],
       "volumesFrom": [],
-      "secrets": [],
-      "dnsServers": [],
-      "dnsSearchDomains": [],
-      "extraHosts": [],
-      "dockerSecurityOptions": [],
-      "dockerLabels": {},
-      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -39,35 +30,23 @@
           "awslogs-group": "/ecs/mauve-test-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
-        },
-        "secretOptions": []
-      },
-      "systemControls": []
+        }
+      }
     },
     {
       "name": "reverse-proxy-test-container",
       "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reserve-proxy-test:latest",
-      "cpu": 0,
-      "links": [],
+      "cpu": 50,
+      "memoryReservation": 100,
       "portMappings": [{
         "containerPort": 80,
         "hostPort": 80,
         "protocol": "tcp"
       }],
       "essential": true,
-      "entryPoint": [],
-      "command": [],
       "environment": [],
-      "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
-      "secrets": [],
-      "dnsServers": [],
-      "dnsSearchDomains": [],
-      "extraHosts": [],
-      "dockerSecurityOptions": [],
-      "dockerLabels": {},
-      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -75,16 +54,13 @@
           "awslogs-group": "/ecs/mauve-test-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
-        },
-        "secretOptions": []
-      },
-      "systemControls": []
+        }
+      }
     }
   ],
   "family": "mauve-test-task",
   "executionRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 1,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [{
@@ -100,16 +76,13 @@
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
     },
     {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
-    },
-    {
       "name": "ecs.capability.env-files.s3"
     },
     {
-      "name": "ecs.capability.execution-role-ecr-pull"
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
     },
     {
-      "name": "ecs.capability.extensible-ephemeral-storage"
+      "name": "ecs.capability.execution-role-ecr-pull"
     },
     {
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
@@ -135,11 +108,6 @@
   ],
   "cpu": "256",
   "memory": "512",
-  "registeredAt": "2021-12-01T05:42:46.320Z",
-  "registeredBy": "arn:aws:iam::447993352427:root",
-  "ephemeralStorage": {
-    "sizeInGiB": 21
-  },
   "tags": [{
       "key": "ecs:taskDefinition:createdFrom",
       "value": "ecs-console-v2"
