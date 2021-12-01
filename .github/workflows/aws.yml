@@ -64,7 +64,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.reverse-proxy-test-container.outputs.task-definition }}
+          task-definition: ${{ steps.render-reverse-proxy-test-container.outputs.task-definition }}
           service: mauve-test-service
           cluster: mauve-test-cluster
           wait-for-service-stability: true
