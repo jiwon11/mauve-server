@@ -1,0 +1,70 @@
+name: Deploy to Amazon ECS
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - test
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: mauve-test
+          IMAGE_TAG: latest
+        run: |
+          echo ${{ steps.login-ecr.outputs.registry }}
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker-compose --file docker-compose.test.yml build
+          docker-compose --file docker-compose.test.yml push
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Render Amazon ECS task definition for mauve app test container
+        id: render-mauve-test-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.test.json
+          container-name: mauve-test-container
+          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest
+
+      - name: Modify Amazon ECS task definition with reverse proxy container
+        id: render-reverse-proxy-test-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-mauve-test-container.outputs.task-definition }}
+          container-name: reverse-proxy-test-container
+          image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reserve-proxy-test:latest
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.reverse-proxy-test-container.outputs.task-definition }}
+          service: mauve-test-service
+          cluster: mauve-test-cluster
+          wait-for-service-stability: true
