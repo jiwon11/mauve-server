@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'tuningApp', // pm2 name
+      name: 'mauve-app', // pm2 name
       script: './server-register.js', // // 앱 실행 스크립트
       instances: 2, // 클러스터 모드 사용 시 생성할 인스턴스 수
       exec_mode: 'cluster', // fork, cluster 모드 중 선택
