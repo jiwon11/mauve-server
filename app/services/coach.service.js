@@ -51,7 +51,7 @@ export default class CoachService {
 
   static async findById(ID) {
     try {
-      const coachRecord = await CoachModel.findOne({ _id: ID }).select({ name: 1, role: 1, profile_img: 1 }).lean();
+      const coachRecord = await CoachModel.findOne({ _id: ID }).select({ name: 1, role: 1, profile_img: '$profile_img.location' }).lean();
       if (coachRecord) {
         return { success: true, body: { coachRecord } };
       } else {

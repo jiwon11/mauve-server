@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import UserModel from '../models/user';
 
 export default class UserService {
@@ -32,7 +33,23 @@ export default class UserService {
 
   static async findById(ID) {
     try {
-      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: 1 }).lean();
+      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: '$profile_img.location' }).lean();
+      if (userRecord) {
+        return { success: true, body: { userRecord } };
+      } else {
+        return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async updatePaid(ID, paid) {
+    try {
+      const userRecord = await UserModel.findByIdAndUpdate(ID, {
+        paid: paid
+      }).exec();
       if (userRecord) {
         return { success: true, body: { userRecord } };
       } else {
@@ -55,6 +72,30 @@ export default class UserService {
         return { success: true, body: { userRecord } };
       } else {
         return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async getCustomerUid(userId) {
+    try {
+      const userRecord = await UserModel.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(userId)
+          },
+          $project: {
+            _id: 1,
+            customer_uid: 1
+          }
+        }
+      ]);
+      if (userRecord) {
+        return { success: true, body: userRecord };
+      } else {
+        return { success: false, body: { message: `User not founded by ID : ${userId}` } };
       }
     } catch (err) {
       console.log(err);
