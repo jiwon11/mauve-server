@@ -11,8 +11,8 @@ const userSchema = new Schema(
     },
     phone_NO: { type: String, required: true, unique: true },
     birthdate: { type: Date, required: true },
-    height: { type: Number, required: true },
-    tendency: { type: String, required: true },
+    //height: { type: Number, required: true },
+    //tendency: { type: String, required: true },
     profile_img: {
       type: Schema.Types.Mixed,
       default: {
@@ -22,7 +22,7 @@ const userSchema = new Schema(
         key: ' ',
         location: ' '
       }
-    },
+    } /*
     weight_info: {
       now: { type: Number, required: true },
       avg_over_last_5y: { type: Number, required: true },
@@ -30,6 +30,7 @@ const userSchema = new Schema(
       max_since_age20: { type: Number, required: true },
       goal: { type: Number, required: true }
     },
+    */,
     fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'user' },
     customer_uid: [{ type: String }],
