@@ -16,12 +16,16 @@ export const upload = multer(
   {
     storage: multerS3({
       s3: new AWS.S3(),
-      bucket: 'wecan-app',
+      bucket: 'mauve-static',
       ACL: 'public-read-write',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: function (req, file, cb) {
         const splitPath = req.baseUrl.split('/');
-        cb(null, `${splitPath[1]}/${file.fieldname}/${req.params.tag}/${+Date.now()}${path.basename(file.originalname.replace(/ /gi, ''))}`);
+        if (req.params.tag) {
+          cb(null, `${splitPath[1]}/${file.fieldname}/${req.params.tag}/${+Date.now()}${path.basename(file.originalname.replace(/ /gi, ''))}`);
+        } else {
+          cb(null, `${splitPath[1]}/${file.fieldname}/${+Date.now()}${path.basename(file.originalname.replace(/ /gi, ''))}`);
+        }
       }
     })
   },

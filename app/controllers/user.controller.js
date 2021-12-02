@@ -5,6 +5,9 @@ import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IMPORT from '../libs/utils/import';
 import moment from 'moment-timezone';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const signAccount = async (req, res) => {
   try {
@@ -13,8 +16,9 @@ export const signAccount = async (req, res) => {
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
     }
+    profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
     userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
-    userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.sign(userDTO, profileImgDTO);

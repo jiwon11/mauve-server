@@ -1,5 +1,8 @@
 import moment from 'moment-timezone';
 import ChatService from '../services/chat.service';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const getChatsByRoomId = async (req, res) => {
   try {
@@ -42,6 +45,7 @@ export const postMedia = async (req, res) => {
     const targetRoomId = req.params.roomId;
     const media_tag = req.params.tag;
     const chatMediaDTO = req.file;
+    chatMediaDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${chatMediaDTO.key}?w=150&h=150&f=png&q=100`;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
     const postChatMediaResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
