@@ -99,10 +99,7 @@
       "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reserve-proxy-test:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
-      "dependsOn": [{
-        "containerName": "mauve-test-container",
-        "condition": "SUCCESS"
-      }],
+      "dependsOn": [],
       "disableNetworking": null,
       "interactive": null,
       "healthCheck": null,
