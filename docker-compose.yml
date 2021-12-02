@@ -12,9 +12,7 @@ services:
       - ./nginx/logrotate.conf:/etc/logrotate.conf
     environment:
       TZ: Asia/Seoul
-    links:
-      - mauve-test-container
-    depends_on:
+    external_links:
       - mauve-test-container
   mauve-test-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest
