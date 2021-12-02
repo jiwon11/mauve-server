@@ -11,7 +11,7 @@ export default async () => {
 
     try {
       mongoose.connect(`mongodb+srv://${process.env.MONGO_HOST}`, {
-        dbName: 'mauve',
+        dbName: `mauve_${process.env.NODE_ENV}`,
         user: process.env.MONGO_USER,
         pass: process.env.MONGO_PASSWORD,
         autoCreate: true,
