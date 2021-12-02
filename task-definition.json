@@ -104,9 +104,7 @@
       "interactive": null,
       "healthCheck": null,
       "essential": true,
-      "links": [
-        "mauve-test-container"
-      ],
+      "links": [],
       "hostname": null,
       "extraHosts": null,
       "pseudoTerminal": null,
