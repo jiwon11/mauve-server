@@ -19,7 +19,7 @@ export const pushSMS = async phoneNumber => {
   await newPhoneVerify.save();
   try {
     const message = await client.messages.create({
-      body: `[WECAN]인증번호 [${token}]를 입력해주세요.`,
+      body: `[MAUVE]인증번호 [${token}]를 입력해주세요.`,
       messagingServiceSid: messagingServiceSid,
       to: `+82${phoneNumber}`
     });
