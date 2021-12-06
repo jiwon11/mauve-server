@@ -2,6 +2,25 @@
   "ipcMode": null,
   "executionRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "containerDefinitions": [{
+      "name": "xray-daemon",
+      "image": "amazon/aws-xray-daemon",
+      "cpu": 32,
+      "memoryReservation": 50,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "secretOptions": null,
+        "options": {
+          "awslogs-group": "/ecs/mauve-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [{
+        "hostPort": 0,
+        "containerPort": 2000,
+        "protocol": "udp"
+      }]
+    }, {
       "dnsSearchDomains": null,
       "environmentFiles": [{
         "value": "arn:aws:s3:::mauve-app-config/config.env",
@@ -11,28 +30,24 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/mauve-test-task",
+          "awslogs-group": "/ecs/mauve-app-task",
           "awslogs-region": "ap-northeast-2",
-          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "ecs"
         }
       },
       "entryPoint": null,
       "portMappings": [{
-          "hostPort": 3000,
-          "protocol": "tcp",
-          "containerPort": 3000
-        },
-        {
-          "hostPort": 3030,
-          "protocol": "tcp",
-          "containerPort": 3030
-        }
-      ],
+        "hostPort": 3000,
+        "protocol": "tcp",
+        "containerPort": 3000
+      }],
       "command": null,
       "linuxParameters": null,
-      "cpu": 0,
-      "environment": [],
+      "cpu": 1024,
+      "environment": [{
+        "name": "AWS_XRAY_DAEMON_ADDRESS",
+        "value": "xray-daemon:2000"
+      }],
       "resourceRequirements": null,
       "ulimits": null,
       "dnsServers": null,
@@ -40,11 +55,11 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": null,
+      "memory": 850,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest",
+      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-app:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -52,7 +67,7 @@
       "interactive": null,
       "healthCheck": null,
       "essential": true,
-      "links": null,
+      "links": ["xray-daemon"],
       "hostname": null,
       "extraHosts": null,
       "pseudoTerminal": null,
@@ -61,18 +76,18 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "mauve-test-container"
+      "name": "mauve-app-container"
     },
     {
       "dnsSearchDomains": null,
-      "environmentFiles": [],
+      "environmentFiles": null,
       "logConfiguration": {
         "logDriver": "awslogs",
+        "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/mauve-test-task",
+          "awslogs-group": "/ecs/mauve-app-task",
           "awslogs-region": "ap-northeast-2",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
+          "awslogs-stream-prefix": "ecs"
         }
       },
       "entryPoint": null,
@@ -83,28 +98,33 @@
       }],
       "command": null,
       "linuxParameters": null,
-      "cpu": 0,
-      "environment": null,
+      "cpu": 900,
+      "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
-      "dnsServers": [],
-      "mountPoints": null,
+      "dnsServers": null,
+      "mountPoints": [],
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": null,
+      "memory": 50,
       "memoryReservation": null,
-      "volumesFrom": null,
+      "volumesFrom": [],
       "stopTimeout": null,
-      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reserve-proxy-test:latest",
+      "image": "447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
-      "dependsOn": [],
+      "dependsOn": [{
+        "containerName": "mauve-app-container",
+        "condition": "START"
+      }],
       "disableNetworking": null,
       "interactive": null,
       "healthCheck": null,
       "essential": true,
-      "links": [],
+      "links": [
+        "mauve-app-container"
+      ],
       "hostname": null,
       "extraHosts": null,
       "pseudoTerminal": null,
@@ -113,35 +133,21 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "reverse-proxy-test-container",
-      "repositoryCredentials": {
-        "credentialsParameter": ""
-      }
+      "name": "reverse-proxy-container"
     }
   ],
-  "memory": "512",
-  "taskRoleArn": null,
-  "family": "mauve-test-task",
+  "memory": null,
+  "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
+  "family": "mauve-app-task",
   "pidMode": null,
   "requiresCompatibilities": [
-    "FARGATE"
+    "EC2"
   ],
-  "networkMode": "awsvpc",
-  "runtimePlatform": {
-    "operatingSystemFamily": "LINUX",
-    "cpuArchitecture": "X86_64"
-  },
-  "cpu": "256",
+  "networkMode": null,
+  "cpu": "2048",
   "inferenceAccelerators": [],
   "proxyConfiguration": null,
   "volumes": [],
-  "tags": [{
-      "key": "ecs:taskDefinition:createdFrom",
-      "value": "ecs-console-v2"
-    },
-    {
-      "key": "ecs:taskDefinition:stackId",
-      "value": "arn:aws:cloudformation:ap-northeast-2:447993352427:stack/ECS-Console-V2-TaskDefinition-b28e5467-d554-4a97-b56d-adbdba94cfe2/6ffa2170-5269-11ec-bf95-0670322c0108"
-    }
-  ]
+  "placementConstraints": [],
+  "tags": []
 }
