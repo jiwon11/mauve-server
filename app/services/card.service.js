@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import CardModel from '../models/card';
-import * as IMPORT from '../libs/utils/import';
+import * as IAMPORT from '../libs/utils/iamport';
 
 export default class CardService {
   static async createBillingKey(userId, billingKeyData) {
@@ -39,12 +39,12 @@ export default class CardService {
 
   static async deleteBillingKey(customer_uid) {
     try {
-      const getTokenResult = await IMPORT.getToken();
+      const getTokenResult = await IAMPORT.getToken();
       if (!getTokenResult.success) {
         return { success: false, body: { statusCode: 400, message: `import access_token 취득에 실패하였습니다. ` } };
       }
       const accessToken = getTokenResult.body.access_token;
-      const deleteBillingKeyResult = await IMPORT.deleteBillingKey(accessToken, customer_uid);
+      const deleteBillingKeyResult = await IAMPORT.deleteBillingKey(accessToken, customer_uid);
       if (!deleteBillingKeyResult) {
         return { success: false, body: { statusCode: 400, message: `import 구매자의 빌링키 정보 삭제에 실패하였습니다. `, error: deleteBillingKeyResult.body } };
       }
