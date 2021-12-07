@@ -3,7 +3,7 @@ import roomService from '../services/room.service';
 import CardService from '../services/card.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
-import IMPORT from '../libs/utils/import';
+import IAMPORT from '../libs/utils/iamport';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 
@@ -70,7 +70,7 @@ export const addCustomerUid = async (req, res) => {
   try {
     const { customer_uid } = req.body; // req의 body에서 customer_uid 추출
     const userId = req.user.ID;
-    const billingKeyResult = await IMPORT.getBillingKeyInfo(customer_uid);
+    const billingKeyResult = await IAMPORT.getBillingKeyInfo(customer_uid);
     if (billingKeyResult.success) {
       const userCuidResult = await userService.addCustomerUid(userId, customer_uid);
       if (userCuidResult) {

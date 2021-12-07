@@ -41,11 +41,11 @@ export default class CoachService {
         };
         return { success: true, body: coachToken };
       } else {
-        return { success: false, body: { message: `Coach not founded by passCode : ${passCode}` } };
+        return { success: false, body: { statusCode: 500, err: `Coach not founded by passCode : ${passCode}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: err.message };
+      return { success: false, body: { statusCode: 500, err } };
     }
   }
 
@@ -55,11 +55,11 @@ export default class CoachService {
       if (coachRecord) {
         return { success: true, body: { coachRecord } };
       } else {
-        return { success: false, body: { message: `Coach not founded by ID : ${ID}` } };
+        return { success: false, body: { err: `Coach not founded by ID : ${ID}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: err.message };
+      return { success: false, body: { statusCode: 500, err } };
     }
   }
 }
