@@ -50,6 +50,23 @@ export const signAccount = async (req, res) => {
   }
 };
 
+export const logout = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    redisClient.del(userID, function (err, response) {
+      if (response == 1) {
+        console.log('Deleted Successfully!');
+      } else {
+        console.error(err);
+        console.log('Cannot delete');
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const getUserData = async (req, res) => {
   try {
     const targetUserId = req.params.id;
