@@ -17,8 +17,8 @@ export const getToken = async function () {
       method: 'post', // POST method
       headers: { 'Content-Type': 'application/json' }, // "Content-Type": "application/json"
       data: {
-        imp_key: process.env.IMPORT_KEY, // REST API 키
-        imp_secret: process.env.IMPORT_SECRET // REST API Secret
+        imp_key: process.env.IAMPORT_KEY, // REST API 키
+        imp_secret: process.env.IAMPORT_SECRET // REST API Secret
       }
     });
     const { access_token } = token.data.response;

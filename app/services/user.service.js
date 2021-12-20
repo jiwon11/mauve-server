@@ -1,21 +1,32 @@
 import mongoose from 'mongoose';
 import UserModel from '../models/user';
-
+import WhiteListModel from '../models/white_list';
 export default class UserService {
   static async sign(userDTO, profileImgDTO) {
     try {
       let userRecord, created;
-      const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
-      if (existUser) {
-        userRecord = existUser;
-        created = false;
+      const whiteUser = await WhiteListModel.aggregate([
+        {
+          $match: {
+            phone_NO: userDTO.phone_NO
+          }
+        }
+      ]);
+      if (whiteUser.length > 0) {
+        const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
+        if (existUser) {
+          userRecord = existUser;
+          created = false;
+        } else {
+          const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
+          const saveUser = await newUser.save();
+          userRecord = saveUser;
+          created = true;
+        }
+        return { success: true, body: { userRecord, created } };
       } else {
-        const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
-        const saveUser = await newUser.save();
-        userRecord = saveUser;
-        created = true;
+        return { success: false, body: { statusCode: 401, err: 'white User가 아닙니다.' } };
       }
-      return { success: true, body: { userRecord, created } };
     } catch (err) {
       console.log(err);
       if (err.name === 'ValidationError') {

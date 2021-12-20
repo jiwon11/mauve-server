@@ -3,7 +3,7 @@ import roomService from '../services/room.service';
 import CardService from '../services/card.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
-import IMPORT from '../libs/utils/import';
+import IAMPORT from '../libs/utils/iamport';
 import moment from 'moment-timezone';
 import dotenv from 'dotenv';
 
@@ -15,8 +15,8 @@ export const signAccount = async (req, res) => {
     const profileImgDTO = req.file;
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
     }
-    profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
     userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
     //userDTO.weight_info = JSON.parse(userDTO.weight_info);
     console.log('userData', userDTO);
@@ -70,7 +70,7 @@ export const addCustomerUid = async (req, res) => {
   try {
     const { customer_uid } = req.body; // req의 body에서 customer_uid 추출
     const userId = req.user.ID;
-    const billingKeyResult = await IMPORT.getBillingKeyInfo(customer_uid);
+    const billingKeyResult = await IAMPORT.getBillingKeyInfo(customer_uid);
     if (billingKeyResult.success) {
       const userCuidResult = await userService.addCustomerUid(userId, customer_uid);
       if (userCuidResult) {
