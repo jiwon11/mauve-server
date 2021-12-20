@@ -61,6 +61,22 @@ export const logout = async (req, res) => {
         console.log('Cannot delete');
       }
     });
+    return res.jsonResult(200, '로그아웃 되었습니다.');
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const withdraw = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const { success, body } = await userService.withdraw(userID);
+    if (success) {
+      return res.jsonResult(204, body);
+    } else {
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+    }
   } catch (err) {
     console.log(err);
     return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
@@ -75,7 +91,7 @@ export const getUserData = async (req, res) => {
     if (userDataResult.success) {
       return res.jsonResult(200, userDataResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body: userDataResult.body });
+      return res.jsonResult(userDataResult.body.statusCode, { message: userDataResult.body.message });
     }
   } catch (err) {
     console.log(err);
