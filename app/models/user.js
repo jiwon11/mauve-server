@@ -58,7 +58,7 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.plugin(mongoose_delete);
+userSchema.plugin(mongoose_delete, { overrideMethods: 'all' });
 
 const User = mongoose.model('USER', userSchema);
 
