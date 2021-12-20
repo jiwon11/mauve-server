@@ -1,9 +1,9 @@
-import { pushSMS, verifyToken } from '../libs/utils/verify';
+import { sendSMSByNCP, pushSMS, verifyToken } from '../libs/utils/verify';
 
 export const pushTokenToUser = async (req, res) => {
   try {
     const phoneNumber = req.body.phone_NO;
-    const pushTokenResult = await pushSMS(phoneNumber);
+    const pushTokenResult = await sendSMSByNCP(phoneNumber);
     let statusCode;
     if (pushTokenResult.success) {
       statusCode = 200;
