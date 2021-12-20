@@ -44,15 +44,15 @@ export default class UserService {
 
   static async findById(ID) {
     try {
-      const userRecord = await UserModel.findOne({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: '$profile_img.location' }).lean();
-      if (userRecord) {
-        return { success: true, body: { userRecord } };
+      const userRecord = await UserModel.find({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: '$profile_img.location' }).lean();
+      if (userRecord.length > 0) {
+        return { success: true, body: userRecord[0] };
       } else {
-        return { success: false, body: { message: `User not founded by ID : ${ID}` } };
+        return { success: false, body: { statusCode: 404, message: `User not founded by ID : ${ID}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: err.message };
+      return { success: false, body: { statusCode: 500, message: err.message } };
     }
   }
 
@@ -90,21 +90,19 @@ export default class UserService {
     }
   }
 
-  static async getCustomerUid(userId) {
+  static async withdraw(userId) {
     try {
       const userRecord = await UserModel.aggregate([
         {
           $match: {
-            _id: mongoose.Types.ObjectId(userId)
-          },
-          $project: {
-            _id: 1,
-            customer_uid: 1
+            _id: userId
           }
         }
       ]);
       if (userRecord) {
-        return { success: true, body: userRecord };
+        const deletedUser = await UserModel.deleteById(userId);
+        console.log(deletedUser);
+        return { success: true, body: deletedUser };
       } else {
         return { success: false, body: { message: `User not founded by ID : ${userId}` } };
       }

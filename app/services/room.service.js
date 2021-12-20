@@ -81,9 +81,11 @@ export default class roomService {
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.deleted': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.profile_img.location': 1,
+            'coach.deleted': 1,
             non_read_chats_num: { $size: '$non_read_chats' }
           }
         },
@@ -195,10 +197,12 @@ export default class roomService {
             _id: 1,
             created_at: 1,
             'user.name': 1,
+            'user.deleted': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
             'coach.name': 1,
             'coach._id': 1,
+            'coach.deleted': 1,
             'coach.profile_img.location': 1,
             coach_chat_possible_time_start: {
               $arrayElemAt: [
