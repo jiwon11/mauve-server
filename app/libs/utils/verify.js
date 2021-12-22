@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import CryptoJS from 'crypto-js';
 import SHA256 from 'crypto-js/sha256';
 import Base64 from 'crypto-js/enc-base64';
+import request from 'request-promise-native';
 
 dotenv.config();
 
@@ -62,7 +63,8 @@ export const sendSMSByNCP = async phoneNumber => {
         ]
       }
     });
-    if (requestSMS.statusCode === 202) {
+    console.log(requestSMS);
+    if (requestSMS.statusCode === '202') {
       return {
         success: true,
         body: {
