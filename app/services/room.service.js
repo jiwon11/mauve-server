@@ -101,20 +101,12 @@ export default class roomService {
 
   static async getRoomIdByUserId(userId) {
     try {
-      const roomRecord = await RoomModel.aggregate([
-        {
-          $match: {
-            user: mongoose.Types.ObjectId(userId)
-          }
-        },
-        {
-          $project: {
-            _id: 1
-          }
-        }
-      ]);
+      const roomRecord = await RoomModel.findOne({
+        user: userId
+      });
+      console.log(roomRecord);
       if (roomRecord) {
-        return { success: true, body: roomRecord[0] };
+        return { success: true, body: roomRecord };
       } else {
         return { success: false, body: { message: `Room not founded by User ID : ${userId}` } };
       }

@@ -1,5 +1,10 @@
 import CoachModel from '../models/coach';
+import UserModel from '../models/user';
+import ChatModel from '../models/chat';
+import WeightModel from '../models/weight';
+import mongoose from 'mongoose';
 import { sign, refresh } from '../libs/utils/jwt';
+import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
@@ -49,11 +54,57 @@ export default class CoachService {
     }
   }
 
-  static async findById(ID) {
+  static async getUserInfo(ID) {
     try {
       const coachRecord = await CoachModel.findOne({ _id: ID }).select({ name: 1, role: 1, profile_img: '$profile_img.location' }).lean();
       if (coachRecord) {
         return { success: true, body: { coachRecord } };
+      } else {
+        return { success: false, body: { err: `Coach not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async getUserLog(targetUserId) {
+    try {
+      const userLogRecord = await ChatModel.aggregate([
+        {
+          $match: {
+            sender_user: mongoose.Types.ObjectId(targetUserId),
+            tag: { $nin: ['chat', 'picture'] }
+          }
+        },
+        {
+          $project: {
+            tag: 1,
+            body: {
+              text: 1,
+              time: 1,
+              kilograms: 1,
+              location: 1,
+              contentType: 1,
+              key: 1
+            },
+            created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
+          }
+        },
+        {
+          $sort: {
+            created_at: -1
+          }
+        }
+      ]);
+      if (userLogRecord) {
+        const groupByUserLogRecord = groupBy(userLogRecord, 'created_at_date');
+        const groupByTag = Object.keys(groupByUserLogRecord).map(date => {
+          const result = {};
+          result[date] = groupByOnce(groupByUserLogRecord[date], 'tag');
+          return result;
+        });
+        return { success: true, body: { userLogRecord: groupByTag } };
       } else {
         return { success: false, body: { err: `Coach not founded by ID : ${ID}` } };
       }
