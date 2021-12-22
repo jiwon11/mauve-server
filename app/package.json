@@ -47,6 +47,7 @@
     "progress-stream": "^2.0.0",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
+    "request-promise-native": "^1.0.9",
     "slack-node": "^0.1.8",
     "socket.io": "^4.3.1",
     "socket.io-redis": "^6.1.1",
