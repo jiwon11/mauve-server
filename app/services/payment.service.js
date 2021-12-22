@@ -55,7 +55,7 @@ export default class PaymentService {
       const requestPaymentResult = await IAMPORT.requestPayment(accessToken, userId, customer_uid, itemRecord[0].amount, `${itemRecord[0]._id.toString()}_${itemRecord[0].name}`);
       console.timeEnd('requestPayment');
       if (requestPaymentResult.success) {
-        return { success: true, body: requestPaymentResult.body };
+        return { success: true, body: requestPaymentResult.body.response };
       } else {
         return { success: false, body: { statusCode: 400, message: `import 결제 요청에 실패하였습니다.`, error: requestPaymentResult.body } };
       }

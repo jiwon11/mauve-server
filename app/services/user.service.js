@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import UserModel from '../models/user';
 import WhiteListModel from '../models/white_list';
+import moment from 'moment-timezone';
 export default class UserService {
   static async sign(userDTO, profileImgDTO) {
     try {
@@ -59,7 +60,8 @@ export default class UserService {
   static async updatePaid(ID, paid) {
     try {
       const userRecord = await UserModel.findByIdAndUpdate(ID, {
-        paid: paid
+        has_paid: paid,
+        next_payment: paid === true ? moment.tz('Asia/Seoul').add(1, 'month').format() : null
       }).exec();
       if (userRecord) {
         return { success: true, body: { userRecord } };
