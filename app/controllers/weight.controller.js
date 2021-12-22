@@ -8,8 +8,8 @@ export const create = async (req, res) => {
     const userId = req.user.ID;
     const userRole = req.user.role;
     const kilograms = req.body.kilograms;
-    console.log(moment().tz('Asia/Seoul').hour());
-    const time = moment().tz('Asia/Seoul').hour() > 12 ? 'night' : 'morning';
+    const time = req.body.time;
+    //const time = moment().tz('Asia/Seoul').hour() > 12 ? 'night' : 'morning';
     const weightDTO = { user: userId, time: time, kilograms: kilograms };
     const weightCreateResult = await WeightService.create(weightDTO);
     if (weightCreateResult.success) {

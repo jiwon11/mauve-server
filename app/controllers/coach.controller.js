@@ -42,11 +42,10 @@ export const login = async (req, res) => {
   }
 };
 
-export const getUserData = async (req, res) => {
+export const getUserLog = async (req, res) => {
   try {
-    const targetCoachId = req.params.id;
-    const userID = req.user.ID;
-    const { success, body } = await coachService.findById(targetCoachId);
+    const targetUserId = req.params.userId;
+    const { success, body } = await coachService.getUserLog(targetUserId);
     if (success) {
       return res.jsonResult(200, body);
     } else {
