@@ -72,12 +72,12 @@ export const phase = async (req, res) => {
     if (['current', 'all'].indexOf(step) !== -1) {
       const periodResult = await PeriodService.getAll(userId);
       if (!periodResult.success) {
-        return res.jsonResult(500, { message: 'Period GetAll Service Error', body });
+        return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
       }
       const periodStatisticResult = await PeriodService.statistic(periodResult.body);
       const periodPhaseResult = await PeriodService.phase(periodResult.body[0], periodStatisticResult.body, step);
       if (!periodPhaseResult.success) {
-        return res.jsonResult(500, { message: 'Period Phase Service Error', body });
+        return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
       }
       const currentPhasePhrase = await mainPhraseService.getByPhase(periodPhaseResult.body.current_phase.phase);
       if (!currentPhasePhrase.success) {
