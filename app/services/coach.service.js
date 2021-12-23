@@ -76,16 +76,14 @@ export default class CoachService {
           }
         }
       ]);
-      const periodResult = await PeriodService.getAll(targetUserId);
-      if (!periodResult.success) {
-        return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
-      }
-      const periodStatisticResult = await PeriodService.statistic(periodResult.body);
-      const periodPhaseResult = await PeriodService.phase(periodResult.body[0], periodStatisticResult.body, 'all');
       if (userInfoRecord) {
-        return { success: true, body: { userInfo: userInfoRecord[0], periodPhaseRecord: periodPhaseResult.body } };
+        const periodResult = await PeriodService.getAll(targetUserId);
+        if (!periodResult) {
+          return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
+        }
+        return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
       } else {
-        return { success: false, body: { err: `User not founded by ID : ${ID}` } };
+        return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
