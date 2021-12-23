@@ -29,6 +29,7 @@ export const sendSMSByNCP = async phoneNumber => {
     const newLine = '\n';
     const url = `https://sens.apigw.ntruss.com/sms/v2/services/${uri}/messages`;
     const url2 = `/sms/v2/services/${uri}/messages`;
+    console.log('secretKey', secretKey);
     const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
     hmac.update(method);
     hmac.update(space);
