@@ -45,7 +45,21 @@ export default class UserService {
 
   static async findById(ID) {
     try {
-      const userRecord = await UserModel.find({ _id: ID }).select({ name: 1, phone_NO: 1, role: 1, profile_img: '$profile_img.location' }).lean();
+      const userRecord = await UserModel.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(ID)
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            phone_NO: 1,
+            role: 1,
+            profile_img: '$profile_img.location'
+          }
+        }
+      ]);
       if (userRecord.length > 0) {
         return { success: true, body: userRecord[0] };
       } else {

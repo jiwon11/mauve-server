@@ -23,11 +23,11 @@ const verifyMiddleware = async (socket, next) => {
     if (result.role === 'user') {
       const findUserResult = await UserService.findById(result.id);
       success = findUserResult.success;
-      clientRecord = findUserResult.body.userRecord;
+      clientRecord = findUserResult.body;
     } else {
       const findCoachResult = await CoachService.findById(result.id);
       success = findCoachResult.success;
-      clientRecord = findCoachResult.body.coachRecord;
+      clientRecord = findCoachResult.body;
     }
     if (success) {
       socket.handshake.auth = clientRecord;
