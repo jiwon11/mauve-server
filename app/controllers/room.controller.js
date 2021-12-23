@@ -6,9 +6,10 @@ import ChatService from '../services/chat.service';
 export const getAll = async (req, res) => {
   try {
     const userId = req.user.ID;
+    const userRole = req.user.role;
     const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
     const offset = req.query.offset ? parseInt(req.query.offset) : undefined;
-    const { success, body } = await RoomService.findAll(userId, limit, offset);
+    const { success, body } = await RoomService.findAll(userId, userRole, limit, offset);
     if (success) {
       return res.jsonResult(200, body);
     } else {

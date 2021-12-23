@@ -1,7 +1,6 @@
 import CoachModel from '../models/coach';
 import UserModel from '../models/user';
 import ChatModel from '../models/chat';
-import WeightModel from '../models/weight';
 import mongoose from 'mongoose';
 import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';

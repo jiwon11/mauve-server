@@ -57,6 +57,20 @@ export const getUserLog = async (req, res) => {
   }
 };
 
+export const getUserList = async (req, res) => {
+  try {
+    const { success, body } = await coachService.getUserList();
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'User Service Error', err: body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
+
 export const getUserInfo = async (req, res) => {
   try {
     const targetUserId = req.params.userId;
