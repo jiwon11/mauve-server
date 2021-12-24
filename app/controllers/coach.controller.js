@@ -42,15 +42,43 @@ export const login = async (req, res) => {
   }
 };
 
-export const getUserData = async (req, res) => {
+export const getUserLog = async (req, res) => {
   try {
-    const targetCoachId = req.params.id;
-    const userID = req.user.ID;
-    const { success, body } = await coachService.findById(targetCoachId);
+    const targetUserId = req.params.userId;
+    const { success, body } = await coachService.getUserLog(targetUserId);
     if (success) {
       return res.jsonResult(200, body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body });
+      return res.jsonResult(500, { message: 'User Service Error', err: body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
+
+export const getUserList = async (req, res) => {
+  try {
+    const { success, body } = await coachService.getUserList();
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'User Service Error', err: body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'User Controller Error', err });
+  }
+};
+
+export const getUserInfo = async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    const { success, body } = await coachService.getUserInfo(targetUserId);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'User Service Error', err: body });
     }
   } catch (err) {
     console.log(err);
