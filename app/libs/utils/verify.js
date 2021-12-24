@@ -2,8 +2,6 @@ import PhoneVerifyModel from '../../models/phone_verify';
 import UserModel from '../../models/user';
 import dotenv from 'dotenv';
 import CryptoJS from 'crypto-js';
-import SHA256 from 'crypto-js/sha256';
-import Base64 from 'crypto-js/enc-base64';
 import request from 'request-promise-native';
 
 dotenv.config();
@@ -31,6 +29,7 @@ export const sendSMSByNCP = async phoneNumber => {
     const newLine = '\n';
     const url = `https://sens.apigw.ntruss.com/sms/v2/services/${uri}/messages`;
     const url2 = `/sms/v2/services/${uri}/messages`;
+    console.log('secretKey', secretKey);
     const hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
     hmac.update(method);
     hmac.update(space);
