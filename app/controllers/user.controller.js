@@ -112,9 +112,9 @@ export const withdraw = async (req, res) => {
 
 export const getUserData = async (req, res) => {
   try {
-    const targetUserId = req.params.id === 'self' ? req.user.ID : req.params.id;
+    const requestSelf = req.params.id === 'self' ? { targetUserId: req.user.ID, self: true } : { targetUserId: req.params.id, self: false };
     const userID = req.user.ID;
-    const userDataResult = await userService.findById(targetUserId);
+    const userDataResult = await userService.findById(requestSelf.targetUserId, requestSelf.self);
     if (userDataResult.success) {
       return res.jsonResult(200, userDataResult.body);
     } else {

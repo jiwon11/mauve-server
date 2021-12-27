@@ -43,8 +43,30 @@ export default class UserService {
     }
   }
 
-  static async findById(ID) {
+  static async findById(ID, self) {
     try {
+      console.log(ID);
+      console.log(self);
+      const projectPipeLine = {
+        name: 1,
+        phone_NO: 1,
+        role: 1,
+        profile_img: '$profile_img.location'
+      };
+      if (self) {
+        projectPipeLine.notification_config = {
+          chat: 1,
+          record_feedback: 1,
+          plan_assignment: 1,
+          mission: 1,
+          event: 1
+        };
+        projectPipeLine.height = 1;
+        projectPipeLine.weight_info = {
+          now: 1,
+          goal: 1
+        };
+      }
       const userRecord = await UserModel.aggregate([
         {
           $match: {
@@ -52,12 +74,7 @@ export default class UserService {
           }
         },
         {
-          $project: {
-            name: 1,
-            phone_NO: 1,
-            role: 1,
-            profile_img: '$profile_img.location'
-          }
+          $project: projectPipeLine
         }
       ]);
       if (userRecord.length > 0) {
