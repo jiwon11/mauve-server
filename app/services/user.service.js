@@ -88,6 +88,20 @@ export default class UserService {
     }
   }
 
+  static async updateNotificationConfig(ID, notificationConfigDTO) {
+    try {
+      const userRecord = await UserModel.findByIdAndUpdate(ID, { notification_config: notificationConfigDTO }, { new: true });
+      if (userRecord) {
+        return { success: true, body: userRecord.notification_config };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err: err.message } };
+    }
+  }
+
   static async update(ID, userDTO, profileImgDTO) {
     try {
       const userRecord = await UserModel.findByIdAndUpdate(ID, { ...userDTO, ...{ profile_img: profileImgDTO } }, { new: true });

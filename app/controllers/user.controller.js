@@ -110,6 +110,22 @@ export const withdraw = async (req, res) => {
   }
 };
 
+export const updateNotificationConfig = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const notificationConfigDTO = req.body;
+    const { success, body } = await userService.updateNotificationConfig(userID, notificationConfigDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const getUserData = async (req, res) => {
   try {
     const requestSelf = req.params.id === 'self' ? { targetUserId: req.user.ID, self: true } : { targetUserId: req.params.id, self: false };
