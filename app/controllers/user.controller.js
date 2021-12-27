@@ -50,6 +50,33 @@ export const signAccount = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const userDTO = req.body;
+    const profileImgDTO = req.file;
+    if (profileImgDTO) {
+      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
+    }
+    if ('birthdate' in Object.keys(userDTO)) {
+      userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
+    }
+    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    console.log('userData', userDTO);
+    console.log('userProfileImgData', profileImgDTO);
+    const { success, body } = await userService.update(userId, userDTO, profileImgDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const logout = async (req, res) => {
   try {
     const userID = req.user.ID;

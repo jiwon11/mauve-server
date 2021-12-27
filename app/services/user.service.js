@@ -71,12 +71,30 @@ export default class UserService {
     }
   }
 
+  static async update(ID, userDTO, profileImgDTO) {
+    try {
+      const userRecord = await UserModel.findByIdAndUpdate(ID, { ...userDTO, ...{ profile_img: profileImgDTO } }, { new: true });
+      if (userRecord) {
+        return { success: true, body: userRecord };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by ID : ${ID}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err: err.message } };
+    }
+  }
+
   static async updatePaid(ID, paid) {
     try {
-      const userRecord = await UserModel.findByIdAndUpdate(ID, {
-        has_paid: paid,
-        next_payment: paid === true ? moment.tz('Asia/Seoul').add(1, 'month').format() : null
-      }).exec();
+      const userRecord = await UserModel.findByIdAndUpdate(
+        ID,
+        {
+          has_paid: paid,
+          next_payment: paid === true ? moment.tz('Asia/Seoul').add(1, 'month').format() : null
+        },
+        { new: true }
+      ).exec();
       if (userRecord) {
         return { success: true, body: { userRecord } };
       } else {
