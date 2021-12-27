@@ -50,6 +50,33 @@ export const signAccount = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const userDTO = req.body;
+    const profileImgDTO = req.file;
+    if (profileImgDTO) {
+      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
+    }
+    if ('birthdate' in Object.keys(userDTO)) {
+      userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
+    }
+    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    console.log('userData', userDTO);
+    console.log('userProfileImgData', profileImgDTO);
+    const { success, body } = await userService.update(userId, userDTO, profileImgDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const logout = async (req, res) => {
   try {
     const userID = req.user.ID;
@@ -83,11 +110,27 @@ export const withdraw = async (req, res) => {
   }
 };
 
+export const updateNotificationConfig = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const notificationConfigDTO = req.body;
+    const { success, body } = await userService.updateNotificationConfig(userID, notificationConfigDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const getUserData = async (req, res) => {
   try {
-    const targetUserId = req.params.id === 'self' ? req.user.ID : req.params.id;
+    const requestSelf = req.params.id === 'self' ? { targetUserId: req.user.ID, self: true } : { targetUserId: req.params.id, self: false };
     const userID = req.user.ID;
-    const userDataResult = await userService.findById(targetUserId);
+    const userDataResult = await userService.findById(requestSelf.targetUserId, requestSelf.self);
     if (userDataResult.success) {
       return res.jsonResult(200, userDataResult.body);
     } else {
