@@ -50,6 +50,7 @@ export const postMedia = async (req, res) => {
     const senderRole = req.user.role;
     const postChatMediaResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
     if (postChatMediaResult.success) {
+      await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, chatDTO: postChatMediaResult.body });
       return res.jsonResult(201, postChatMediaResult.body);
     } else {
       return res.jsonResult(500, { message: 'User Service Error', err: postChatMediaResult.body });
