@@ -8,5 +8,5 @@ const notificationsQueue = new Queue('notifications', {
 notificationsQueue.process(notificationsProcess);
 
 export const createNewNotification = async notification => {
-  notificationsQueue.add(notification, {});
+  notificationsQueue.add(notification, { removeOnComplete: true });
 };
