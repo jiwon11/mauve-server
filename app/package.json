@@ -11,6 +11,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "@babel/runtime": "^7.15.4",
+    "@bull-board/express": "^3.8.1",
     "@socket.io/admin-ui": "^0.2.0",
     "@socket.io/cluster-adapter": "^0.1.0",
     "@socket.io/redis-adapter": "^7.0.0",
@@ -20,6 +21,8 @@
     "aws-xray-sdk": "^3.3.3",
     "axios": "^0.22.0",
     "babel-plugin-add-module-exports": "^1.0.4",
+    "bull": "^4.2.0",
+    "bull-master": "^1.0.5",
     "compression": "^1.7.4",
     "cookie-parser": "~1.4.5",
     "cors": "^2.8.5",

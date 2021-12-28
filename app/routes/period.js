@@ -11,5 +11,6 @@ router.post('/', upload.none(), jwtAuth, periodController.add);
 router.put('/:id', upload.none(), jwtAuth, periodController.update);
 router.get('/statistic', jwtAuth, periodController.statistic);
 router.get('/phase/:step', jwtAuth, periodController.phase);
+router.get('/:userId', jwtAuth, periodController.getAll);
 
 export default router;
