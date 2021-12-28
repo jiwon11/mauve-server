@@ -8,11 +8,11 @@ const notificationSchema = new Schema(
   {
     title: String,
     body: String,
-    data: { any: Object },
-    sender: { type: Schema.Types.ObjectId, refPath: 'senderModel', index: true },
-    senderModel: { type: String, required: true, enum: ['USER', 'COACH'] },
-    notified_user: { type: Schema.Types.ObjectId, refPath: 'receiverModel', index: true },
-    receiverModel: { type: String, required: true, enum: ['USER', 'COACH'] }
+    data: Object,
+    sender_user: { type: Schema.Types.ObjectId, ref: 'USER' },
+    sender_coach: { type: Schema.Types.ObjectId, ref: 'COACH' },
+    notified_user: { type: Schema.Types.ObjectId, ref: 'USER' },
+    notified_coach: { type: Schema.Types.ObjectId, ref: 'COACH' }
   },
   {
     collection: 'NOTIFICATION',
