@@ -26,7 +26,7 @@ const notificationSchema = new Schema(
   }
 );
 
-notificationSchema.plugin(mongoose_delete);
+notificationSchema.plugin(mongoose_delete, { overrideMethods: 'all' });
 
 const Notification = mongoose.model('NOTIFICATION', notificationSchema);
 

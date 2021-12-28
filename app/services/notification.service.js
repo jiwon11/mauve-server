@@ -96,4 +96,19 @@ export default class NotificationService {
       return { success: false, body: err.message };
     }
   }
+
+  static async remove(userId, userRole, notificationId) {
+    try {
+      const deletePipeLine = {};
+      deletePipeLine[`notified_${userRole}`] = mongoose.Types.ObjectId(userId);
+      if (notificationId !== 'all') {
+        deletePipeLine._id = mongoose.Types.ObjectId(notificationId);
+      }
+      const chatRoomRecord = await NotificationModel.delete(deletePipeLine);
+      return { success: true, body: chatRoomRecord };
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
 }
