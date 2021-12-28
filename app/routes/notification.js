@@ -9,4 +9,6 @@ import jwtAuth from '../middlewares/authJWT';
 
 router.put('/config', jwtAuth, userController.updateNotificationConfig);
 router.get('/', jwtAuth, notificationController.getAll);
+router.delete('/:id', jwtAuth, notificationController.remove);
+
 export default router;
