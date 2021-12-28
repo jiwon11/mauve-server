@@ -92,3 +92,25 @@ export const phase = async (req, res) => {
     return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
   }
 };
+
+export const getAll = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const targetUserId = req.user.id;
+    const userRole = req.user.role;
+    let periodResult;
+    if (userRole === 'coach' || userId === targetUserId) {
+      periodResult = await PeriodService.getAll(targetUserId);
+    } else {
+      return res.jsonResult(403, { message: 'Period Controller Error', err: '권한이 없습니다.' });
+    }
+    if (periodResult.success) {
+      return res.jsonResult(200, periodResult.body);
+    } else {
+      return res.jsonResult(500, { message: 'Period GetAll Service Error', body: periodResult.body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
+  }
+};
