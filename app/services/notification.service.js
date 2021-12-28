@@ -50,7 +50,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$user'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
             ],
             as: 'sender_user'
           }
@@ -67,7 +67,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$coach'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
             ],
             as: 'sender_coach'
           }
