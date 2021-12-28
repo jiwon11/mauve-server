@@ -1,7 +1,6 @@
-import moment from 'moment-timezone';
 import ChatService from '../services/chat.service';
 import dotenv from 'dotenv';
-
+import { createNewNotification } from '../queue/notification-queue';
 dotenv.config();
 
 export const getChatsByRoomId = async (req, res) => {
@@ -30,6 +29,7 @@ export const postChat = async (req, res) => {
     const senderRole = req.user.role;
     const postChatResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, { text: chatBody });
     if (postChatResult.success) {
+      await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, chatDTO: postChatResult.body });
       return res.jsonResult(201, postChatResult.body);
     } else {
       return res.jsonResult(500, { message: 'Chat Service Error', err: postChatResult.body });
