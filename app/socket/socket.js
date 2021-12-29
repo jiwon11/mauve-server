@@ -66,7 +66,10 @@ export default (server, app) => {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
     db: process.env.REDIS_DB,
-    password: process.env.REDIS_PW
+    password: process.env.REDIS_PW,
+    options: {
+      connect_timeout: 600
+    }
   });
   const subClient = pubClient.duplicate();
   const redisAdapter = socketIoRedisAdapter({
