@@ -6,24 +6,28 @@ export default class NotificationService {
   static async createByChat(senderId, senderRole, chatRoomId, chatDTO) {
     try {
       const chatRoomRecord = await ChatRoomModel.aggregate([{ $match: { _id: mongoose.Types.ObjectId(chatRoomId) } }]);
-      let notificationDTO = {};
-      notificationDTO[`sender_${senderRole}`] = senderId;
-      if (senderRole === 'user') {
-        notificationDTO.notified_coach = chatRoomRecord[0].coach;
+      if (chatRoomRecord.length > 0) {
+        let notificationDTO = {};
+        notificationDTO[`sender_${senderRole}`] = senderId;
+        if (senderRole === 'user') {
+          notificationDTO.notified_coach = chatRoomRecord[0].coach;
+        } else {
+          notificationDTO.notified_user = chatRoomRecord[0].user;
+        }
+        notificationDTO.title = chatDTO.sender.name;
+        if (chatDTO.tag === 'chat') {
+          notificationDTO.body = chatDTO.body.text;
+        } else if (chatDTO.tag === 'weight') {
+          notificationDTO.body = '몸무게';
+        } else {
+          notificationDTO.body = '사진';
+        }
+        notificationDTO.data = { id: chatDTO._id, type: 'chat' };
+        const newNotificationRecord = await NotificationModel.create(notificationDTO);
+        return { success: true, body: newNotificationRecord };
       } else {
-        notificationDTO.notified_user = chatRoomRecord[0].user;
+        return { success: false, body: '해당 chatRoomId를 가진 ChatRoom이 없습니다.' };
       }
-      notificationDTO.title = chatDTO.sender.name;
-      if (chatDTO.tag === 'chat') {
-        notificationDTO.body = chatDTO.body.text;
-      } else if (chatDTO.tag === 'weight') {
-        notificationDTO.body = '몸무게';
-      } else {
-        notificationDTO.body = '사진';
-      }
-      notificationDTO.data = { id: chatDTO._id, type: 'chat' };
-      const newNotificationRecord = await NotificationModel.create(notificationDTO);
-      return { success: true, body: newNotificationRecord };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
