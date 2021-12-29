@@ -24,9 +24,14 @@ export default class roomService {
     }
   }
 
-  static async findAll(userId, limit = 20, offset = 0) {
+  static async findAll(userId, userRole, limit = 20, offset = 0) {
     try {
+      const matchPipeline = {};
+      matchPipeline[userRole] = mongoose.Types.ObjectId(userId);
       const roomRecords = await RoomModel.aggregate([
+        {
+          $match: matchPipeline
+        },
         {
           $lookup: {
             from: 'USER',
@@ -56,9 +61,59 @@ export default class roomService {
                     }
                   }
                 }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
               }
             ],
             as: 'non_read_chats'
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { created_at: '$created_at' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $gte: [
+                      '$created_at',
+                      {
+                        $dateFromString: {
+                          dateString: moment().tz('Asia/Seoul').format('YYYY-MM-DD'),
+                          format: '%Y-%m-%d'
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              }
+            ],
+            as: 'today_chats'
           }
         },
         {
@@ -77,13 +132,117 @@ export default class roomService {
           $project: {
             _id: 1,
             title: 1,
-            created_at: 1,
+            //created_at: 1,
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.deleted': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.profile_img.location': 1,
+            'coach.deleted': 1,
+            //today_chats: 1,
+            input_breakfast: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: '$today_chats',
+                          as: 'today_chat',
+                          cond: { $eq: ['$$today_chat.tag', 'breakfast'] }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                true,
+                false
+              ]
+            },
+            input_lunch: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: '$today_chats',
+                          as: 'today_chat',
+                          cond: { $eq: ['$$today_chat.tag', 'lunch'] }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                true,
+                false
+              ]
+            },
+            input_dinner: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: '$today_chats',
+                          as: 'today_chat',
+                          cond: { $eq: ['$$today_chat.tag', 'dinner'] }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                true,
+                false
+              ]
+            },
+            input_morning_weight: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: '$today_chats',
+                          as: 'today_chat',
+                          cond: { $and: [{ $eq: ['$$today_chat.tag', 'weight'] }, { $eq: ['$$today_chat.body.time', 'morning'] }] }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                true,
+                false
+              ]
+            },
+            input_night_weight: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: '$today_chats',
+                          as: 'today_chat',
+                          cond: { $and: [{ $eq: ['$$today_chat.tag', 'weight'] }, { $eq: ['$$today_chat.body.time', 'night'] }] }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                true,
+                false
+              ]
+            },
+            recent_non_read_chats: { $first: '$non_read_chats' },
             non_read_chats_num: { $size: '$non_read_chats' }
           }
         },
@@ -99,20 +258,12 @@ export default class roomService {
 
   static async getRoomIdByUserId(userId) {
     try {
-      const roomRecord = await RoomModel.aggregate([
-        {
-          $match: {
-            user: mongoose.Types.ObjectId(userId)
-          }
-        },
-        {
-          $project: {
-            _id: 1
-          }
-        }
-      ]);
+      const roomRecord = await RoomModel.findOne({
+        user: userId
+      });
+      console.log(roomRecord);
       if (roomRecord) {
-        return { success: true, body: roomRecord[0] };
+        return { success: true, body: roomRecord };
       } else {
         return { success: false, body: { message: `Room not founded by User ID : ${userId}` } };
       }
@@ -172,7 +323,7 @@ export default class roomService {
                 }
               },
               { $project: { chat: 1, _id: 1, type: 1 } },
-              { $sort: { createdAt: -1 } },
+              { $sort: { created_at: -1 } },
               { $limit: 1 }
             ],
             as: 'recent_non_read_chats'
@@ -195,10 +346,12 @@ export default class roomService {
             _id: 1,
             created_at: 1,
             'user.name': 1,
+            'user.deleted': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
             'coach.name': 1,
             'coach._id': 1,
+            'coach.deleted': 1,
             'coach.profile_img.location': 1,
             coach_chat_possible_time_start: {
               $arrayElemAt: [

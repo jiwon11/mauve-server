@@ -72,12 +72,12 @@ export const phase = async (req, res) => {
     if (['current', 'all'].indexOf(step) !== -1) {
       const periodResult = await PeriodService.getAll(userId);
       if (!periodResult.success) {
-        return res.jsonResult(500, { message: 'Period GetAll Service Error', body });
+        return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
       }
       const periodStatisticResult = await PeriodService.statistic(periodResult.body);
       const periodPhaseResult = await PeriodService.phase(periodResult.body[0], periodStatisticResult.body, step);
       if (!periodPhaseResult.success) {
-        return res.jsonResult(500, { message: 'Period Phase Service Error', body });
+        return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
       }
       const currentPhasePhrase = await mainPhraseService.getByPhase(periodPhaseResult.body.current_phase.phase);
       if (!currentPhasePhrase.success) {
@@ -86,6 +86,28 @@ export const phase = async (req, res) => {
       return res.jsonResult(200, { ...periodPhaseResult.body, ...{ phrases: currentPhasePhrase.body.phrases } });
     } else {
       return res.jsonResult(500, { message: 'Period Controller Error', body: '유효하지 않는 파라미터입니다.' });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
+  }
+};
+
+export const getAll = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const targetUserId = req.user.id;
+    const userRole = req.user.role;
+    let periodResult;
+    if (userRole === 'coach' || userId === targetUserId) {
+      periodResult = await PeriodService.getAll(targetUserId);
+    } else {
+      return res.jsonResult(403, { message: 'Period Controller Error', err: '권한이 없습니다.' });
+    }
+    if (periodResult.success) {
+      return res.jsonResult(200, periodResult.body);
+    } else {
+      return res.jsonResult(500, { message: 'Period GetAll Service Error', body: periodResult.body });
     }
   } catch (err) {
     console.log(err);
