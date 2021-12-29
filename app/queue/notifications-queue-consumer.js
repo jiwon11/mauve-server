@@ -1,53 +1,62 @@
 import NotificationService from '../services/notification.service';
-import request from 'request-promise-native';
+import axios from 'axios';
 
 const FLARELANE_PROJECT_ID = process.env.FLARELANE_PROJECT_ID;
 const FLARELANE_TOKEN = process.env.FLARELANE_TOKEN;
 
-const notificationsProcess = async job => {
-  try {
-    const data = job.data;
-    console.log(data);
-    const createNotificationResult = await NotificationService.createByChat(data.senderId, data.senderRole, data.chatRoomId, data.chatDTO);
+export const notificationsProcess = async function (job, done) {
+  console.log(`Job ${job.id} is ready!`);
+  const data = job.data;
+  console.log('notificationsProcess Data', data);
+  NotificationService.createByChat(data.senderId, data.senderRole, data.chatRoomId, data.chatDTO).then(createNotificationResult => {
     if (createNotificationResult.success) {
-      console.log(createNotificationResult.body);
-      const requestSMS = await request({
-        method: method,
-        json: true,
-        uri: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
-        headers: {
-          'Content-type': 'application/json; charset=utf-8',
-          Authorization: `Bearer ${FLARELANE_TOKEN}`
-        },
-        body: {
+      const result = createNotificationResult.body;
+      axios({
+        url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
+        method: 'post',
+        headers: { 'Content-type': 'application/json; charset=utf-8', Authorization: `Bearer ${FLARELANE_TOKEN}` },
+        data: {
           targetTypes: 'userId',
-          targetIds: [createNotificationResult.body.notified_user],
-          title: createNotificationResult.body.title,
-          body: createNotificationResult.body.body
+          targetIds: [result.body.notified_user],
+          title: result.body.title,
+          body: result.body.body
         }
-      });
-      console.log(requestSMS);
-      if (requestSMS.statusCode === '200') {
-        console.log({
-          success: true,
-          body: {
-            message: '푸시 알림을 발신하였습니다.'
+      })
+        .then(function (response) {
+          console.log(response);
+          let responseResult;
+          if (response.statusCode == 200) {
+            responseResult = {
+              success: true,
+              body: {
+                message: '푸시 알림을 발신하였습니다.'
+              }
+            };
+          } else {
+            responseResult = {
+              success: false,
+              body: body
+            };
           }
-        });
-      } else {
-        console.log({
-          success: false,
-          body: {
-            message: requestSMS.messages
+          console.log(responseResult);
+          done(null);
+        })
+        .catch(function (error) {
+          if (error.response) {
+            console.log({
+              success: false,
+              body: error.response.data
+            });
+          } else if (error.request) {
+            console.log(error.request);
+          } else {
+            console.log('Error', error.message);
           }
+          done(null);
         });
-      }
     } else {
-      console.error(createNotificationResult.body);
+      console.log('success:false', createNotificationResult.body);
+      done(null);
     }
-  } catch (err) {
-    console.error(err);
-  }
+  });
 };
-
-export default notificationsProcess;
