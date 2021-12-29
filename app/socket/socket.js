@@ -63,10 +63,10 @@ export default (server, app) => {
   });
 
   const pubClient = redis.createClient({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    db: process.env.REDIS_DB,
-    password: process.env.REDIS_PW,
+    host: process.env.REDIS_PROD_HOST,
+    port: process.env.REDIS_PROD_PORT,
+    db: process.env.REDIS_PROD_DB,
+    password: process.env.REDIS_PROD_PW,
     options: {
       connect_timeout: 600
     }
