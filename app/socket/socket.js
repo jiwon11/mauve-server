@@ -63,10 +63,10 @@ export default (server, app) => {
   });
 
   const pubClient = redis.createClient({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    db: process.env.REDIS_DB,
-    password: process.env.REDIS_PW
+    host: process.env.REDIS_TEST_HOST,
+    port: process.env.REDIS_TEST_PORT,
+    db: process.env.REDIS_TEST_DB,
+    password: process.env.REDIS_TEST_PW
   });
   const subClient = pubClient.duplicate();
   const redisAdapter = socketIoRedisAdapter({
