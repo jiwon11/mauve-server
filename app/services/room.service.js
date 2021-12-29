@@ -51,14 +51,19 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { readers: '$readers' },
+            let: { readers: '$readers', roomId: '$_id' },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $not: {
-                      $in: [userId, '$readers']
-                    }
+                    $and: [
+                      {
+                        $not: {
+                          $in: [userId, '$readers']
+                        }
+                      },
+                      { $eq: ['$room', '$$roomId'] }
+                    ]
                   }
                 }
               },
@@ -82,18 +87,23 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { created_at: '$created_at' },
+            let: { created_at: '$created_at', roomId: '$_id' },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $gte: [
-                      '$created_at',
+                    $and: [
+                      { $eq: ['$room', '$$roomId'] },
                       {
-                        $dateFromString: {
-                          dateString: moment().tz('Asia/Seoul').format('YYYY-MM-DD'),
-                          format: '%Y-%m-%d'
-                        }
+                        $gte: [
+                          '$created_at',
+                          {
+                            $dateFromString: {
+                              dateString: moment().tz('Asia/Seoul').format('YYYY-MM-DD'),
+                              format: '%Y-%m-%d'
+                            }
+                          }
+                        ]
                       }
                     ]
                   }
