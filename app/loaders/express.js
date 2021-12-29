@@ -19,10 +19,11 @@ import paymentRouter from '../routes/payment';
 import periodRouter from '../routes/period';
 import weightRouter from '../routes/weight';
 import mainPhraseRouter from '../routes/mainPhrase';
+import notificationRouter from '../routes/notification';
+import questionnaireRouter from '../routes/questionnaire';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 AWSXRay.captureHTTPsGlobal(require('https'));
-
 export default async app => {
   app.set('trust proxy', true);
   app.use(cors({ credentials: true, origin: true, exposedHeaders: ['cookie'] }));
@@ -59,6 +60,8 @@ export default async app => {
   app.use('/period', periodRouter);
   app.use('/weight', weightRouter);
   app.use('/mainPhrase', mainPhraseRouter);
+  app.use('/notification', notificationRouter);
+  app.use('/questionnaire', questionnaireRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);

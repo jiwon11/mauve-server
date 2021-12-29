@@ -3,8 +3,11 @@ import roomService from '../services/room.service';
 import CardService from '../services/card.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
-import IMPORT from '../libs/utils/import';
+import IAMPORT from '../libs/utils/iamport';
 import moment from 'moment-timezone';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const signAccount = async (req, res) => {
   try {
@@ -12,9 +15,10 @@ export const signAccount = async (req, res) => {
     const profileImgDTO = req.file;
     if (profileImgDTO) {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
     }
     userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
-    userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.sign(userDTO, profileImgDTO);
@@ -46,15 +50,91 @@ export const signAccount = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const userDTO = req.body;
+    const profileImgDTO = req.file;
+    if (profileImgDTO) {
+      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?w=150&h=150&f=png&q=100`;
+    }
+    if ('birthdate' in Object.keys(userDTO)) {
+      userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
+    }
+    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    console.log('userData', userDTO);
+    console.log('userProfileImgData', profileImgDTO);
+    const { success, body } = await userService.update(userId, userDTO, profileImgDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    redisClient.del(userID, function (err, response) {
+      if (response == 1) {
+        console.log('Deleted Successfully!');
+      } else {
+        console.error(err);
+        console.log('Cannot delete');
+      }
+    });
+    return res.jsonResult(200, '로그아웃 되었습니다.');
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const withdraw = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const { success, body } = await userService.withdraw(userID);
+    if (success) {
+      return res.jsonResult(204, body);
+    } else {
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const updateNotificationConfig = async (req, res) => {
+  try {
+    const userID = req.user.ID;
+    const notificationConfigDTO = req.body;
+    const { success, body } = await userService.updateNotificationConfig(userID, notificationConfigDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
 export const getUserData = async (req, res) => {
   try {
-    const targetUserId = req.params.id;
+    const requestSelf = req.params.id === 'self' ? { targetUserId: req.user.ID, self: true } : { targetUserId: req.params.id, self: false };
     const userID = req.user.ID;
-    const userDataResult = await userService.findById(targetUserId);
+    const userDataResult = await userService.findById(requestSelf.targetUserId, requestSelf.self);
     if (userDataResult.success) {
       return res.jsonResult(200, userDataResult.body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', body: userDataResult.body });
+      return res.jsonResult(userDataResult.body.statusCode, { message: userDataResult.body.message });
     }
   } catch (err) {
     console.log(err);
@@ -66,7 +146,7 @@ export const addCustomerUid = async (req, res) => {
   try {
     const { customer_uid } = req.body; // req의 body에서 customer_uid 추출
     const userId = req.user.ID;
-    const billingKeyResult = await IMPORT.getBillingKeyInfo(customer_uid);
+    const billingKeyResult = await IAMPORT.getBillingKeyInfo(customer_uid);
     if (billingKeyResult.success) {
       const userCuidResult = await userService.addCustomerUid(userId, customer_uid);
       if (userCuidResult) {

@@ -65,6 +65,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-reverse-proxy-container.outputs.task-definition }}
-          service: tuning-app-service
-          cluster: tuning-app-cluster
+          service: mauve-app-service
+          cluster: mauve-app-cluster
           wait-for-service-stability: true
