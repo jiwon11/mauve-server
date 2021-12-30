@@ -1,6 +1,7 @@
 import CoachModel from '../models/coach';
 import UserModel from '../models/user';
 import ChatModel from '../models/chat';
+import ChatRoomModel from '../models/chat_room';
 import mongoose from 'mongoose';
 import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
@@ -111,6 +112,55 @@ export default class CoachService {
         return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
       } else {
         return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async getUserNote(targetUserId) {
+    try {
+      const noteRecord = await ChatRoomModel.aggregate([
+        {
+          $match: {
+            user: mongoose.Types.ObjectId(targetUserId)
+          }
+        },
+        {
+          $project: {
+            note: 1
+          }
+        }
+      ]);
+      if (noteRecord.length > 0) {
+        return { success: true, body: { note: noteRecord[0].note } };
+      } else {
+        return { success: false, body: { err: `ChatRoom not founded by User ID : ${targetUserId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async updateUserNote(targetUserId, noteDTO) {
+    try {
+      const noteRecord = await ChatRoomModel.findOneAndUpdate(
+        {
+          user: targetUserId
+        },
+        {
+          note: noteDTO
+        },
+        {
+          new: true
+        }
+      );
+      if (noteRecord) {
+        return { success: true, body: { note: noteRecord.note } };
+      } else {
+        return { success: false, body: { err: `ChatRoom not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
