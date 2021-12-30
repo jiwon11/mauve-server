@@ -92,7 +92,7 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $and: [{ $eq: ['$room', '$$roomId'] }, { $ne: ['$sender_user', null] }]
+                    $and: [{ $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_user', null] }]
                   }
                 }
               },
@@ -114,6 +114,39 @@ export default class roomService {
               }
             ],
             as: 'recent_user_chat'
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$room', '$$roomId']
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } },
+                  sender_role: { $cond: { if: { $gt: ['$sender_user', null] }, then: 'user', else: 'coach' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              },
+              {
+                $limit: 1
+              }
+            ],
+            as: 'recent_chat'
           }
         },
         {
@@ -290,9 +323,14 @@ export default class roomService {
                 false
               ]
             },
+            recent_chat: { $first: '$recent_chat' },
+            //{ $cond: { if: { $eq: [{ $size: '$non_read_chats' }, 0] }, then: { $first: '$recent_chat' }, else: '$i' } },
             recent_time_user_send_chat: '$recent_user_chat.created_at',
-            recent_non_read_chats: { $first: '$non_read_chats' },
-            non_read_chats_num: { $size: '$non_read_chats' }
+            //recent_non_read_chats: { $first: '$non_read_chats' },
+            /*{ $cond: { if: { $eq: [{ $first: '$non_read_chats' }, null] }, then: { $first: '$non_read_chats' }, else: { $first: '$recent_chat' } } }*/
+            non_read_chats_num: {
+              $size: '$non_read_chats'
+            }
           }
         },
         { $limit: limit },
