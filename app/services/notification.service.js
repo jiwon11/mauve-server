@@ -2,11 +2,12 @@ import NotificationModel from '../models/notification';
 import mongoose from 'mongoose';
 
 export default class NotificationService {
-  static async createByChat(senderId, senderRole, chatDTO) {
+  static async createByChat(senderId, room, chatDTO) {
     try {
       let notificationDTO = {};
-      notificationDTO[`sender_${senderRole}`] = senderId;
+      notificationDTO.sender_coach = senderId;
       notificationDTO.title = chatDTO.sender.name;
+      notificationDTO.notified_user = room.user;
       if (chatDTO.tag === 'chat') {
         notificationDTO.body = chatDTO.body.text;
       } else if (chatDTO.tag === 'weight') {
