@@ -112,12 +112,8 @@ function groupBy(objectArray, property) {
 }
 
 export default class chatService {
-  static async postChat(req, senderId, senderRole, targetRoomId, chatBody, tag = 'chat') {
+  static async postChat(io, connectedUser, senderId, senderRole, targetRoomId, chatBody, tag = 'chat') {
     try {
-      const io = await req.app.get('io');
-      const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
-      console.log('connectedUser', connectedUser);
       const chatDTO = { room: targetRoomId, tag: tag, readers: connectedUser };
       if (senderRole === 'user') {
         chatDTO.sender_user = senderId;
@@ -138,11 +134,11 @@ export default class chatService {
       */
       const chat = await ChatModel.create(chatDTO);
       const chatRecord = await this.getById(chat._id, senderId);
-      req.app.get('io').of('/chat').to(targetRoomId).emit('chat', chatRecord);
+      io.of('/chat').to(targetRoomId).emit('chat', chatRecord);
       return { success: true, body: chatRecord };
     } catch (err) {
       console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 
