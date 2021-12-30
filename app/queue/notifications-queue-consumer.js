@@ -32,7 +32,6 @@ export const notificationsProcess = async function (job, done) {
             }
           })
             .then(function (response) {
-              console.log(response);
               let responseResult;
               if (response.statusCode == 200) {
                 responseResult = {

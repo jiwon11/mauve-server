@@ -51,7 +51,7 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { readers: '$readers', roomId: '$_id' },
+            let: { roomId: '$_id' },
             pipeline: [
               {
                 $match: {
@@ -59,7 +59,7 @@ export default class roomService {
                     $and: [
                       {
                         $not: {
-                          $in: [userId, '$readers']
+                          $in: [mongoose.Types.ObjectId(userId), '$readers']
                         }
                       },
                       { $eq: ['$room', '$$roomId'] }
@@ -87,15 +87,12 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { readers: '$readers', roomId: '$_id' },
+            let: { roomId: '$_id' },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $and: [
-                      { $eq: ['$room', '$$roomId'] }
-                      /*{ $eq: ['$sender_coach', undefined] }*/
-                    ]
+                    $and: [{ $eq: ['$room', '$$roomId'] }, { $ne: ['$sender_user', null] }]
                   }
                 }
               },
@@ -117,12 +114,6 @@ export default class roomService {
               }
             ],
             as: 'recent_user_chat'
-          }
-        },
-        {
-          $unwind: {
-            path: '$recent_user_chat',
-            preserveNullAndEmptyArrays: false
           }
         },
         {
@@ -177,6 +168,12 @@ export default class roomService {
           $unwind: {
             path: '$coach',
             preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unwind: {
+            path: '$recent_user_chat',
+            preserveNullAndEmptyArrays: false
           }
         },
         {
