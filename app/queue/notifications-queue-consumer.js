@@ -16,18 +16,19 @@ export const notificationsProcess = async function (job, done) {
       console.log('알람을 받을 사용자가 없습니다.');
       done();
     } else {
-      NotificationService.createByChat(data.senderId, data.senderRole, data.chatDTO).then(createNotificationResult => {
+      NotificationService.createByChat(data.senderId, room, data.chatDTO).then(createNotificationResult => {
         if (createNotificationResult.success) {
           const result = createNotificationResult.body;
+          console.log(result);
           axios({
             url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
             method: 'post',
             headers: { 'Content-type': 'application/json; charset=utf-8', Authorization: `Bearer ${FLARELANE_TOKEN}` },
             data: {
-              targetTypes: 'userId',
-              targetIds: [result.body.notified_user],
-              title: result.body.title,
-              body: result.body.body
+              targetType: 'userId',
+              targetIds: [result.notified_user.toString()],
+              title: result.title,
+              body: result.body
             }
           })
             .then(function (response) {
