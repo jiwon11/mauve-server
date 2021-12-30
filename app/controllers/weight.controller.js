@@ -19,7 +19,11 @@ export const create = async (req, res) => {
         errorMsg = { message: 'Room get By User ID Service Error', err: roomResult.body };
       }
       const targetRoomId = roomResult.body._id.toString();
-      const postChatResult = await ChatService.postChat(req, userId, userRole, targetRoomId, weightCreateResult.body, 'weight');
+      const io = await req.app.get('io');
+      const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
+      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+      console.log('connectedUser', connectedUser);
+      const postChatResult = await ChatService.postChat(io, connectedUser, userId, userRole, targetRoomId, weightCreateResult.body, 'weight');
       if (!postChatResult.success) {
         errorMsg = { message: 'Chat post weight Service Error', err: postChatResult.body };
       }
