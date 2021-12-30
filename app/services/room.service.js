@@ -283,6 +283,20 @@ export default class roomService {
     }
   }
 
+  static async simpleFindById(roomId) {
+    try {
+      const roomRecord = await RoomModel.aggregate([{ $match: { _id: mongoose.Types.ObjectId(roomId) } }]);
+      if (roomRecord.length > 0) {
+        return { success: true, body: { room: roomRecord[0] } };
+      } else {
+        return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
   static async findById(userId, userRole, roomId) {
     try {
       const dayOfWeek = moment().tz('Asia/seoul').day() - 1; // 0:일 ~ 6:토요일 --> 코치의 상담시간 array : 0:월요일 ~ 4:금요일
@@ -434,7 +448,7 @@ export default class roomService {
           }
         }
       ]);
-      if (roomRecord) {
+      if (roomRecord.length > 0) {
         return { success: true, body: { room: roomRecord[0] } };
       } else {
         return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };

@@ -15,7 +15,7 @@ export const createNewNotification = async notification => {
     removeOnComplete: true,
     removeOnFail: true,
     repeat: {
-      every: 1 * 1000,
+      every: 5 * 100,
       limit: 3
     }
   });
@@ -27,6 +27,18 @@ const getJobPriority = notification => {
 };
 
 notificationsQueue.process(notificationsProcess);
+notificationsQueue.on('stalled', function (job) {
+  // A job has been marked as stalled. This is useful for debugging job
+  // workers that crash or pause the event loop.
+  console.log('Job ' + job.id + ' is stalled... ');
+});
+notificationsQueue.on('lock-extension-failed', function (job, err) {
+  // A job failed to extend lock. This will be useful to debug redis
+  // connection issues and jobs getting restarted because workers
+  // are not able to extend locks.
+  console.log('Job ' + job.id + ' is lock extension failed... ');
+  console.log(err);
+});
 
 notificationsQueue.on('waiting', function (jobId) {
   // A Job is waiting to be processed as soon as a worker is idling.
@@ -68,7 +80,7 @@ notificationsQueue.on('resumed', function (job) {
 notificationsQueue.on('cleaned', function (jobs, type) {
   // Old jobs have been cleaned from the queue. `jobs` is an array of cleaned
   // jobs, and `type` is the type of jobs cleaned.
-  console.log('Cleaned %s %s jobs', jobs.length, type);
+  console.log(`Cleaned ${jobs.length} ${type} jobs`);
 
   for (let i = 0; i < jobs.length; i++) {
     console.log('Job ' + jobs[i].id + ' is cleaned...');
@@ -90,6 +102,9 @@ notificationsQueue.on('removed', function (job) {
 
 notificationsQueue.on('completed', function (job, result) {
   console.log(`Job ${job.id} completed! Result: ${result}`);
-  notificationsQueue.removeRepeatable(job.id, job.opts.repeat);
-  job.remove();
+  const repeatableKey = job.opts.repeat.key;
+  console.log('Job repeatableKey :', repeatableKey);
+  notificationsQueue.removeRepeatableByKey(repeatableKey).then(() => {
+    console.log('Remove Repeat job');
+  });
 });
