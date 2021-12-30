@@ -23,7 +23,7 @@ export const signAccount = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
   }
 };
 
@@ -38,7 +38,7 @@ export const login = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
   }
 };
 
@@ -49,11 +49,11 @@ export const getUserLog = async (req, res) => {
     if (success) {
       return res.jsonResult(200, body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', err: body });
+      return res.jsonResult(500, { message: 'Coach Service Error', err: body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
   }
 };
 
@@ -63,11 +63,42 @@ export const getUserList = async (req, res) => {
     if (success) {
       return res.jsonResult(200, body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', err: body });
+      return res.jsonResult(500, { message: 'Coach Service Error', err: body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
+  }
+};
+
+export const updateUserNote = async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    const noteDTO = req.body.note;
+    const { success, body } = await coachService.updateUserNote(targetUserId, noteDTO);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'Coach Service Error', err: body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
+  }
+};
+
+export const getUserNote = async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    const { success, body } = await coachService.getUserNote(targetUserId);
+    if (success) {
+      return res.jsonResult(200, body);
+    } else {
+      return res.jsonResult(500, { message: 'Coach Service Error', err: body });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
   }
 };
 
@@ -78,10 +109,10 @@ export const getUserInfo = async (req, res) => {
     if (success) {
       return res.jsonResult(200, body);
     } else {
-      return res.jsonResult(500, { message: 'User Service Error', err: body });
+      return res.jsonResult(500, { message: 'Coach Service Error', err: body });
     }
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, { message: 'User Controller Error', err });
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
   }
 };
