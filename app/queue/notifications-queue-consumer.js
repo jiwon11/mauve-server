@@ -33,7 +33,7 @@ export const notificationsProcess = async function (job, done) {
           })
             .then(function (response) {
               let responseResult;
-              if (response.statusCode == 200) {
+              if (response.status == 201) {
                 responseResult = {
                   success: true,
                   body: {
@@ -43,7 +43,7 @@ export const notificationsProcess = async function (job, done) {
               } else {
                 responseResult = {
                   success: false,
-                  body: body
+                  body: response.data
                 };
               }
               console.log(responseResult);
