@@ -87,6 +87,47 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
+            let: { readers: '$readers', roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$room', '$$roomId'] }
+                      /*{ $eq: ['$sender_coach', undefined] }*/
+                    ]
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              },
+              {
+                $limit: 1
+              }
+            ],
+            as: 'recent_user_chat'
+          }
+        },
+        {
+          $unwind: {
+            path: '$recent_user_chat',
+            preserveNullAndEmptyArrays: false
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
             let: { created_at: '$created_at', roomId: '$_id' },
             pipeline: [
               {
@@ -252,6 +293,7 @@ export default class roomService {
                 false
               ]
             },
+            recent_time_user_send_chat: '$recent_user_chat.created_at',
             recent_non_read_chats: { $first: '$non_read_chats' },
             non_read_chats_num: { $size: '$non_read_chats' }
           }

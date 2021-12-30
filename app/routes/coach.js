@@ -13,4 +13,6 @@ router.post('/login', upload.none(), coachController.login);
 router.get('/users', coachController.getUserList);
 router.get('/user/log/:userId', coachController.getUserLog);
 router.get('/user/info/:userId', coachController.getUserInfo);
+router.get('/note/:userId', coachController.getUserNote);
+router.put('/note/:userId', coachController.updateUserNote);
 export default router;
