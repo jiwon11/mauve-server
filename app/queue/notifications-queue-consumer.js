@@ -20,6 +20,8 @@ export const notificationsProcess = async function (job, done) {
         if (createNotificationResult.success) {
           const result = createNotificationResult.body;
           console.log(result);
+          const dataUrl = `roomId=${room._id.toString()}&chatId=${data.chatDTO._id.toString()}&created_at=${data.chatDTO.created_at}`;
+          console.log(dataUrl);
           axios({
             url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
             method: 'post',
@@ -27,8 +29,9 @@ export const notificationsProcess = async function (job, done) {
             data: {
               targetType: 'userId',
               targetIds: [result.notified_user.toString()],
-              title: result.title,
-              body: result.body
+              title: `MAUVE`,
+              body: `${result.title} : ${result.body}`,
+              url: dataUrl
             }
           })
             .then(function (response) {
