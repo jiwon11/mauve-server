@@ -43,7 +43,16 @@ const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
               $expr: { $eq: ['$_id', '$$user'] }
             }
           },
-          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              profile_img: '$profile_img.location',
+              thumbnail: '$profile_img.thumbnail',
+              deleted: 1,
+              self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] }
+            }
+          }
         ],
         as: 'sender_user'
       }
@@ -60,7 +69,7 @@ const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
               $expr: { $eq: ['$_id', '$$coach'] }
             }
           },
-          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
+          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
         ],
         as: 'sender_coach'
       }
@@ -80,6 +89,7 @@ const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
           time: 1,
           kilograms: 1,
           location: 1,
+          thumbnail: 1,
           contentType: 1,
           key: 1
         },
