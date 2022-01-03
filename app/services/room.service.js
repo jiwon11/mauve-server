@@ -69,7 +69,7 @@ export default class roomService {
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
@@ -98,7 +98,7 @@ export default class roomService {
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
@@ -130,7 +130,7 @@ export default class roomService {
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } },
@@ -176,7 +176,7 @@ export default class roomService {
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
@@ -217,10 +217,12 @@ export default class roomService {
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.profile_img.thumbnail': 1,
             'user.deleted': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.profile_img.location': 1,
+            'coach.profile_img.thumbnail': 1,
             'coach.deleted': 1,
             //today_chats: 1,
             input_breakfast: {
@@ -450,10 +452,12 @@ export default class roomService {
             'user.deleted': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.profile_img.thumbnail': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.deleted': 1,
             'coach.profile_img.location': 1,
+            'coach.profile_img.thumbnail': 1,
             coach_chat_possible_time_start: {
               $arrayElemAt: [
                 {
