@@ -14,7 +14,7 @@ const client = require('twilio')(accountSid, authToken);
 
 export const sendSMSByNCP = async phoneNumber => {
   try {
-    const token = Math.floor(Math.random() * 1000000);
+    const token = Math.floor(100000 + Math.random() * 900000);
     const newPhoneVerify = new PhoneVerifyModel({
       token: token,
       phone_NO: phoneNumber
