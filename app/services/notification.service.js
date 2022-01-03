@@ -44,7 +44,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$user'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1 } }
             ],
             as: 'sender_user'
           }
@@ -61,7 +61,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$coach'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1 } }
             ],
             as: 'sender_coach'
           }

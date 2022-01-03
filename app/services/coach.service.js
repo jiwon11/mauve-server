@@ -45,7 +45,8 @@ export default class CoachService {
             name: 1,
             phone_NO: 1,
             role: 1,
-            profile_img: '$profile_img.location'
+            profile_img: '$profile_img.location',
+            thumbnail: '$profile_img.thumbnail'
           }
         }
       ]);
@@ -185,6 +186,7 @@ export default class CoachService {
               time: 1,
               kilograms: 1,
               location: 1,
+              thumbnail: 1,
               contentType: 1,
               key: 1
             },
