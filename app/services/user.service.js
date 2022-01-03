@@ -50,6 +50,7 @@ export default class UserService {
         phone_NO: 1,
         role: 1,
         profile_img: '$profile_img.location',
+        thumbnail: '$profile_img.thumbnail',
         room_id: '$room._id'
       };
       const modelPipeLine = [
