@@ -96,7 +96,7 @@ export const phase = async (req, res) => {
 export const getAll = async (req, res) => {
   try {
     const userId = req.user.ID;
-    const targetUserId = req.user.id;
+    const targetUserId = req.params.userId;
     const userRole = req.user.role;
     let periodResult;
     if (userRole === 'coach' || userId === targetUserId) {
