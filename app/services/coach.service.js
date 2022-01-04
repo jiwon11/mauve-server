@@ -135,9 +135,10 @@ export default class CoachService {
         }
       ]);
       if (noteRecord.length > 0) {
-        return { success: true, body: { note: noteRecord[0].note } };
+        let note = noteRecord[0].note ? noteRecord[0].note : '';
+        return { success: true, body: { note } };
       } else {
-        return { success: false, body: { err: `ChatRoom not founded by User ID : ${targetUserId}` } };
+        return { success: false, body: { err: `Note not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
@@ -161,7 +162,7 @@ export default class CoachService {
       if (noteRecord) {
         return { success: true, body: { note: noteRecord.note } };
       } else {
-        return { success: false, body: { err: `ChatRoom not founded by User ID : ${targetUserId}` } };
+        return { success: false, body: { err: `Note not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
