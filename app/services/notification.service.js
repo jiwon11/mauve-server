@@ -1,19 +1,13 @@
 import NotificationModel from '../models/notification';
-import ChatRoomModel from '../models/chat_room';
 import mongoose from 'mongoose';
 
 export default class NotificationService {
-  static async createByChat(senderId, senderRole, chatRoomId, chatDTO) {
+  static async createByChat(senderId, room, chatDTO) {
     try {
-      const chatRoomRecord = await ChatRoomModel.aggregate([{ $match: { _id: mongoose.Types.ObjectId(chatRoomId) } }]);
       let notificationDTO = {};
-      notificationDTO[`sender_${senderRole}`] = senderId;
-      if (senderRole === 'user') {
-        notificationDTO.notified_coach = chatRoomRecord[0].coach;
-      } else {
-        notificationDTO.notified_user = chatRoomRecord[0].user;
-      }
+      notificationDTO.sender_coach = senderId;
       notificationDTO.title = chatDTO.sender.name;
+      notificationDTO.notified_user = room.user;
       if (chatDTO.tag === 'chat') {
         notificationDTO.body = chatDTO.body.text;
       } else if (chatDTO.tag === 'weight') {
@@ -50,7 +44,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$user'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1 } }
             ],
             as: 'sender_user'
           }
@@ -67,7 +61,7 @@ export default class NotificationService {
                   $expr: { $eq: ['$_id', '$$coach'] }
                 }
               },
-              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', deleted: 1 } }
+              { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1 } }
             ],
             as: 'sender_coach'
           }

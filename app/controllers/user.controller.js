@@ -129,7 +129,7 @@ export const updateNotificationConfig = async (req, res) => {
 export const getUserData = async (req, res) => {
   try {
     const requestSelf = req.params.id === 'self' ? { targetUserId: req.user.ID, self: true } : { targetUserId: req.params.id, self: false };
-    const userID = req.user.ID;
+    const userId = req.user.ID;
     const userDataResult = await userService.findById(requestSelf.targetUserId, requestSelf.self);
     if (userDataResult.success) {
       return res.jsonResult(200, userDataResult.body);

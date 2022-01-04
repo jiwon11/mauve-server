@@ -1,6 +1,7 @@
 import CoachModel from '../models/coach';
 import UserModel from '../models/user';
 import ChatModel from '../models/chat';
+import ChatRoomModel from '../models/chat_room';
 import mongoose from 'mongoose';
 import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
@@ -44,7 +45,8 @@ export default class CoachService {
             name: 1,
             phone_NO: 1,
             role: 1,
-            profile_img: '$profile_img.location'
+            profile_img: '$profile_img.location',
+            thumbnail: '$profile_img.thumbnail'
           }
         }
       ]);
@@ -118,6 +120,56 @@ export default class CoachService {
     }
   }
 
+  static async getUserNote(targetUserId) {
+    try {
+      const noteRecord = await ChatRoomModel.aggregate([
+        {
+          $match: {
+            user: mongoose.Types.ObjectId(targetUserId)
+          }
+        },
+        {
+          $project: {
+            note: 1
+          }
+        }
+      ]);
+      if (noteRecord.length > 0) {
+        let note = noteRecord[0].note ? noteRecord[0].note : '';
+        return { success: true, body: { note } };
+      } else {
+        return { success: false, body: { err: `Note not founded by User ID : ${targetUserId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async updateUserNote(targetUserId, noteDTO) {
+    try {
+      const noteRecord = await ChatRoomModel.findOneAndUpdate(
+        {
+          user: targetUserId
+        },
+        {
+          note: noteDTO
+        },
+        {
+          new: true
+        }
+      );
+      if (noteRecord) {
+        return { success: true, body: { note: noteRecord.note } };
+      } else {
+        return { success: false, body: { err: `Note not founded by User ID : ${targetUserId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
   static async getUserLog(targetUserId) {
     try {
       const userLogRecord = await ChatModel.aggregate([
@@ -135,6 +187,7 @@ export default class CoachService {
               time: 1,
               kilograms: 1,
               location: 1,
+              thumbnail: 1,
               contentType: 1,
               key: 1
             },

@@ -27,9 +27,15 @@ export const postChat = async (req, res) => {
     const chatBody = req.body.chat;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
-    const postChatResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, { text: chatBody });
+    const io = await req.app.get('io');
+    const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
+    const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+    console.log('connectedUser', connectedUser);
+    const postChatResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, { text: chatBody });
     if (postChatResult.success) {
-      await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, chatDTO: postChatResult.body });
+      if (senderRole === 'coach') {
+        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatResult.body });
+      }
       return res.jsonResult(201, postChatResult.body);
     } else {
       return res.jsonResult(500, { message: 'Chat Service Error', err: postChatResult.body });
@@ -48,9 +54,15 @@ export const postMedia = async (req, res) => {
     chatMediaDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${chatMediaDTO.key}?w=150&h=150&f=png&q=100`;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
-    const postChatMediaResult = await ChatService.postChat(req, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
+    const io = await req.app.get('io');
+    const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
+    const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+    console.log('connectedUser', connectedUser);
+    const postChatMediaResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
     if (postChatMediaResult.success) {
-      await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, chatDTO: postChatMediaResult.body });
+      if (senderRole === 'coach') {
+        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatResult.body });
+      }
       return res.jsonResult(201, postChatMediaResult.body);
     } else {
       return res.jsonResult(500, { message: 'User Service Error', err: postChatMediaResult.body });
