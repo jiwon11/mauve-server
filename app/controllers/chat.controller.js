@@ -51,7 +51,7 @@ export const postMedia = async (req, res) => {
     const targetRoomId = req.params.roomId;
     const media_tag = req.params.tag;
     const chatMediaDTO = req.file;
-    chatMediaDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${chatMediaDTO.key}?w=150&h=150&f=png&q=100`;
+    chatMediaDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${chatMediaDTO.key}?f=png&q=100`;
     const senderId = req.user.ID;
     const senderRole = req.user.role;
     const io = await req.app.get('io');
