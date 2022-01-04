@@ -7,7 +7,8 @@ const ChatRoomSchema = new Schema(
   {
     title: { type: String, unique: true },
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
-    coach: { type: Schema.Types.ObjectId, ref: 'COACH' }
+    coach: { type: Schema.Types.ObjectId, ref: 'COACH' },
+    note: { type: String, default: '' }
   },
   {
     collection: 'CHAT_ROOM',

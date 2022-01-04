@@ -51,20 +51,25 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { readers: '$readers' },
+            let: { roomId: '$_id' },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $not: {
-                      $in: [userId, '$readers']
-                    }
+                    $and: [
+                      {
+                        $not: {
+                          $in: [mongoose.Types.ObjectId(userId), '$readers']
+                        }
+                      },
+                      { $eq: ['$room', '$$roomId'] }
+                    ]
                   }
                 }
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
@@ -82,18 +87,88 @@ export default class roomService {
         {
           $lookup: {
             from: 'CHAT',
-            let: { created_at: '$created_at' },
+            let: { roomId: '$_id' },
             pipeline: [
               {
                 $match: {
                   $expr: {
-                    $gte: [
-                      '$created_at',
+                    $and: [{ $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_user', null] }]
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              },
+              {
+                $limit: 1
+              }
+            ],
+            as: 'recent_user_chat'
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$room', '$$roomId']
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } },
+                  sender_role: { $cond: { if: { $gt: ['$sender_user', null] }, then: 'user', else: 'coach' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              },
+              {
+                $limit: 1
+              }
+            ],
+            as: 'recent_chat'
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { created_at: '$created_at', roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$room', '$$roomId'] },
                       {
-                        $dateFromString: {
-                          dateString: moment().tz('Asia/Seoul').format('YYYY-MM-DD'),
-                          format: '%Y-%m-%d'
-                        }
+                        $gte: [
+                          '$created_at',
+                          {
+                            $dateFromString: {
+                              dateString: moment().tz('Asia/Seoul').format('YYYY-MM-DD'),
+                              format: '%Y-%m-%d'
+                            }
+                          }
+                        ]
                       }
                     ]
                   }
@@ -101,7 +176,7 @@ export default class roomService {
               },
               {
                 $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, contentType: 1, key: 1 },
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
                   _id: 0,
                   tag: 1,
                   created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
@@ -129,6 +204,12 @@ export default class roomService {
           }
         },
         {
+          $unwind: {
+            path: '$recent_user_chat',
+            preserveNullAndEmptyArrays: false
+          }
+        },
+        {
           $project: {
             _id: 1,
             title: 1,
@@ -136,10 +217,12 @@ export default class roomService {
             'user.name': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.profile_img.thumbnail': 1,
             'user.deleted': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.profile_img.location': 1,
+            'coach.profile_img.thumbnail': 1,
             'coach.deleted': 1,
             //today_chats: 1,
             input_breakfast: {
@@ -242,8 +325,14 @@ export default class roomService {
                 false
               ]
             },
-            recent_non_read_chats: { $first: '$non_read_chats' },
-            non_read_chats_num: { $size: '$non_read_chats' }
+            recent_chat: { $first: '$recent_chat' },
+            //{ $cond: { if: { $eq: [{ $size: '$non_read_chats' }, 0] }, then: { $first: '$recent_chat' }, else: '$i' } },
+            recent_time_user_send_chat: '$recent_user_chat.created_at',
+            //recent_non_read_chats: { $first: '$non_read_chats' },
+            /*{ $cond: { if: { $eq: [{ $first: '$non_read_chats' }, null] }, then: { $first: '$non_read_chats' }, else: { $first: '$recent_chat' } } }*/
+            non_read_chats_num: {
+              $size: '$non_read_chats'
+            }
           }
         },
         { $limit: limit },
@@ -266,6 +355,20 @@ export default class roomService {
         return { success: true, body: roomRecord };
       } else {
         return { success: false, body: { message: `Room not founded by User ID : ${userId}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: err.message };
+    }
+  }
+
+  static async simpleFindById(roomId) {
+    try {
+      const roomRecord = await RoomModel.aggregate([{ $match: { _id: mongoose.Types.ObjectId(roomId) } }]);
+      if (roomRecord.length > 0) {
+        return { success: true, body: { room: roomRecord[0] } };
+      } else {
+        return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };
       }
     } catch (err) {
       console.log(err);
@@ -349,10 +452,12 @@ export default class roomService {
             'user.deleted': 1,
             'user._id': 1,
             'user.profile_img.location': 1,
+            'user.profile_img.thumbnail': 1,
             'coach.name': 1,
             'coach._id': 1,
             'coach.deleted': 1,
             'coach.profile_img.location': 1,
+            'coach.profile_img.thumbnail': 1,
             coach_chat_possible_time_start: {
               $arrayElemAt: [
                 {
@@ -424,7 +529,7 @@ export default class roomService {
           }
         }
       ]);
-      if (roomRecord) {
+      if (roomRecord.length > 0) {
         return { success: true, body: { room: roomRecord[0] } };
       } else {
         return { success: false, body: { message: `Room not founded by ID : ${roomId}` } };

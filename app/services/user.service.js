@@ -45,14 +45,21 @@ export default class UserService {
 
   static async findById(ID, self) {
     try {
-      console.log(ID);
-      console.log(self);
       const projectPipeLine = {
         name: 1,
         phone_NO: 1,
         role: 1,
-        profile_img: '$profile_img.location'
+        profile_img: '$profile_img.location',
+        thumbnail: '$profile_img.thumbnail',
+        room_id: '$room._id'
       };
+      const modelPipeLine = [
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(ID)
+          }
+        }
+      ];
       if (self) {
         projectPipeLine.notification_config = {
           chat: 1,
@@ -66,17 +73,21 @@ export default class UserService {
           now: 1,
           goal: 1
         };
-      }
-      const userRecord = await UserModel.aggregate([
-        {
-          $match: {
-            _id: mongoose.Types.ObjectId(ID)
+        modelPipeLine.push({
+          $lookup: {
+            from: 'CHAT_ROOM',
+            localField: '_id',
+            foreignField: 'user',
+            as: 'room'
           }
-        },
-        {
-          $project: projectPipeLine
-        }
-      ]);
+        });
+        modelPipeLine.push({ $unwind: { path: '$room', preserveNullAndEmptyArrays: true } });
+        //projectPipeLine.roomId = '$room._id';
+      }
+      modelPipeLine.push({
+        $project: projectPipeLine
+      });
+      const userRecord = await UserModel.aggregate(modelPipeLine);
       if (userRecord.length > 0) {
         return { success: true, body: userRecord[0] };
       } else {
