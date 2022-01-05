@@ -17,8 +17,12 @@ export const signAccount = async (req, res) => {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
       profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?f=png&q=100`;
     }
-    userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
-    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    if (Object.keys(userDTO).includes('birthdate')) {
+      userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
+    }
+    if (Object.keys(userDTO).includes('weight_info')) {
+      userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    }
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.sign(userDTO, profileImgDTO);
@@ -59,10 +63,12 @@ export const updateProfile = async (req, res) => {
       ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
       profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?f=png&q=100`;
     }
-    if ('birthdate' in Object.keys(userDTO)) {
+    if (Object.keys(userDTO).includes('birthdate')) {
       userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
     }
-    //userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    if (Object.keys(userDTO).includes('weight_info')) {
+      userDTO.weight_info = JSON.parse(userDTO.weight_info);
+    }
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.update(userId, userDTO, profileImgDTO);
