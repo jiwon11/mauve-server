@@ -206,7 +206,7 @@ export default class roomService {
         {
           $unwind: {
             path: '$recent_user_chat',
-            preserveNullAndEmptyArrays: false
+            preserveNullAndEmptyArrays: true
           }
         },
         {
