@@ -24,7 +24,7 @@ const userSchema = new Schema(
       }
     },
     weight_info: {
-      now: { type: Number },
+      begin: { type: Number },
       avg_over_last_5y: { type: Number },
       min_since_age20: { type: Number },
       max_since_age20: { type: Number },
