@@ -206,7 +206,7 @@ export default class roomService {
         {
           $unwind: {
             path: '$recent_user_chat',
-            preserveNullAndEmptyArrays: false
+            preserveNullAndEmptyArrays: true
           }
         },
         {
@@ -426,10 +426,42 @@ export default class roomService {
                 }
               },
               { $project: { chat: 1, _id: 1, type: 1 } },
-              { $sort: { created_at: -1 } },
-              { $limit: 1 }
+              { $sort: { created_at: -1 } }
             ],
-            as: 'recent_non_read_chats'
+            as: 'non_read_chats'
+          }
+        },
+        {
+          $lookup: {
+            from: 'CHAT',
+            let: { roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$room', '$$roomId']
+                  }
+                }
+              },
+              {
+                $project: {
+                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
+                  _id: 0,
+                  tag: 1,
+                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } },
+                  sender_role: { $cond: { if: { $gt: ['$sender_user', null] }, then: 'user', else: 'coach' } }
+                }
+              },
+              {
+                $sort: {
+                  created_at: -1
+                }
+              },
+              {
+                $limit: 1
+              }
+            ],
+            as: 'recent_chat'
           }
         },
         {
@@ -525,7 +557,10 @@ export default class roomService {
                 else: false
               }
             },
-            recent_non_read_chats: '$recent_non_read_chats'
+            recent_chat: { $first: '$recent_chat' },
+            non_read_chats_num: {
+              $size: '$non_read_chats'
+            }
           }
         }
       ]);

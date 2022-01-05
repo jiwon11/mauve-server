@@ -98,7 +98,7 @@ export default class CoachService {
             name: 1,
             phone_NO: 1,
             age: { $sum: [{ $toInt: { $divide: [{ $subtract: [new Date(), '$birthdate'] }, 365 * 24 * 60 * 60 * 1000] } }, 1] },
-            weight: '$weight_info.now',
+            weight: '$weight_info',
             height: 1,
             next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
             next_payment: 1
