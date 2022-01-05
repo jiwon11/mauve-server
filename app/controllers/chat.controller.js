@@ -61,7 +61,7 @@ export const postMedia = async (req, res) => {
     const postChatMediaResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
     if (postChatMediaResult.success) {
       if (senderRole === 'coach') {
-        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatResult.body });
+        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatMediaResult.body });
       }
       return res.jsonResult(201, postChatMediaResult.body);
     } else {
