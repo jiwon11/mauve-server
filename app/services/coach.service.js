@@ -51,6 +51,7 @@ export default class CoachService {
         }
       ]);
       if (coachRecord.length > 0) {
+        coachRecord[0]._id = coachRecord[0]._id.toString();
         return { success: true, body: coachRecord[0] };
       } else {
         return { success: false, body: { statusCode: 404, message: `Coach not founded by ID : ${ID}` } };

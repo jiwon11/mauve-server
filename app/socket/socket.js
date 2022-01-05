@@ -112,15 +112,21 @@ export default (server, app) => {
       let roomId;
       socket.on('room-join', async msg => {
         roomId = msg.roomId;
-        console.log('join roomId: ', roomId);
-        await socket.join(roomId);
-
-        chatNamespace.to(roomId).emit('join', {
-          sender: 'system',
-          connect: true,
-          userId: socket.handshake.auth._id,
-          name: socket.handshake.auth.name
-        });
+        const userId = socket.handshake.auth._id;
+        const sockets = await chatNamespace.in(roomId).fetchSockets();
+        const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+        console.log('connectedUser :', connectedUser);
+        console.log('userId :', userId);
+        if (!connectedUser.includes(userId)) {
+          await socket.join(roomId);
+          console.log('join roomId :', roomId);
+          chatNamespace.to(roomId).emit('join', {
+            sender: 'system',
+            connect: true,
+            userId: socket.handshake.auth._id,
+            name: socket.handshake.auth.name
+          });
+        }
       });
 
       socket.on('room-leave', async msg => {
