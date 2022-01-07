@@ -1,10 +1,10 @@
-# Mauve API Test Server
+# Mauve API Server
 
-test branch를 통해 AWS ECS에 Mauve API Test Server 배포
+main branch를 통해 AWS ECS에 Mauve API Server 배포
 
 ## Host
 
-http://api-test.mauve.care
+http://api.mauve.care
 
 ### Route
 

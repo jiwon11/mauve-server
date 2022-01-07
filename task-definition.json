@@ -25,10 +25,7 @@
       "command": null,
       "linuxParameters": null,
       "cpu": 1024,
-      "environment": [{
-        "name": "AWS_XRAY_DAEMON_ADDRESS",
-        "value": "xray-daemon:2000"
-      }],
+      "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
       "dnsServers": null,
