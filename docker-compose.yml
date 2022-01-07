@@ -1,8 +1,6 @@
 version: '2'
 
 services:
-  aws-xray:
-    image: amazon/aws-xray-daemon
   reverse-proxy-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     build:
