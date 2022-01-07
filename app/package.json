@@ -12,6 +12,8 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/runtime": "^7.15.4",
     "@bull-board/express": "^3.8.1",
+    "@sentry/node": "^6.16.1",
+    "@sentry/tracing": "^6.16.1",
     "@socket.io/admin-ui": "^0.2.0",
     "@socket.io/cluster-adapter": "^0.1.0",
     "@socket.io/redis-adapter": "^7.0.0",
