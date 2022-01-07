@@ -40,6 +40,11 @@ export default async app => {
     tracesSampleRate: 1.0
   });
 
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
   app.set('trust proxy', true);
   app.use(cors({ credentials: true, origin: true, exposedHeaders: ['cookie'] }));
   app.all('/*', function (req, res, next) {
@@ -49,11 +54,6 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
-  // RequestHandler creates a separate execution context using domains, so that every
-  // transaction/span/breadcrumb is attached to its own Hub instance
-  app.use(Sentry.Handlers.requestHandler());
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler());
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
