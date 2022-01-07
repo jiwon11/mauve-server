@@ -69,10 +69,7 @@ export default class UserService {
           event: 1
         };
         projectPipeLine.height = 1;
-        projectPipeLine.weight_info = {
-          now: 1,
-          goal: 1
-        };
+        projectPipeLine.weight_info = 1;
         modelPipeLine.push({
           $lookup: {
             from: 'CHAT_ROOM',
@@ -89,6 +86,7 @@ export default class UserService {
       });
       const userRecord = await UserModel.aggregate(modelPipeLine);
       if (userRecord.length > 0) {
+        userRecord[0]._id = userRecord[0]._id.toString();
         return { success: true, body: userRecord[0] };
       } else {
         return { success: false, body: { statusCode: 404, message: `User not founded by ID : ${ID}` } };

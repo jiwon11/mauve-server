@@ -51,6 +51,7 @@ export default class CoachService {
         }
       ]);
       if (coachRecord.length > 0) {
+        coachRecord[0]._id = coachRecord[0]._id.toString();
         return { success: true, body: coachRecord[0] };
       } else {
         return { success: false, body: { statusCode: 404, message: `Coach not founded by ID : ${ID}` } };
@@ -98,7 +99,7 @@ export default class CoachService {
             name: 1,
             phone_NO: 1,
             age: { $sum: [{ $toInt: { $divide: [{ $subtract: [new Date(), '$birthdate'] }, 365 * 24 * 60 * 60 * 1000] } }, 1] },
-            weight: '$weight_info.now',
+            weight: '$weight_info',
             height: 1,
             next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
             next_payment: 1
