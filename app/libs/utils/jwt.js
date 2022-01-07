@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import redisClient from '../utils/redis';
 import { promisify } from 'util';
+import * as Sentry from '@sentry/node';
 
 import dotenv from 'dotenv';
 
@@ -14,6 +15,8 @@ export const sign = user => {
     id: user._id,
     role: user.role
   };
+
+  Sentry.setUser(payload);
 
   return jwt.sign(payload, secret, {
     // secret으로 sign하여 발급하고 return
