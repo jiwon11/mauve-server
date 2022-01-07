@@ -41,21 +41,6 @@ export default async app => {
     tracesSampleRate: 1.0
   });
 
-  const transaction = Sentry.startTransaction({
-    op: 'test',
-    name: 'My First Test Transaction'
-  });
-
-  setTimeout(() => {
-    try {
-      foo();
-    } catch (e) {
-      Sentry.captureException(e);
-    } finally {
-      transaction.finish();
-    }
-  }, 99);
-
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
   app.use(Sentry.Handlers.requestHandler());
