@@ -27,6 +27,7 @@ import { pageNotFoundError, respondInternalError } from '../controllers/errorCon
 export default async app => {
   Sentry.init({
     dsn: 'https://f0bf76107d50428689919bb5db0b0a23@o1109647.ingest.sentry.io/6138175',
+    environment: process.env.NODE_ENV,
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
