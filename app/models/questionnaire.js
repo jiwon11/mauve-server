@@ -87,6 +87,6 @@ const QuestionnaireSchema = new Schema(
 
 QuestionnaireSchema.plugin(mongoose_delete);
 
-const Period = mongoose.model('QUESTIONNAIRE', QuestionnaireSchema);
+const Questionnaire = mongoose.model('QUESTIONNAIRE', QuestionnaireSchema);
 
-export default Period;
+export default Questionnaire;
