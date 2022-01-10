@@ -1,6 +1,7 @@
-# Mauve API Server
+<p align="center"><img src="https://user-images.githubusercontent.com/68677647/148726865-01d15dde-e2f4-4325-8672-d400a6744270.png"></p>
+<h1 align="center">Mauve API Server</h1>
 
-main branch를 통해 AWS ECS에 Mauve API Server 배포
+🚀 main branch를 통해 AWS ECS에 Mauve API Server 배포
 
 ## Host
 
