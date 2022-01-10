@@ -22,6 +22,7 @@ const QuestionnaireSchema = new Schema(
       has: { type: Boolean },
       last_year: { type: Number }
     },
+    during_pregnancy: { type: Boolean },
     lifestyle: {
       type: String,
       enum: [
