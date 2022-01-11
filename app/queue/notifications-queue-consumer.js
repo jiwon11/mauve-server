@@ -22,7 +22,13 @@ export const notificationsProcess = async function (job, done) {
           console.log(result);
           const dataUrl = `roomId=${room._id.toString()}&chatId=${data.chatDTO._id.toString()}&created_at=${data.chatDTO.created_at}`;
           console.log(dataUrl);
-          const replaceBody = result.body.substr(0, 150 - 6 - result.title.length);
+          let replaceBody;
+          if (result.body.length > 144) {
+            const subBody = result.body.substr(0, 150 - 6 - result.title.length);
+            replaceBody = `${result.title} : ${replaceBody}...`;
+          } else {
+            replaceBody = result.body;
+          }
           axios({
             url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
             method: 'post',
@@ -31,7 +37,7 @@ export const notificationsProcess = async function (job, done) {
               targetType: 'device',
               targetIds: [/*result.notified_user.toString()*/ '3c7410b8-ed4e-4fe2-81fc-a5a21bf0f4e1'],
               title: `MAUVE`,
-              body: `${result.title} : ${replaceBody}...`,
+              body: replaceBody,
               url: dataUrl
             }
           })
