@@ -27,7 +27,7 @@ export const notificationsProcess = async function (job, done) {
             const subBody = result.body.substr(0, 150 - 6 - result.title.length);
             replaceBody = `${result.title} : ${subBody}...`;
           } else {
-            replaceBody = result.body;
+            replaceBody = `${result.title} : ${result.body}...`;
           }
           axios({
             url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
