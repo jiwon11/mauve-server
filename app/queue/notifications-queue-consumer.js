@@ -25,7 +25,7 @@ export const notificationsProcess = async function (job, done) {
           let replaceBody;
           if (result.body.length > 144) {
             const subBody = result.body.substr(0, 150 - 6 - result.title.length);
-            replaceBody = `${result.title} : ${replaceBody}...`;
+            replaceBody = `${result.title} : ${subBody}...`;
           } else {
             replaceBody = result.body;
           }
