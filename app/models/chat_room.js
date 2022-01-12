@@ -22,7 +22,9 @@ const ChatRoomSchema = new Schema(
   }
 );
 
-ChatRoomSchema.plugin(mongoose_delete);
+ChatRoomSchema.index({ user: 1, coach: 1 });
+
+ChatRoomSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const ChatRoom = mongoose.model('CHAT_ROOM', ChatRoomSchema);
 
