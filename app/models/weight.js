@@ -21,7 +21,7 @@ const WeightSchema = new Schema(
   }
 );
 
-WeightSchema.plugin(mongoose_delete);
+WeightSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Weight = mongoose.model('WEIGHT', WeightSchema);
 

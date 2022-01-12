@@ -53,7 +53,7 @@ const coachSchema = new Schema(
   }
 );
 
-coachSchema.plugin(mongoose_delete);
+coachSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Coach = mongoose.model('COACH', coachSchema);
 

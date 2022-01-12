@@ -20,7 +20,7 @@ const itemSchema = new Schema(
     }
   }
 );
-itemSchema.plugin(mongoose_delete);
+itemSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Item = mongoose.model('ITEM', itemSchema);
 

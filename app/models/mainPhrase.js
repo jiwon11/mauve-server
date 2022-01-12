@@ -25,7 +25,10 @@ const mainPhraseSchema = new Schema(
     }
   }
 );
-mainPhraseSchema.plugin(mongoose_delete);
+
+mainPhraseSchema.index({ phase: 1 });
+
+mainPhraseSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const MainPhrase = mongoose.model('MAIN_PHRASE', mainPhraseSchema);
 
