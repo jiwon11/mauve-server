@@ -22,7 +22,8 @@ const PeriodSchema = new Schema(
   }
 );
 
-PeriodSchema.plugin(mongoose_delete);
+PeriodSchema.index({ user: 1 });
+PeriodSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Period = mongoose.model('PERIOD', PeriodSchema);
 
