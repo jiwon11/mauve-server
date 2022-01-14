@@ -39,7 +39,7 @@ export const notificationsProcess = async function (job, done) {
               method: 'post',
               headers: { 'Content-type': 'application/json; charset=utf-8', Authorization: `Bearer ${FLARELANE_TOKEN}` },
               data: {
-                targetType: 'device',
+                targetType: 'userId',
                 targetIds: [result.notified_user.toString()],
                 title: `MAUVE`,
                 body: replaceBody,
