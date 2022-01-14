@@ -28,11 +28,13 @@ export const sign = user => {
 export const verify = token => {
   try {
     const decoded = jwt.verify(token, secret);
-    return {
+    const result = {
       ok: true,
       id: decoded.id,
       role: decoded.role
     };
+    Sentry.setUser(result);
+    return result;
   } catch (err) {
     return {
       ok: false,
