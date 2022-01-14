@@ -33,6 +33,7 @@ export const notificationsProcess = async function (job, done) {
             } else {
               replaceBody = `${result.title} : ${result.body}`;
             }
+            console.log('userId toString', result.notified_user.toString());
             axios({
               url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
               method: 'post',
