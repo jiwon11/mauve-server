@@ -12,6 +12,7 @@ export const notificationsProcess = async function (job, done) {
   const RoomRecordResult = await RoomService.simpleFindById(data.chatRoomId);
   if (RoomRecordResult.success) {
     const room = RoomRecordResult.body.room;
+    console.log(room);
     if (data.connectedUser.includes(room.user)) {
       console.log('알람을 받을 사용자가 없습니다.');
       done();
@@ -23,9 +24,8 @@ export const notificationsProcess = async function (job, done) {
         NotificationService.createByChat(data.senderId, room, data.chatDTO).then(createNotificationResult => {
           if (createNotificationResult.success) {
             const result = createNotificationResult.body;
-            console.log(result);
+            console.log('createNotificationResult', result);
             const dataUrl = `roomId=${room._id.toString()}&chatId=${data.chatDTO._id.toString()}&created_at=${data.chatDTO.created_at}`;
-            console.log(dataUrl);
             let replaceBody;
             if (result.body.length > 144) {
               const subBody = result.body.substr(0, 150 - 6 - result.title.length);
