@@ -12,7 +12,7 @@ export const notificationsProcess = async function (job, done) {
   const RoomRecordResult = await RoomService.simpleFindById(data.chatRoomId);
   if (RoomRecordResult.success) {
     const room = RoomRecordResult.body.room;
-    if (data.connectedUser.includes(room.user)) {
+    if (data.connectedUser.includes(room.notified_user)) {
       console.log('알람을 받을 사용자가 없습니다.');
       done();
     } else {
@@ -33,6 +33,7 @@ export const notificationsProcess = async function (job, done) {
             } else {
               replaceBody = `${result.title} : ${result.body}`;
             }
+            console.log(result.notified_user.toString());
             axios({
               url: `https://api.flarelane.com/v1/projects/${FLARELANE_PROJECT_ID}/notifications`,
               method: 'post',
