@@ -31,7 +31,7 @@ const cardSchema = new Schema(
     }
   }
 );
-cardSchema.plugin(mongoose_delete);
+cardSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Card = mongoose.model('CARD', cardSchema);
 

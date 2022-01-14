@@ -23,7 +23,7 @@ const feedbackSchema = new Schema(
   }
 );
 
-feedbackSchema.plugin(mongoose_delete);
+feedbackSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Feedback = mongoose.model('FEEDBACK', feedbackSchema);
 

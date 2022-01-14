@@ -92,7 +92,7 @@ const QuestionnaireSchema = new Schema(
   }
 );
 
-QuestionnaireSchema.plugin(mongoose_delete);
+QuestionnaireSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Questionnaire = mongoose.model('QUESTIONNAIRE', QuestionnaireSchema);
 

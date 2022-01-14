@@ -364,7 +364,31 @@ export default class roomService {
 
   static async simpleFindById(roomId) {
     try {
-      const roomRecord = await RoomModel.aggregate([{ $match: { _id: mongoose.Types.ObjectId(roomId) } }]);
+      const roomRecord = await RoomModel.aggregate([
+        { $match: { _id: mongoose.Types.ObjectId(roomId) } },
+        {
+          $lookup: {
+            from: 'USER',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'notified_user'
+          }
+        },
+        {
+          $unwind: {
+            path: '$notified_user',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            notified_user: {
+              _id: 1,
+              notification_config: 1
+            }
+          }
+        }
+      ]);
       if (roomRecord.length > 0) {
         return { success: true, body: { room: roomRecord[0] } };
       } else {
