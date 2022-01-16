@@ -5,23 +5,28 @@ export const today = moment().tz('Asia/Seoul').startOf('day');
 export const calPhase = (duringPeriod, month) => {
   const phaseName = ['period', 'golden_time', 'effort_time', 'before_period'];
   const phaseList = phaseName.map(phase => {
-    let start_date, end_date;
+    let start_date, end_date, phase_kor;
     if (phase === 'period') {
       start_date = duringPeriod.start;
       end_date = duringPeriod.end;
+      phase_kor = '월경기';
     } else if (phase === 'golden_time') {
       start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(1, 'days').format('YYYY-MM-DD');
       end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      phase_kor = '황금기';
     } else if (phase === 'effort_time') {
       start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(9, 'days').format('YYYY-MM-DD');
       end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      phase_kor = '유지기';
     } else if (phase === 'before_period') {
       start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(17, 'days').format('YYYY-MM-DD');
       end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      phase_kor = '월경 전';
     }
     return {
       predict: month === 'this' ? false : true,
       phase: phase,
+      phase_kor: phase_kor,
       start_date: start_date,
       end_date: end_date,
       get is_between() {
@@ -33,6 +38,7 @@ export const calPhase = (duringPeriod, month) => {
     phaseList.push({
       predict: month === 'this' ? false : true,
       phase: 'delayed',
+      phase_kor: '지연',
       start_date: moment(phaseList[phaseList.length - 1].end_date)
         .tz('Asia/Seoul')
         .add(1, 'days')
