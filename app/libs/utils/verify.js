@@ -132,27 +132,45 @@ export const pushSMS = async phoneNumber => {
 };
 
 export const verifyToken = async (userPhoneNumber, token) => {
-  const verifies = await PhoneVerifyModel.findOne({
-    phone_NO: userPhoneNumber,
-    token: token
-  }).lean();
-  if (verifies) {
-    const existedUser = await UserModel.findOne({
-      phone_NO: userPhoneNumber
-    }).lean();
-    await PhoneVerifyModel.deleteOne({ _id: verifies._id }).exec();
-    return {
-      success: true,
-      body: {
-        message: '인증되었습니다.',
-        existedUser: existedUser ? true : false
+  try {
+    const verifies = await PhoneVerifyModel.aggregate([
+      {
+        $match: {
+          phone_NO: userPhoneNumber,
+          token: token
+        }
       }
-    };
-  } else {
+    ]);
+    if (verifies.length > 0) {
+      const existedUser = await UserModel.aggregate([
+        {
+          $match: {
+            phone_NO: userPhoneNumber
+          }
+        }
+      ]);
+      await PhoneVerifyModel.deleteOne({ _id: verifies[0]._id });
+      return {
+        success: true,
+        body: {
+          message: '인증되었습니다.',
+          existedUser: existedUser.length > 0 ? true : false
+        }
+      };
+    } else {
+      return {
+        success: false,
+        body: {
+          message: '인증번호가 틀립니다.'
+        }
+      };
+    }
+  } catch (err) {
+    console.log(err);
     return {
       success: false,
       body: {
-        message: '인증번호가 틀립니다.'
+        message: err.message
       }
     };
   }
