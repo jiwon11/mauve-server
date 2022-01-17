@@ -7,7 +7,7 @@ import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
-
+import { getUserAge } from '../libs/utils/moment';
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -98,15 +98,16 @@ export default class CoachService {
           $project: {
             name: 1,
             phone_NO: 1,
-            age: { $sum: [{ $toInt: { $divide: [{ $subtract: [new Date(), '$birthdate'] }, 365 * 24 * 60 * 60 * 1000] } }, 1] },
-            weight: '$weight_info',
+            birthdate: 1,
+            weight: '$weight',
             height: 1,
             next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
             next_payment: 1
           }
         }
       ]);
-      if (userInfoRecord) {
+      if (userInfoRecord.length > 0) {
+        userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
         if (!periodResult) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
