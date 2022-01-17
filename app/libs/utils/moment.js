@@ -8,7 +8,7 @@ export const calPhase = (duringPeriod, month) => {
     let start_date, end_date, phase_kor;
     if (phase === 'period') {
       start_date = duringPeriod.start;
-      end_date = duringPeriod.end;
+      end_date = duringPeriod.end ? duringPeriod.end : today.format('YYYY-MM-DD');
       phase_kor = '월경기';
     } else if (phase === 'golden_time') {
       start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(1, 'days').format('YYYY-MM-DD');
