@@ -38,7 +38,7 @@ export const calPhase = (duringPeriod, month) => {
     phaseList.push({
       predict: month === 'this' ? false : true,
       phase: 'delayed',
-      phase_kor: '지연',
+      phase_kor: '월경 지연',
       start_date: moment(phaseList[phaseList.length - 1].end_date)
         .tz('Asia/Seoul')
         .add(1, 'days')
