@@ -75,6 +75,7 @@ export const phase = async (req, res) => {
       if (!periodResult.success) {
         return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
       }
+      console.log('periodResult', JSON.stringify(periodResult.body));
       //const recentPeriodRecord = periodResult.body.filter(period => today.isSame(moment(period.start).tz('Asia/Seoul')) || today.isAfter(moment(period.start).tz('Asia/Seoul')))[0];
       const recentPeriodRecord = periodResult.body.filter(period => !today.isBefore(moment(period.start).tz('Asia/Seoul')))[0];
       console.log(recentPeriodRecord);
