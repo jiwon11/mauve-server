@@ -6,15 +6,9 @@ const Schema = mongoose.Schema;
 const QuestionnaireSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
-    body_info: {
-      height: { type: Number },
-      weight: {
-        now: { type: Number },
-        avg_over_last_5y: { type: Number },
-        min_since_age20: { type: Number },
-        //max_since_age20: { type: Number },
-        goal: { type: Number }
-      }
+    additional_weight: {
+      avg_over_last_5y: { type: Number },
+      min_since_age20: { type: Number }
     },
     goal: [{ type: String, enum: ['건강관리', '체중관리', '월경관리'] }],
     menstrual_cycle: { type: String, enum: ['주기가 일정한 편이에요. (1-2일 차이)', '주기가 종종 바뀌어요. (3일 이상 차이)', '주기의 편차가 심해요. (5일 이상 차이)'] },
