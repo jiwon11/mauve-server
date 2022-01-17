@@ -78,7 +78,7 @@ export const phase = async (req, res) => {
       console.log('periodResult', JSON.stringify(periodResult.body));
       //const recentPeriodRecord = periodResult.body.filter(period => today.isSame(moment(period.start).tz('Asia/Seoul')) || today.isAfter(moment(period.start).tz('Asia/Seoul')))[0];
       console.log('periodResultFilter');
-      periodResult.body.forEach(period => console.log(!today.isBefore(moment(period.start).tz('Asia/Seoul'))));
+      periodResult.body.forEach(period => console.log(`today: ${today}, period: ${moment(period.start).tz('Asia/Seoul')}`));
       const recentPeriodRecord = periodResult.body.filter(period => !today.isBefore(moment(period.start).tz('Asia/Seoul')))[0];
       console.log(recentPeriodRecord);
       const periodStatisticResult = await PeriodService.statistic(periodResult.body);
