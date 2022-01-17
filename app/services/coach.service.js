@@ -76,7 +76,7 @@ export default class CoachService {
           accessToken: accessToken,
           refreshToken: refreshToken
         };
-        return { success: true, body: coachToken };
+        return { success: true, body: { ...{ id: coachRecord._id.toString() }, ...coachToken } };
       } else {
         return { success: false, body: { statusCode: 500, err: `Coach not founded by passCode : ${passCode}` } };
       }
