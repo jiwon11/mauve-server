@@ -81,6 +81,7 @@ export const phase = async (req, res) => {
       if (!periodPhaseResult.success) {
         return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
       }
+      console.log('periodPhaseResult', periodPhaseResult);
       const currentPhase = periodPhaseResult.body.current_phase;
       let sinceDelayed;
       if (currentPhase.phase === 'delayed') {
