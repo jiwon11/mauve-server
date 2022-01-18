@@ -1,7 +1,5 @@
 import userService from '../services/user.service';
-import roomService from '../services/room.service';
 import CardService from '../services/card.service';
-import CoachService from '../services/coach.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IAMPORT from '../libs/utils/iamport';
@@ -17,11 +15,6 @@ export const signAccount = async (req, res) => {
     const { success, body } = await userService.sign(userDTO);
     if (success) {
       const { userRecord, created } = body;
-      if (created) {
-        // 추후 결제 후 로직으로 이동
-        const coach = await CoachService.findOne();
-        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, user: userRecord._id, coach: coach.body._id });
-      }
       const accessToken = sign(userRecord);
       const refreshToken = refresh();
 
