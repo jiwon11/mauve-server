@@ -7,7 +7,7 @@ const router = express.Router();
 import * as userController from '../controllers/user.controller';
 import jwtAuth from '../middlewares/authJWT';
 
-router.post('/sign', upload.single('profile_img'), userController.signAccount);
+router.post('/sign', userController.signAccount);
 router.post('/login', userController.login);
 router.put('/profile', jwtAuth, upload.single('profile_img'), userController.updateProfile);
 router.post('/logout', jwtAuth, userController.logout);
