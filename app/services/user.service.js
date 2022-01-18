@@ -3,7 +3,7 @@ import UserModel from '../models/user';
 import WhiteListModel from '../models/white_list';
 import moment from 'moment-timezone';
 export default class UserService {
-  static async sign(userDTO, profileImgDTO) {
+  static async sign(userDTO) {
     try {
       let userRecord, created;
       const whiteUser = await WhiteListModel.aggregate([
@@ -18,7 +18,7 @@ export default class UserService {
         if (existUser) {
           return { success: false, body: { statusCode: 403, err: '이미 등록된 회원입니다.' } };
         } else {
-          const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
+          const newUser = new UserModel(userDTO);
           const saveUser = await newUser.save();
           userRecord = saveUser;
           created = true;
