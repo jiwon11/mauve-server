@@ -50,7 +50,7 @@ export default class PeriodService {
         },
         {
           $sort: {
-            end: -1
+            start: -1
           }
         }
       ];
@@ -104,18 +104,19 @@ export default class PeriodService {
     try {
       const duringPeriod = periodRecord;
       duringPeriod.end = periodRecord.end ? periodRecord.end : moment(periodRecord.start).tz('Asia/Seoul').add(statistic.termAvg, 'days').format('YYYY-MM-DD');
-      const thisMonthPhase = calPhase(duringPeriod, 'this');
-      const nextMonthPhase = calPhase(statistic.predict, 'next');
-      const adjustNextMonthPhase = adjustEffortDate(thisMonthPhase, nextMonthPhase);
-      const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
-      const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
+      const thisMonthAllPhase = calPhase(duringPeriod, 'this');
+      const predictMonthPhase = calPhase(statistic.predict, 'next');
+      const adjustThisMonthPhase = adjustEffortDate(thisMonthAllPhase, predictMonthPhase);
+      //const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
+      //const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
       if (step === 'current') {
-        const currentPhase = monthPhase.filter(phase => phase.is_between === true)[0];
-        const periodPhase = monthPhase.filter(phase => phase.phase === 'period')[0];
-        const periodSchedule = calPeriodSchedule(monthPhase, periodPhase, statistic.predict);
-        return { success: true, body: { period_schedule: periodSchedule, current_phase: currentPhase } };
+        const existCurrentPhase = adjustThisMonthPhase.filter(phase => phase.is_between === true);
+        const currentPhase = existCurrentPhase[0];
+        //const periodPhase = monthPhase.filter(phase => phase.phase === 'period')[0];
+        //const periodSchedule = calPeriodSchedule(monthPhase, periodPhase, statistic.predict);
+        return { success: true, body: { current_phase: currentPhase, this_month_all_phase: adjustThisMonthPhase /*predict_month_all_phase: predictMonthPhase*/ } };
       } else {
-        return { success: true, body: thisMonthPhase.concat(nextMonthPhase) };
+        return { success: true, body: thisMonthPhase.concat(predictMonthPhase) };
       }
     } catch (err) {
       console.log(err);

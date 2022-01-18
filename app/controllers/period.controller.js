@@ -2,6 +2,7 @@ import PeriodService from '../services/period.service';
 import UserService from '../services/user.service';
 import mainPhraseService from '../services/mainPhrase.service';
 import moment from 'moment-timezone';
+import { today } from '../libs/utils/moment';
 
 export const add = async (req, res) => {
   try {
@@ -74,16 +75,28 @@ export const phase = async (req, res) => {
       if (!periodResult.success) {
         return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
       }
+      console.log('periodResult', JSON.stringify(periodResult.body));
+      //const recentPeriodRecord = periodResult.body.filter(period => today.isSame(moment(period.start).tz('Asia/Seoul')) || today.isAfter(moment(period.start).tz('Asia/Seoul')))[0];
+      console.log('periodResultFilter');
+      periodResult.body.forEach(period => console.log(`today: ${today}, period: ${moment(period.start).tz('Asia/Seoul')})`));
+      const recentPeriodRecord = periodResult.body.filter(period => !today.isBefore(moment(period.start).tz('Asia/Seoul')))[0];
+      console.log(recentPeriodRecord);
       const periodStatisticResult = await PeriodService.statistic(periodResult.body);
-      const periodPhaseResult = await PeriodService.phase(periodResult.body[0], periodStatisticResult.body, step);
+      const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, step);
       if (!periodPhaseResult.success) {
         return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
       }
-      const currentPhasePhrase = await mainPhraseService.getByPhase(periodPhaseResult.body.current_phase.phase);
-      if (!currentPhasePhrase.success) {
-        return res.jsonResult(500, { message: 'Main Phrase Service Error', err: currentPhasePhrase.body });
+      console.log('periodPhaseResult', JSON.stringify(periodPhaseResult));
+      const currentPhase = periodPhaseResult.body.current_phase;
+      let sinceDelayed;
+      if (currentPhase.phase === 'delayed') {
+        sinceDelayed = today.diff(moment(currentPhase.start_date).tz('Asia/Seoul'), 'days');
       }
-      return res.jsonResult(200, { ...periodPhaseResult.body, ...{ phrases: currentPhasePhrase.body.phrases } });
+      const currentPhasePhrase = await mainPhraseService.getByPhase(currentPhase.phase);
+      if (!currentPhasePhrase.success) {
+        return res.jsonResult(500, { message: 'Main Phrase Service Error', err: currentPhasePhrase.body.phases });
+      }
+      return res.jsonResult(200, { ...{ since_delayed: sinceDelayed }, ...periodPhaseResult.body, ...{ phrases: currentPhasePhrase.body.phrases } });
     } else {
       return res.jsonResult(500, { message: 'Period Controller Error', body: '유효하지 않는 파라미터입니다.' });
     }

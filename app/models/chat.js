@@ -29,11 +29,14 @@ const ChatSchema = new Schema(
   }
 );
 
+ChatSchema.index({ created_at: -1 });
+ChatSchema.index({ readers: 1 });
+
 ChatSchema.virtual('readersNum').get(function () {
   return this.readers.length;
 });
 
-ChatSchema.plugin(mongoose_delete);
+ChatSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const ChatRoom = mongoose.model('CHAT', ChatSchema);
 

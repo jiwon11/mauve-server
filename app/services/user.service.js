@@ -3,7 +3,7 @@ import UserModel from '../models/user';
 import WhiteListModel from '../models/white_list';
 import moment from 'moment-timezone';
 export default class UserService {
-  static async sign(userDTO, profileImgDTO) {
+  static async sign(userDTO) {
     try {
       let userRecord, created;
       const whiteUser = await WhiteListModel.aggregate([
@@ -16,15 +16,14 @@ export default class UserService {
       if (whiteUser.length > 0) {
         const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
         if (existUser) {
-          userRecord = existUser;
-          created = false;
+          return { success: false, body: { statusCode: 403, err: '이미 등록된 회원입니다.' } };
         } else {
-          const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
+          const newUser = new UserModel(userDTO);
           const saveUser = await newUser.save();
           userRecord = saveUser;
           created = true;
+          return { success: true, body: { userRecord, created } };
         }
-        return { success: true, body: { userRecord, created } };
       } else {
         return { success: false, body: { statusCode: 401, err: 'white User가 아닙니다.' } };
       }
@@ -40,6 +39,32 @@ export default class UserService {
         return { success: false, body: { statusCode: 400, err: errors } };
       }
       return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async login(phoneNumber) {
+    try {
+      const userRecord = await UserModel.aggregate([
+        {
+          $match: {
+            phone_NO: phoneNumber
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            role: 1
+          }
+        }
+      ]);
+      if (userRecord.length > 0) {
+        return { success: true, body: userRecord[0] };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by Phone Number : ${phoneNumber}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 
