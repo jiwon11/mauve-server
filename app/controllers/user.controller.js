@@ -1,5 +1,4 @@
 import userService from '../services/user.service';
-import roomService from '../services/room.service';
 import CardService from '../services/card.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
@@ -12,26 +11,10 @@ dotenv.config();
 export const signAccount = async (req, res) => {
   try {
     const userDTO = req.body;
-    const profileImgDTO = req.file;
-    if (profileImgDTO) {
-      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
-      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?f=png&q=100`;
-    }
-    if (Object.keys(userDTO).includes('birthdate')) {
-      userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
-    }
-    if (Object.keys(userDTO).includes('weight_info')) {
-      userDTO.weight_info = JSON.parse(userDTO.weight_info);
-    }
     console.log('userData', userDTO);
-    console.log('userProfileImgData', profileImgDTO);
-    const { success, body } = await userService.sign(userDTO, profileImgDTO);
+    const { success, body } = await userService.sign(userDTO);
     if (success) {
       const { userRecord, created } = body;
-      if (created) {
-        // 추후 결제 후 로직으로 이동
-        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, user: userRecord._id, coach: null });
-      }
       const accessToken = sign(userRecord);
       const refreshToken = refresh();
 
@@ -46,7 +29,32 @@ export const signAccount = async (req, res) => {
       };
       return res.jsonResult(statusCode, userToken);
     } else {
-      return res.jsonResult(body.statusCode, body.err);
+      return res.jsonResult(body.statusCode, { error: 'User Service Error', message: body.err });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const phoneNumber = req.body.phone_NO;
+    const loginResult = await userService.login(phoneNumber);
+    if (loginResult.success) {
+      const accessToken = sign(loginResult.body);
+      const refreshToken = refresh();
+
+      redisClient.set(loginResult.body._id.toString(), refreshToken, (err, result) => {
+        console.log(err);
+      });
+      const userToken = {
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      };
+      return res.jsonResult(200, userToken);
+    } else {
+      return res.jsonResult(loginResult.body.statusCode, { error: 'User Service Error', message: loginResult.body.err });
     }
   } catch (err) {
     console.log(err);
@@ -67,7 +75,7 @@ export const updateProfile = async (req, res) => {
       userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
     }
     if (Object.keys(userDTO).includes('weight_info')) {
-      userDTO.weight_info = JSON.parse(userDTO.weight_info);
+      userDTO.weight = JSON.parse(userDTO.weight);
     }
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);

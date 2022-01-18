@@ -6,10 +6,13 @@ const Schema = mongoose.Schema;
 const mainPhraseSchema = new Schema(
   {
     phase: { type: String, required: true, enum: ['effort_time', 'before_period', 'period', 'golden_time'] },
-    phrases: {
-      type: Array,
-      required: true
-    }
+    phrases: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        image: { type: Schema.Types.Mixed, required: true }
+      }
+    ]
   },
   {
     collection: 'MAIN_PHRASE',
@@ -22,7 +25,10 @@ const mainPhraseSchema = new Schema(
     }
   }
 );
-mainPhraseSchema.plugin(mongoose_delete);
+
+mainPhraseSchema.index({ phase: 1 });
+
+mainPhraseSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const MainPhrase = mongoose.model('MAIN_PHRASE', mainPhraseSchema);
 

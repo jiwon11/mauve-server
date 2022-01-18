@@ -22,7 +22,7 @@ const orderSchema = new Schema(
     }
   }
 );
-orderSchema.plugin(mongoose_delete);
+orderSchema.plugin(mongoose_delete, { overrideMethods: true });
 
 const Order = mongoose.model('ORDER', orderSchema);
 

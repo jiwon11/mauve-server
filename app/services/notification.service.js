@@ -7,7 +7,7 @@ export default class NotificationService {
       let notificationDTO = {};
       notificationDTO.sender_coach = senderId;
       notificationDTO.title = chatDTO.sender.name;
-      notificationDTO.notified_user = room.user;
+      notificationDTO.notified_user = room.notified_user;
       if (chatDTO.tag === 'chat') {
         notificationDTO.body = chatDTO.body.text;
       } else if (chatDTO.tag === 'weight') {
