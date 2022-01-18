@@ -11,8 +11,11 @@ const userSchema = new Schema(
     },
     phone_NO: { type: String, required: true, unique: true },
     birthdate: { type: Date, required: true },
-    height: { type: Number, required: true },
-    //tendency: { type: String, required: true },
+    height: { type: Number },
+    weight: {
+      now: { type: Number },
+      goal: { type: Number }
+    },
     profile_img: {
       type: Schema.Types.Mixed,
       default: {
@@ -23,14 +26,6 @@ const userSchema = new Schema(
         location: ' '
       }
     },
-    weight_info: {
-      begin: { type: Number },
-      avg_over_last_5y: { type: Number },
-      min_since_age20: { type: Number },
-      max_since_age20: { type: Number },
-      goal: { type: Number }
-    },
-    fcm_token: { type: String, required: true, default: ` ` },
     role: { type: String, default: 'user' },
     customer_uid: [{ type: String }],
     has_paid: { type: Boolean, default: false },

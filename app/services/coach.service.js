@@ -7,7 +7,7 @@ import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
-
+import { getUserAge } from '../libs/utils/moment';
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -29,6 +29,37 @@ export default class CoachService {
         return { success: false, body: { statusCode: 400, err: errors } };
       }
       return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async findOne() {
+    try {
+      const coachRecord = await CoachModel.aggregate([
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            phone_NO: 1,
+            role: 1,
+            profile_img: '$profile_img.location',
+            thumbnail: '$profile_img.thumbnail'
+          }
+        },
+        {
+          $sort: { created_at: 1 }
+        },
+        {
+          $limit: 1
+        }
+      ]);
+      if (coachRecord.length > 0) {
+        return { success: true, body: coachRecord[0] };
+      } else {
+        return { success: false, body: { statusCode: 404, message: `Coach not founded ` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, message: err.message } };
     }
   }
 
@@ -76,7 +107,7 @@ export default class CoachService {
           accessToken: accessToken,
           refreshToken: refreshToken
         };
-        return { success: true, body: coachToken };
+        return { success: true, body: { ...{ id: coachRecord._id.toString() }, ...coachToken } };
       } else {
         return { success: false, body: { statusCode: 500, err: `Coach not founded by passCode : ${passCode}` } };
       }
@@ -98,15 +129,16 @@ export default class CoachService {
           $project: {
             name: 1,
             phone_NO: 1,
-            age: { $sum: [{ $toInt: { $divide: [{ $subtract: [new Date(), '$birthdate'] }, 365 * 24 * 60 * 60 * 1000] } }, 1] },
-            weight: '$weight_info',
+            birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+            weight: 1,
             height: 1,
             next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
             next_payment: 1
           }
         }
       ]);
-      if (userInfoRecord) {
+      if (userInfoRecord.length > 0) {
+        userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
         if (!periodResult) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };

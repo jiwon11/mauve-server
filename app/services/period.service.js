@@ -110,7 +110,7 @@ export default class PeriodService {
       //const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
       //const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
       if (step === 'current') {
-        const existCurrentPhase = thisMonthAllPhase.filter(phase => phase.is_between === true);
+        const existCurrentPhase = adjustThisMonthPhase.filter(phase => phase.is_between === true);
         const currentPhase = existCurrentPhase[0];
         //const periodPhase = monthPhase.filter(phase => phase.phase === 'period')[0];
         //const periodSchedule = calPeriodSchedule(monthPhase, periodPhase, statistic.predict);

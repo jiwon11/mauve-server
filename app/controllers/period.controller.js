@@ -75,12 +75,18 @@ export const phase = async (req, res) => {
       if (!periodResult.success) {
         return res.jsonResult(500, { message: 'Period GetAll Service Error', err: periodResult.body });
       }
-      const recentPeriodRecord = periodResult.body[0];
+      console.log('periodResult', JSON.stringify(periodResult.body));
+      //const recentPeriodRecord = periodResult.body.filter(period => today.isSame(moment(period.start).tz('Asia/Seoul')) || today.isAfter(moment(period.start).tz('Asia/Seoul')))[0];
+      console.log('periodResultFilter');
+      periodResult.body.forEach(period => console.log(`today: ${today}, period: ${moment(period.start).tz('Asia/Seoul')}`));
+      const recentPeriodRecord = periodResult.body.filter(period => !today.isBefore(moment(period.start).tz('Asia/Seoul')))[0];
+      console.log(recentPeriodRecord);
       const periodStatisticResult = await PeriodService.statistic(periodResult.body);
       const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, step);
       if (!periodPhaseResult.success) {
         return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
       }
+      console.log('periodPhaseResult', JSON.stringify(periodPhaseResult));
       const currentPhase = periodPhaseResult.body.current_phase;
       let sinceDelayed;
       if (currentPhase.phase === 'delayed') {

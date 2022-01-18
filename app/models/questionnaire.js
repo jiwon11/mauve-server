@@ -6,15 +6,9 @@ const Schema = mongoose.Schema;
 const QuestionnaireSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
-    body_info: {
-      height: { type: Number },
-      weight: {
-        now: { type: Number },
-        avg_over_last_5y: { type: Number },
-        min_since_age20: { type: Number },
-        //max_since_age20: { type: Number },
-        goal: { type: Number }
-      }
+    additional_weight: {
+      avg_over_last_5y: { type: Number },
+      min_since_age20: { type: Number }
     },
     goal: [{ type: String, enum: ['건강관리', '체중관리', '월경관리'] }],
     menstrual_cycle: { type: String, enum: ['주기가 일정한 편이에요. (1-2일 차이)', '주기가 종종 바뀌어요. (3일 이상 차이)', '주기의 편차가 심해요. (5일 이상 차이)'] },
@@ -68,17 +62,14 @@ const QuestionnaireSchema = new Schema(
     },
     number_of_coffee: {
       type: String,
-      enum: ['하루 한잔은 꼭 마셔요.', '하루 2잔 이상 마셔요.', '일주일에 4-5 잔 정도 마셔요.', '일주일에 2-3잔 정도 마셔요.', '아주 가끔 마셔요. (일주일에 1잔 정도)', '아예 안 마셔요.']
+      enum: ['하루 한잔은 꼭 마셔요.', '하루 2잔 이상 마셔요.', '일주일에 4-5잔 정도 마셔요.', '일주일에 2-3잔 정도 마셔요.', '아주 가끔 마셔요. (일주일에 1잔 정도)', '아예 안 마셔요.']
     },
-    diseases: {
-      name: {
+    diseases: [
+      {
         type: String,
         enum: ['만성질환 및 대사성 질환', '호르몬관련 질환', '정신 질환', '암', '알러지', '기타', '해당없음']
-      },
-      text: {
-        type: String
       }
-    }
+    ]
   },
   {
     collection: 'QUESTIONNAIRE',
