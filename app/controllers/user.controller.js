@@ -48,7 +48,7 @@ export const signAccount = async (req, res) => {
       };
       return res.jsonResult(statusCode, userToken);
     } else {
-      return res.jsonResult(body.statusCode, body.err);
+      return res.jsonResult(body.statusCode, { error: 'User Service Error', message: body.err });
     }
   } catch (err) {
     console.log(err);

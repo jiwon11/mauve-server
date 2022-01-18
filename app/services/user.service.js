@@ -16,15 +16,14 @@ export default class UserService {
       if (whiteUser.length > 0) {
         const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
         if (existUser) {
-          userRecord = existUser;
-          created = false;
+          return { success: false, body: { statusCode: 403, err: '이미 등록된 회원입니다.' } };
         } else {
           const newUser = new UserModel({ ...userDTO, ...{ profile_img: profileImgDTO } });
           const saveUser = await newUser.save();
           userRecord = saveUser;
           created = true;
+          return { success: true, body: { userRecord, created } };
         }
-        return { success: true, body: { userRecord, created } };
       } else {
         return { success: false, body: { statusCode: 401, err: 'white User가 아닙니다.' } };
       }
