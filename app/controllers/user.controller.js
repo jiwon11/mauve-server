@@ -1,6 +1,7 @@
 import userService from '../services/user.service';
 import roomService from '../services/room.service';
 import CardService from '../services/card.service';
+import CoachService from '../services/coach.service';
 import { sign, refresh } from '../libs/utils/jwt';
 import redisClient from '../libs/utils/redis';
 import IAMPORT from '../libs/utils/iamport';
@@ -30,7 +31,8 @@ export const signAccount = async (req, res) => {
       const { userRecord, created } = body;
       if (created) {
         // 추후 결제 후 로직으로 이동
-        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, user: userRecord._id, coach: null });
+        const coach = await CoachService.findOne();
+        await roomService.create(req, { title: `${userRecord.name} CHAT ROOM`, user: userRecord._id, coach: coach.body._id });
       }
       const accessToken = sign(userRecord);
       const refreshToken = refresh();
@@ -47,6 +49,31 @@ export const signAccount = async (req, res) => {
       return res.jsonResult(statusCode, userToken);
     } else {
       return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { error: 'User Controller Error', message: err.message });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const phoneNumber = req.body.phone_NO;
+    const loginResult = await userService.login(phoneNumber);
+    if (loginResult.success) {
+      const accessToken = sign(loginResult.body);
+      const refreshToken = refresh();
+
+      redisClient.set(loginResult.body._id.toString(), refreshToken, (err, result) => {
+        console.log(err);
+      });
+      const userToken = {
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      };
+      return res.jsonResult(200, userToken);
+    } else {
+      return res.jsonResult(loginResult.body.statusCode, { error: 'User Service Error', message: loginResult.body.err });
     }
   } catch (err) {
     console.log(err);

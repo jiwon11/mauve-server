@@ -32,6 +32,37 @@ export default class CoachService {
     }
   }
 
+  static async findOne() {
+    try {
+      const coachRecord = await CoachModel.aggregate([
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            phone_NO: 1,
+            role: 1,
+            profile_img: '$profile_img.location',
+            thumbnail: '$profile_img.thumbnail'
+          }
+        },
+        {
+          $sort: { created_at: 1 }
+        },
+        {
+          $limit: 1
+        }
+      ]);
+      if (coachRecord.length > 0) {
+        return { success: true, body: coachRecord[0] };
+      } else {
+        return { success: false, body: { statusCode: 404, message: `Coach not founded ` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, message: err.message } };
+    }
+  }
+
   static async findById(ID) {
     try {
       const coachRecord = await CoachModel.aggregate([

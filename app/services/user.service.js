@@ -43,6 +43,32 @@ export default class UserService {
     }
   }
 
+  static async login(phoneNumber) {
+    try {
+      const userRecord = await UserModel.aggregate([
+        {
+          $match: {
+            phone_NO: phoneNumber
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            role: 1
+          }
+        }
+      ]);
+      if (userRecord.length > 0) {
+        return { success: true, body: userRecord[0] };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by Phone Number : ${phoneNumber}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err: err.message } };
+    }
+  }
+
   static async findById(ID, self) {
     try {
       const projectPipeLine = {
