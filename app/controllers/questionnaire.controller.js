@@ -1,4 +1,6 @@
 import QuestionnaireService from '../services/questionnaire.service';
+import roomService from '../services/room.service';
+import CoachService from '../services/coach.service';
 
 export const create = async (req, res) => {
   try {
@@ -6,6 +8,9 @@ export const create = async (req, res) => {
     const questionnaireDTO = { user: userId, ...req.body };
     const questionnaireCreateResult = await QuestionnaireService.create(questionnaireDTO);
     if (questionnaireCreateResult.success) {
+      // 추후 결제 후 로직으로 이동
+      const coach = await CoachService.findOne();
+      await roomService.create(req, { title: `${userId} CHAT ROOM`, user: userId, coach: coach.body._id });
       return res.jsonResult(201, questionnaireCreateResult.body);
     } else {
       return res.jsonResult(questionnaireCreateResult.body.statusCode, { message: 'Questionnaire Service Error', err: questionnaireCreateResult.body.err });
