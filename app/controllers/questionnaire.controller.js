@@ -24,7 +24,7 @@ export const getByUserId = async (req, res) => {
     if (userId === targetUserId || userRole === 'coach') {
       const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(targetUserId);
       if (getQuestionnaireByUserIdResult.success) {
-        return res.jsonResult(201, getQuestionnaireByUserIdResult.body);
+        return res.jsonResult(200, getQuestionnaireByUserIdResult.body);
       } else {
         return res.jsonResult(500, { message: 'Questionnaire Create Service Error', err: getQuestionnaireByUserIdResult.body });
       }
