@@ -64,15 +64,17 @@ const QuestionnaireSchema = new Schema(
       type: String,
       enum: ['하루 한잔은 꼭 마셔요.', '하루 2잔 이상 마셔요.', '일주일에 4-5 잔 정도 마셔요.', '일주일에 2-3잔 정도 마셔요.', '아주 가끔 마셔요. (일주일에 1잔 정도)', '아예 안 마셔요.']
     },
-    diseases: {
-      name: {
-        type: String,
-        enum: ['만성질환 및 대사성 질환', '호르몬관련 질환', '정신 질환', '암', '알러지', '기타', '해당없음']
-      },
-      text: {
-        type: String
+    diseases: [
+      {
+        name: {
+          type: String,
+          enum: ['만성질환 및 대사성 질환', '호르몬관련 질환', '정신 질환', '암', '알러지', '기타', '해당없음']
+        },
+        text: {
+          type: String
+        }
       }
-    }
+    ]
   },
   {
     collection: 'QUESTIONNAIRE',
