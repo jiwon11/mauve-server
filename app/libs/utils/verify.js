@@ -1,5 +1,6 @@
 import PhoneVerifyModel from '../../models/phone_verify';
 import UserModel from '../../models/user';
+import WhiteListModel from '../../models/white_list';
 import dotenv from 'dotenv';
 import CryptoJS from 'crypto-js';
 import request from 'request-promise-native';
@@ -142,6 +143,13 @@ export const verifyToken = async (userPhoneNumber, token) => {
       }
     ]);
     if (verifies.length > 0) {
+      const whiteUser = await WhiteListModel.aggregate([
+        {
+          $match: {
+            phone_NO: userPhoneNumber
+          }
+        }
+      ]);
       const existedUser = await UserModel.aggregate([
         {
           $match: {
@@ -154,6 +162,7 @@ export const verifyToken = async (userPhoneNumber, token) => {
         success: true,
         body: {
           message: '인증되었습니다.',
+          whiteUser: whiteUser.length > 0 ? true : false,
           existedUser: existedUser.length > 0 ? true : false
         }
       };
