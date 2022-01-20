@@ -1,4 +1,5 @@
 import RoomModel from '../models/chat_room';
+import chatService from './chat.service';
 import mongoose from 'mongoose';
 import moment from 'moment-timezone';
 export default class roomService {
@@ -6,9 +7,13 @@ export default class roomService {
     try {
       const room = new RoomModel(roomDTO);
       const newRoom = await room.save();
+      const findRoom = await this.findById(roomDTO.user, 'user', newRoom._id.toString());
+      const roomRecord = findRoom.body.room;
       const io = req.app.get('io');
-      io.of('/room').emit('newRoom', newRoom);
-      return { success: true, body: newRoom };
+      const sockets = await io.of('/chat').in(newRoom._id.toString()).fetchSockets();
+      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+      await chatService.postChat(io, connectedUser, roomDTO.coach, 'coach', newRoom._id.toString(), { text: `${roomRecord.user.name}님 안녕하세요! 모브 ${roomRecord.coach.name} 입니다!` });
+      return { success: true, body: roomRecord };
     } catch (err) {
       console.log(err);
       if (err.name === 'ValidationError') {

@@ -1,6 +1,5 @@
 import ChatService from '../services/chat.service';
 import dotenv from 'dotenv';
-import { createNewNotification } from '../queue/notification-queue';
 dotenv.config();
 
 export const getChatsByRoomId = async (req, res) => {
@@ -33,9 +32,6 @@ export const postChat = async (req, res) => {
     console.log('connectedUser', connectedUser);
     const postChatResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, { text: chatBody });
     if (postChatResult.success) {
-      if (senderRole === 'coach') {
-        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatResult.body });
-      }
       return res.jsonResult(201, postChatResult.body);
     } else {
       return res.jsonResult(500, { message: 'Chat Service Error', err: postChatResult.body });
