@@ -33,6 +33,33 @@ export default class PeriodService {
     }
   }
 
+  static async remove(periodId, userId) {
+    try {
+      const existPeriod = await PeriodModel.aggregate([
+        {
+          $match: {
+            user: mongoose.Types.ObjectId(userId),
+            _id: mongoose.Types.ObjectId(periodId)
+          }
+        }
+      ]);
+      if (existPeriod.length > 0) {
+        await PeriodModel.deleteById(periodId);
+        const periodRecord = await this.getAll(userId);
+        if (periodRecord.success) {
+          return { success: true, body: periodRecord.body };
+        } else {
+          return { success: false, body: { statusCode: 500, err: periodRecord.body } };
+        }
+      } else {
+        return { success: false, body: { statusCode: 404, err: '해당 Id를 가진 월경 기록을 찾을 수 없습니다.' } };
+      }
+    } catch (err) {
+      console.log(err);
+      return { success: false, body: { statusCode: 500, err: err.message } };
+    }
+  }
+
   static async getAll(userId, limit) {
     try {
       const pipeline = [
@@ -43,9 +70,9 @@ export default class PeriodService {
         },
         {
           $project: {
-            ovulation_day: { $dateToString: { format: '%Y-%m-%d', date: '$ovulation_day', timezone: 'Asia/Seoul' } },
-            start: { $dateToString: { format: '%Y-%m-%d', date: '$start', timezone: 'Asia/Seoul' } },
-            end: { $dateToString: { format: '%Y-%m-%d', date: '$end', timezone: 'Asia/Seoul' } }
+            ovulation_day: { $dateToString: { format: '%Y-%m-%d', date: '$ovulation_day' } },
+            start: { $dateToString: { format: '%Y-%m-%d', date: '$start' } },
+            end: { $dateToString: { format: '%Y-%m-%d', date: '$end' } }
           }
         },
         {

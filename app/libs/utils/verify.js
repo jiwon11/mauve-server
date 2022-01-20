@@ -1,9 +1,11 @@
 import PhoneVerifyModel from '../../models/phone_verify';
 import UserModel from '../../models/user';
 import WhiteListModel from '../../models/white_list';
+import QuestionnaireModel from '../../models/questionnaire';
 import dotenv from 'dotenv';
 import CryptoJS from 'crypto-js';
 import request from 'request-promise-native';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -141,7 +143,10 @@ export const verifyToken = async (userPhoneNumber, token) => {
         }
       }
     ]);
+    console.log(verifies);
     if (verifies.length > 0) {
+      let existedUserVal = false;
+      let userQuestionnaire = false;
       const whiteUser = await WhiteListModel.aggregate([
         {
           $match: {
@@ -156,13 +161,26 @@ export const verifyToken = async (userPhoneNumber, token) => {
           }
         }
       ]);
-      await PhoneVerifyModel.deleteOne({ _id: verifies[0]._id });
+      if (existedUser.length > 0) {
+        existedUserVal = true;
+        const questionnaireRecord = await QuestionnaireModel.aggregate([
+          {
+            $match: {
+              user: mongoose.Types.ObjectId(existedUser[0]._id)
+            }
+          }
+        ]);
+        if (questionnaireRecord.length > 0) {
+          userQuestionnaire = true;
+        }
+      }
       return {
         success: true,
         body: {
           message: '인증되었습니다.',
           whiteUser: whiteUser.length > 0 ? true : false,
-          existedUser: existedUser.length > 0 ? true : false
+          existedUser: existedUserVal,
+          questionnaire: userQuestionnaire
         }
       };
     } else {

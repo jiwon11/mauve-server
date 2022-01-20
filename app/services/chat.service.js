@@ -1,4 +1,5 @@
 import ChatModel from '../models/chat';
+import { createNewNotification } from '../queue/notification-queue';
 import mongoose from 'mongoose';
 import moment from 'moment';
 import 'moment-timezone';

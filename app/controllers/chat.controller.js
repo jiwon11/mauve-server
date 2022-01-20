@@ -1,6 +1,5 @@
 import ChatService from '../services/chat.service';
 import dotenv from 'dotenv';
-import { createNewNotification } from '../queue/notification-queue';
 dotenv.config();
 
 export const getChatsByRoomId = async (req, res) => {
