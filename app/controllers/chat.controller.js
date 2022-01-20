@@ -1,4 +1,5 @@
 import ChatService from '../services/chat.service';
+import { createNewNotification } from '../queue/notification-queue';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,9 +7,10 @@ export const getChatsByRoomId = async (req, res) => {
   try {
     const targetRoomId = req.params.roomId;
     const userId = req.user.ID;
+    const userRole = req.user.role;
     const from = req.query.from;
     const to = req.query.to;
-    const { success, body } = await ChatService.getChatsByRoomId(targetRoomId, userId, from, to);
+    const { success, body } = await ChatService.getChatsByRoomId(targetRoomId, userId, userRole, from, to);
     if (success) {
       return res.jsonResult(200, body);
     } else {
