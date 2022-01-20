@@ -2,6 +2,27 @@ import RoomModel from '../models/chat_room';
 import chatService from './chat.service';
 import mongoose from 'mongoose';
 import moment from 'moment-timezone';
+
+const createGreetingMessage = roomRecord => {
+  const userName = roomRecord.user.name;
+  const coachName = roomRecord.coach.name;
+  return `안녕하세요, ${userName}님 ^^ 
+저는 앞으로 ${userName}님의 담당을 맡아서 건강한 몸을 만들어드릴 모브 코치 ‘김희정’이라고 합니다 ^^
+
+앞으로 저와 함께 1:1 앱 채팅 소통을 통해서 
+건강한 월경주기와 다이어트가 진행이 되실 예정이고 
+${userName}님의 식습관과 생활습관, 그리고 월경주기 트랙킹을 통해서 
+체중감량 뿐만 아니라 건강한 몸을 만들 수 있도록 도와드릴거에요. 
+
+모브 앱을 사용하기 전에 
+전반적인 몸 상태와 식습관, 생활패턴을 
+문진표를 통해서 작성을 해주셨는데요. 
+
+문진표를 바탕으로 
+제가 ${userName}님의 식습관을 
+건강하게 만들어드리겠습니다!
+`;
+};
 export default class roomService {
   static async create(req, roomDTO) {
     try {
@@ -12,7 +33,8 @@ export default class roomService {
       const io = req.app.get('io');
       const sockets = await io.of('/chat').in(newRoom._id.toString()).fetchSockets();
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
-      await chatService.postChat(io, connectedUser, roomDTO.coach, 'coach', newRoom._id.toString(), { text: `${roomRecord.user.name}님 안녕하세요! 모브 ${roomRecord.coach.name} 입니다!` });
+      const greetingMessage = createGreetingMessage(roomRecord);
+      await chatService.postChat(io, connectedUser, roomDTO.coach, 'coach', newRoom._id.toString(), { text: greetingMessage });
       return { success: true, body: roomRecord };
     } catch (err) {
       console.log(err);
