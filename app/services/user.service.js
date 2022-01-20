@@ -94,7 +94,7 @@ export default class UserService {
           event: 1
         };
         projectPipeLine.height = 1;
-        projectPipeLine.weight_info = 1;
+        projectPipeLine.weight = 1;
         modelPipeLine.push({
           $lookup: {
             from: 'CHAT_ROOM',
