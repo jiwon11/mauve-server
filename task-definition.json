@@ -114,7 +114,7 @@
       "name": "reverse-proxy-container"
     }
   ],
-  "memory": "1024",
+  "memory": null,
   "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "family": "mauve-app-task",
   "pidMode": null,
