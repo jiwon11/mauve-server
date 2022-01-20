@@ -74,9 +74,6 @@ export const updateProfile = async (req, res) => {
     if (Object.keys(userDTO).includes('birthdate')) {
       userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
     }
-    if (Object.keys(userDTO).includes('weight')) {
-      userDTO.weight = JSON.parse(userDTO.weight);
-    }
     console.log('userData', userDTO);
     console.log('userProfileImgData', profileImgDTO);
     const { success, body } = await userService.update(userId, userDTO, profileImgDTO);
