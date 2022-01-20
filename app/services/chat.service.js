@@ -146,9 +146,6 @@ export default class chatService {
       const chat = await ChatModel.create(chatDTO);
       const chatRecord = await this.getById(chat._id, senderId);
       io.of('/chat').to(targetRoomId).emit('chat', chatRecord);
-      if (senderRole === 'coach') {
-        await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: chatRecord });
-      }
       return { success: true, body: chatRecord };
     } catch (err) {
       console.log(err);
