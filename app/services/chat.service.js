@@ -173,23 +173,20 @@ export default class chatService {
       if (chatRecords.length == 0) {
         return { success: true, body: chatRecords };
       }
-      const recentRead = chatRecords[0].readers.findIndex(chat => chat._id.toString() === userId);
       let updatedChatRecords;
-      if (recentRead === -1) {
-        console.time('Update Chat Readers');
-        const chatRecordIds = chatRecords.map(chat => chat._id);
-        await ChatModel.updateMany(
-          { _id: { $in: chatRecordIds }, readers: { $nin: [userId] } },
-          {
-            $push: {
-              readers: { $each: [userId] }
-            }
+      console.time('Update Chat Readers');
+      const chatRecordIds = chatRecords.map(chat => chat._id);
+      await ChatModel.updateMany(
+        { _id: { $in: chatRecordIds }, readers: { $nin: [userId] } },
+        {
+          $push: {
+            readers: { $each: [userId] }
           }
-        );
-        console.timeEnd('Update Chat Readers');
-        const aggregatePipeline = chatAggregatePipeline(false, chatRecordIds, userId);
-        updatedChatRecords = await ChatModel.aggregate(aggregatePipeline);
-      }
+        }
+      );
+      console.timeEnd('Update Chat Readers');
+      const updateAggregatePipeline = chatAggregatePipeline(false, chatRecordIds, userId);
+      updatedChatRecords = await ChatModel.aggregate(updateAggregatePipeline);
       let returnChatRecords = updatedChatRecords ? updatedChatRecords : chatRecords;
       /*
       const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
