@@ -46,6 +46,22 @@ export const update = async (req, res) => {
   }
 };
 
+export const remove = async (req, res) => {
+  try {
+    const userId = req.user.ID;
+    const periodId = req.params.id;
+    const periodRemoveResult = await PeriodService.remove(periodId, userId);
+    if (periodRemoveResult.success) {
+      return res.jsonResult(200, periodRemoveResult.body);
+    } else {
+      return res.jsonResult(periodRemoveResult.body.statusCode, { message: 'Period Remove Service Error', err: periodRemoveResult.body.err });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Period Controller Error', err: err.message });
+  }
+};
+
 export const statistic = async (req, res) => {
   try {
     const userId = req.user.ID;
