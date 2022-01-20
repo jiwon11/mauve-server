@@ -160,7 +160,7 @@ export const verifyToken = async (userPhoneNumber, token) => {
         }
       ]);
       let existedUserVal = false;
-      let userQuestionnaire;
+      let userQuestionnaire = false;
       if (existedUser.length > 0) {
         existedUserVal = true;
         userQuestionnaire = await QuestionnaireModel.aggregate([
