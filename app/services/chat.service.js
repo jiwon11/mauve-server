@@ -1,5 +1,5 @@
 import ChatModel from '../models/chat';
-import { createNewNotification } from '../queue/notification-queue';
+import RoomModel from '../models/chat_room';
 import mongoose from 'mongoose';
 import moment from 'moment';
 import 'moment-timezone';
@@ -96,6 +96,7 @@ const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
         },
         sender: { $ifNull: ['$sender_user', '$sender_coach'] },
         readers: 1,
+        userInReaders: { $in: [mongoose.Types.ObjectId(userId), '$readers'] },
         nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
         created_at: 1,
         //created_date_time: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } },
@@ -164,8 +165,19 @@ export default class chatService {
     }
   }
 
-  static async getChatsByRoomId(targetRoomId, userId, from, to) {
+  static async getChatsByRoomId(targetRoomId, userId, userRole, from, to) {
     try {
+      const roomMatchPipeline = {};
+      roomMatchPipeline._id = mongoose.Types.ObjectId(targetRoomId);
+      roomMatchPipeline[userRole] = mongoose.Types.ObjectId(userId);
+      const existRoom = await RoomModel.aggregate([
+        {
+          $match: roomMatchPipeline
+        }
+      ]);
+      if (existRoom.length === 0) {
+        return { success: false, body: '조회 가능한 채팅방이 없습니다!' };
+      }
       console.time('Find Chat');
       const aggregatePipeline = chatAggregatePipeline(true, targetRoomId, userId, from, to);
       const chatRecords = await ChatModel.aggregate(aggregatePipeline);
@@ -173,11 +185,18 @@ export default class chatService {
       if (chatRecords.length == 0) {
         return { success: true, body: chatRecords };
       }
-      let updatedChatRecords;
+      const nonReadChatIds = [];
+      chatRecords
+        .filter(chat => chat.userInReaders === false)
+        .forEach(chat => {
+          chat.readers.push(mongoose.Types.ObjectId(userId));
+          chat.nonReadersNum -= 1;
+          nonReadChatIds.push(chat._id);
+        });
+      console.log('nonReadChatIds : ', nonReadChatIds);
       console.time('Update Chat Readers');
-      const chatRecordIds = chatRecords.map(chat => chat._id);
       await ChatModel.updateMany(
-        { _id: { $in: chatRecordIds }, readers: { $nin: [userId] } },
+        { _id: { $in: nonReadChatIds }, readers: { $nin: [userId] } },
         {
           $push: {
             readers: { $each: [userId] }
@@ -185,9 +204,6 @@ export default class chatService {
         }
       );
       console.timeEnd('Update Chat Readers');
-      const updateAggregatePipeline = chatAggregatePipeline(false, chatRecordIds, userId);
-      updatedChatRecords = await ChatModel.aggregate(updateAggregatePipeline);
-      let returnChatRecords = updatedChatRecords ? updatedChatRecords : chatRecords;
       /*
       const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       const groupByChatRecords = Object.keys(groupByDateChatRecords).map(date => {
@@ -196,7 +212,7 @@ export default class chatService {
         return result;
       });
       */
-      return { success: true, body: returnChatRecords };
+      return { success: true, body: chatRecords };
     } catch (err) {
       console.log(err);
       return { success: false, body: err.message };
