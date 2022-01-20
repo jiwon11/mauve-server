@@ -31,6 +31,6 @@ export const verifyTokenByUser = async (req, res) => {
     return res.jsonResult(statusCode, verifyTokenResult.body);
   } catch (err) {
     console.log(err);
-    return res.jsonResult(500, err);
+    return res.jsonResult(500, err.message);
   }
 };
