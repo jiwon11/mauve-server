@@ -43,9 +43,9 @@ export default class PeriodService {
         },
         {
           $project: {
-            ovulation_day: { $dateToString: { format: '%Y-%m-%d', date: '$ovulation_day', timezone: 'Asia/Seoul' } },
-            start: { $dateToString: { format: '%Y-%m-%d', date: '$start', timezone: 'Asia/Seoul' } },
-            end: { $dateToString: { format: '%Y-%m-%d', date: '$end', timezone: 'Asia/Seoul' } }
+            ovulation_day: { $dateToString: { format: '%Y-%m-%d', date: '$ovulation_day' } },
+            start: { $dateToString: { format: '%Y-%m-%d', date: '$start' } },
+            end: { $dateToString: { format: '%Y-%m-%d', date: '$end' } }
           }
         },
         {
