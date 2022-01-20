@@ -146,6 +146,8 @@ export const verifyToken = async (userPhoneNumber, token) => {
     ]);
     console.log(verifies);
     if (verifies.length > 0) {
+      let existedUserVal = false;
+      let userQuestionnaire = false;
       const whiteUser = await WhiteListModel.aggregate([
         {
           $match: {
@@ -160,17 +162,18 @@ export const verifyToken = async (userPhoneNumber, token) => {
           }
         }
       ]);
-      let existedUserVal = false;
-      let userQuestionnaire = false;
       if (existedUser.length > 0) {
         existedUserVal = true;
-        userQuestionnaire = await QuestionnaireModel.aggregate([
+        const questionnaireRecord = await QuestionnaireModel.aggregate([
           {
             $match: {
               user: mongoose.Types.ObjectId(existedUser[0]._id)
             }
           }
         ]);
+        if (questionnaireRecord.length > 0) {
+          userQuestionnaire = true;
+        }
       }
       return {
         success: true,
@@ -178,7 +181,7 @@ export const verifyToken = async (userPhoneNumber, token) => {
           message: '인증되었습니다.',
           whiteUser: whiteUser.length > 0 ? true : false,
           existedUser: existedUserVal,
-          questionnaire: userQuestionnaire.length > 0 ? true : false
+          questionnaire: userQuestionnaire
         }
       };
     } else {
