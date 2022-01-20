@@ -74,7 +74,7 @@ export const updateProfile = async (req, res) => {
     if (Object.keys(userDTO).includes('birthdate')) {
       userDTO.birthdate = moment(userDTO.birthdate).tz('Asia/seoul').format('YYYY-MM-DD');
     }
-    if (Object.keys(userDTO).includes('weight_info')) {
+    if (Object.keys(userDTO).includes('weight')) {
       userDTO.weight = JSON.parse(userDTO.weight);
     }
     console.log('userData', userDTO);
