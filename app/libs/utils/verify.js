@@ -143,6 +143,7 @@ export const verifyToken = async (userPhoneNumber, token) => {
         }
       }
     ]);
+    console.log(verifies);
     if (verifies.length > 0) {
       const whiteUser = await WhiteListModel.aggregate([
         {
