@@ -491,7 +491,7 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $eq: ['$room', '$$roomId']
+                    $and: [{ $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_coach', null] }]
                   }
                 }
               },
