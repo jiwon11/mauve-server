@@ -12,8 +12,8 @@ export const notificationsProcess = async function (job, done) {
   const RoomRecordResult = await RoomService.simpleFindById(data.chatRoomId);
   if (RoomRecordResult.success) {
     const room = RoomRecordResult.body.room;
-    console.log(room);
-    if (data.connectedUser.includes(room.notified_user._id)) {
+    console.log('connected User: ', data.connectedUser, 'notified_user: ', room.notified_user._id.toString());
+    if (data.connectedUser.includes(room.notified_user._id.toString())) {
       console.log('알람을 받을 사용자가 없습니다.');
       done();
     } else {
