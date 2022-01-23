@@ -137,11 +137,26 @@ export default class PeriodService {
       //const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
       //const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
       if (step === 'current') {
+        if (adjustThisMonthPhase.filter(phase => phase.is_between === true).length === 0) {
+          adjustThisMonthPhase.push({
+            predict: adjustThisMonthPhase[adjustThisMonthPhase.length - 1].predict,
+            phase: 'delayed',
+            phase_kor: '월경 지연',
+            start_date: moment(adjustThisMonthPhase[adjustThisMonthPhase.length - 1].end_date)
+              .tz('Asia/Seoul')
+              .add(1, 'days')
+              .format('YYYY-MM-DD'),
+            end_date: moment('9999-12-31').tz('Asia/Seoul').format('YYYY-MM-DD'),
+            get is_between() {
+              return moment().tz('Asia/Seoul').isBetween(this.start_date, this.end_date, 'day', '[]');
+            }
+          });
+        }
         const existCurrentPhase = adjustThisMonthPhase.filter(phase => phase.is_between === true);
         const currentPhase = existCurrentPhase[0];
         //const periodPhase = monthPhase.filter(phase => phase.phase === 'period')[0];
         //const periodSchedule = calPeriodSchedule(monthPhase, periodPhase, statistic.predict);
-        return { success: true, body: { current_phase: currentPhase, this_month_all_phase: adjustThisMonthPhase /*predict_month_all_phase: predictMonthPhase*/ } };
+        return { success: true, body: { current_phase: currentPhase, this_month_all_phase: adjustThisMonthPhase, predict_month_all_phase: predictMonthPhase } };
       } else {
         return { success: true, body: thisMonthPhase.concat(predictMonthPhase) };
       }
