@@ -1,8 +1,8 @@
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import socketIoRedisAdapter from 'socket.io-redis';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { createClient } from 'redis';
 const { instrument } = require('@socket.io/admin-ui');
-import redis from 'redis';
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
 import UserService from '../services/user.service';
@@ -62,7 +62,7 @@ export default (server, app) => {
     readonly: true
   });
 
-  const pubClient = redis.createClient({
+  const pubClient = createClient({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
     db: process.env.REDIS_DB,
@@ -72,13 +72,7 @@ export default (server, app) => {
     }
   });
   const subClient = pubClient.duplicate();
-  const redisAdapter = socketIoRedisAdapter({
-    pubClient,
-    subClient,
-    requestsTimeout: 3000,
-    key: 'chat-socket'
-  });
-  io.adapter(redisAdapter);
+  io.adapter(createAdapter(pubClient, subClient));
 
   pubClient.on('connect', () => {
     console.log('Redis adapter pubClient connected');

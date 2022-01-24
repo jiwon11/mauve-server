@@ -12,15 +12,15 @@ export const calPhase = (duringPeriod, month) => {
       phase_kor = '월경기';
     } else if (phase === 'golden_time') {
       start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(1, 'days').format('YYYY-MM-DD');
-      end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      end_date = moment(start_date).add(6, 'days').format('YYYY-MM-DD');
       phase_kor = '황금기';
     } else if (phase === 'effort_time') {
-      start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(9, 'days').format('YYYY-MM-DD');
-      end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(8, 'days').format('YYYY-MM-DD');
+      end_date = moment(start_date).add(6, 'days').format('YYYY-MM-DD');
       phase_kor = '유지기';
     } else if (phase === 'before_period') {
-      start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(17, 'days').format('YYYY-MM-DD');
-      end_date = moment(start_date).add(7, 'days').format('YYYY-MM-DD');
+      start_date = moment(duringPeriod.end).tz('Asia/Seoul').add(15, 'days').format('YYYY-MM-DD');
+      end_date = moment(start_date).add(6, 'days').format('YYYY-MM-DD');
       phase_kor = '월경 전';
     }
     return {
@@ -34,21 +34,6 @@ export const calPhase = (duringPeriod, month) => {
       }
     };
   });
-  if (phaseList.filter(phase => phase.is_between === true).length === 0) {
-    phaseList.push({
-      predict: month === 'this' ? false : true,
-      phase: 'delayed',
-      phase_kor: '월경 지연',
-      start_date: moment(phaseList[phaseList.length - 1].end_date)
-        .tz('Asia/Seoul')
-        .add(1, 'days')
-        .format('YYYY-MM-DD'),
-      end_date: moment('9999-12-31').tz('Asia/Seoul').format('YYYY-MM-DD'),
-      get is_between() {
-        return moment().tz('Asia/Seoul').isBetween(this.start_date, this.end_date, 'day', '[]');
-      }
-    });
-  }
   return phaseList;
 };
 

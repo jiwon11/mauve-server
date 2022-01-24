@@ -33,6 +33,7 @@ export default class roomService {
       const io = req.app.get('io');
       const sockets = await io.of('/chat').in(newRoom._id.toString()).fetchSockets();
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+      connectedUser.push(mongoose.Types.ObjectId(roomRecord.coach._id));
       const greetingMessage = createGreetingMessage(roomRecord);
       await chatService.postChat(io, connectedUser, roomDTO.coach, 'coach', newRoom._id.toString(), { text: greetingMessage });
       return { success: true, body: roomRecord };
@@ -490,7 +491,7 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $eq: ['$room', '$$roomId']
+                    $and: [{ $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_coach', null] }]
                   }
                 }
               },
