@@ -78,7 +78,7 @@ export const calPeriodSchedule = (currentPhase, periodPhase, predictPeriod) => {
 export const getUserAge = birthdate => {
   const todayDate = moment().tz('Asia/Seoul');
   const birthDate = moment(birthdate).tz('Asia/Seoul');
-  let age = todayDate.year() - birthDate.year();
+  let age = todayDate.year() - birthDate.year() + 1;
   const month = todayDate.month() - birthDate.month();
   if (month < 0 || (month === 0 && todayDate.date() < birthDate.date())) {
     age--;
