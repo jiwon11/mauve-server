@@ -19,16 +19,29 @@ export default class UserService {
         }
       ]);
       if (whiteUser.length > 0) {
-        const existUser = await UserModel.findOne({ phone_NO: userDTO.phone_NO });
+        const existUsers = await UserModel.findWithDeleted({ phone_NO: userDTO.phone_NO });
+        const existUser = existUsers[0];
         if (existUser) {
-          return { success: false, body: { statusCode: 403, err: '이미 등록된 회원입니다.' } };
+          if (existUser.deleted) {
+            //const restoredUser = await UserModel.restore({ _id: existUser._id });
+            const restoreUser = await UserModel.restore({ _id: existUser._id });
+            console.log(restoreUser);
+            if (restoreUser.modifiedCount > 0) {
+              userRecord = existUser;
+              created = false;
+            } else {
+              return { success: false, body: { statusCode: 404, err: '수정할 회원이 없습니다.' } };
+            }
+          } else {
+            return { success: false, body: { statusCode: 403, err: '이미 등록된 회원입니다.' } };
+          }
         } else {
           const newUser = new UserModel(userDTO);
           const saveUser = await newUser.save();
           userRecord = saveUser;
           created = true;
-          return { success: true, body: { userRecord, created } };
         }
+        return { success: true, body: { userRecord, created } };
       } else {
         return { success: false, body: { statusCode: 401, err: 'white User가 아닙니다.' } };
       }
