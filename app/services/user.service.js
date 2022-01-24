@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 import UserModel from '../models/user';
+import ChatRoomModel from '../models/chat_room';
+import QuestionnaireModel from '../models/questionnaire';
+import NotificationModel from '../models/notification';
+import WeightModel from '../models/weight';
+import PeriodModel from '../models/period';
 import WhiteListModel from '../models/white_list';
 import moment from 'moment-timezone';
 export default class UserService {
@@ -194,20 +199,25 @@ export default class UserService {
       const userRecord = await UserModel.aggregate([
         {
           $match: {
-            _id: userId
+            _id: mongoose.Types.ObjectId(userId)
           }
         }
       ]);
-      if (userRecord) {
+      if (userRecord.length > 0) {
+        const deletedUserChatRoom = await ChatRoomModel.deleteMany({ user: userRecord[0]._id });
+        const deletedUserQuestionnaire = await QuestionnaireModel.deleteMany({ user: userRecord[0]._id });
+        const deletedUserNotification = await NotificationModel.deleteMany({ user: userRecord[0]._id });
+        const deletedUserWeight = await WeightModel.deleteMany({ user: userRecord[0]._id });
+        const deletedUserPeriod = await PeriodModel.deleteMany({ user: userRecord[0]._id });
         const deletedUser = await UserModel.deleteById(userId);
         console.log(deletedUser);
-        return { success: true, body: deletedUser };
+        return { success: true, body: { deletedUser, deletedUserChatRoom, deletedUserQuestionnaire, deletedUserNotification, deletedUserWeight, deletedUserPeriod } };
       } else {
-        return { success: false, body: { message: `User not founded by ID : ${userId}` } };
+        return { success: false, body: { statusCode: 404, err: `User not founded by ID : ${userId}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: err.message };
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 }
