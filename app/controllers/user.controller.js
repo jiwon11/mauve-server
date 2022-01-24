@@ -113,7 +113,7 @@ export const withdraw = async (req, res) => {
     if (success) {
       return res.jsonResult(204, body);
     } else {
-      return res.jsonResult(body.statusCode, { message: 'User Service Error', body });
+      return res.jsonResult(body.statusCode, { message: 'User Service Error', err: body.err });
     }
   } catch (err) {
     console.log(err);
