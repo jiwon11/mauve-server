@@ -68,3 +68,4 @@ http://api.mauve.care
 - git workflow 기반 branch 개발
 - ECS / ECR / Github Action으로 자동화 CI/CD를 처리합니다.
 - api 문서는 postman에 배포합니다.
+- ㅋㅋ
