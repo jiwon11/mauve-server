@@ -7,7 +7,10 @@ import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
+import moment from 'moment-timezone';
+import { today } from '../libs/utils/moment';
 import { getUserAge } from '../libs/utils/moment';
+
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -140,9 +143,16 @@ export default class CoachService {
       if (userInfoRecord.length > 0) {
         userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
-        if (!periodResult) {
+        if (!periodResult.success) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
         }
+        const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
+        const periodStatisticResult = await PeriodService.statistic(periodResult.body);
+        const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
+        if (!periodPhaseResult.success) {
+          return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+        }
+        userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
         return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
       } else {
         return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
