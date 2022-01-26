@@ -62,7 +62,7 @@ export default (server, app) => {
     readonly: true
   });
 
-  const pubClient = redis.createClient({
+  const pubClient = createClient({
     host: process.env.REDIS_TEST_HOST,
     port: process.env.REDIS_TEST_PORT,
     db: process.env.REDIS_TEST_DB,
