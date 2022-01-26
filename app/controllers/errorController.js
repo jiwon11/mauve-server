@@ -5,7 +5,7 @@ export const pageNotFoundError = (req, res) => {
   const result = {
     status: errorCode,
     body: {
-      message: '유효하지 않는 API입니다! (production)'
+      message: '유효하지 않는 API입니다! (test)'
     }
   };
   res.status(errorCode).json(result);
