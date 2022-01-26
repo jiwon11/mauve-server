@@ -1,8 +1,8 @@
 version: '2'
 
 services:
-  reverse-proxy-container:
-    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
+  reverse-proxy-test-container:
+    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reserve-proxy-test:latest
     build:
       context: ./nginx
     ports:
@@ -12,12 +12,10 @@ services:
       - ./nginx/logrotate.conf:/etc/logrotate.conf
     environment:
       TZ: Asia/Seoul
-    links:
-      - mauve-app-container
-    depends_on:
-      - mauve-app-container
-  mauve-app-container:
-    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-app:latest
+    external_links:
+      - mauve-test-container
+  mauve-test-container:
+    image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/mauve-test:latest
     build:
       context: ./app
     ports:
