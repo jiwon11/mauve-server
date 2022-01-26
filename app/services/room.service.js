@@ -7,7 +7,7 @@ const createGreetingMessage = roomRecord => {
   const userName = roomRecord.user.name;
   const coachName = roomRecord.coach.name;
   return `안녕하세요, ${userName}님 ^^ 
-저는 앞으로 ${userName}님의 담당을 맡아서 건강한 몸을 만들어드릴 모브 코치 ‘김희정’이라고 합니다 ^^
+저는 앞으로 ${userName}님의 담당을 맡아서 건강한 몸을 만들어드릴 모브 코치 ‘${coachName}’이라고 합니다 ^^
 
 앞으로 저와 함께 1:1 앱 채팅 소통을 통해서 
 건강한 월경주기와 다이어트가 진행이 되실 예정이고 
@@ -247,7 +247,7 @@ export default class roomService {
             'user.profile_img.location': 1,
             'user.profile_img.thumbnail': 1,
             'user.deleted': 1,
-            'coach.name': 1,
+            'coach.name': { $concat: ['$coach.name', ' ', '코치'] },
             'coach._id': 1,
             'coach.profile_img.location': 1,
             'coach.profile_img.thumbnail': 1,
@@ -537,7 +537,7 @@ export default class roomService {
             'user._id': 1,
             'user.profile_img.location': 1,
             'user.profile_img.thumbnail': 1,
-            'coach.name': 1,
+            'coach.name': { $concat: ['$coach.name', ' ', '코치'] },
             'coach._id': 1,
             'coach.deleted': 1,
             'coach.profile_img.location': 1,
