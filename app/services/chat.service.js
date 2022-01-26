@@ -70,7 +70,16 @@ const chatAggregatePipeline = (byRoom, matchId, userId, from, to) => {
               $expr: { $eq: ['$_id', '$$coach'] }
             }
           },
-          { $project: { _id: 1, name: 1, profile_img: '$profile_img.location', thumbnail: '$profile_img.thumbnail', deleted: 1, self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] } } }
+          {
+            $project: {
+              _id: 1,
+              name: { $concat: ['$name', ' ', '코치'] },
+              profile_img: '$profile_img.location',
+              thumbnail: '$profile_img.thumbnail',
+              deleted: 1,
+              self: { $eq: [mongoose.Types.ObjectId(userId), '$_id'] }
+            }
+          }
         ],
         as: 'sender_coach'
       }
