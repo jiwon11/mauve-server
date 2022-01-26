@@ -50,7 +50,7 @@
     "passport": "^0.5.2",
     "passport-kakao": "^1.0.1",
     "progress-stream": "^2.0.0",
-    "redis": "^4.0.2",
+    "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "request-promise-native": "^1.0.9",
     "slack-node": "^0.1.8",

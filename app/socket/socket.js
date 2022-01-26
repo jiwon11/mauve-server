@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { createClient } from 'redis';
+import redis from 'redis';
 const { instrument } = require('@socket.io/admin-ui');
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
