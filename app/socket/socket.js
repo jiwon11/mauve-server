@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { createClient } from 'redis';
+import redis from 'redis';
 const { instrument } = require('@socket.io/admin-ui');
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
@@ -39,7 +39,7 @@ const verifyMiddleware = async (socket, next) => {
     }
   } else {
     socket.on('disconnect', () => {
-      console.log(result.message);
+      console.log('verifyMiddleware Error', result.message);
     });
   }
 };
@@ -62,11 +62,14 @@ export default (server, app) => {
     readonly: true
   });
 
-  const pubClient = createClient({
+  const pubClient = redis.createClient({
     host: process.env.REDIS_TEST_HOST,
     port: process.env.REDIS_TEST_PORT,
     db: process.env.REDIS_TEST_DB,
-    password: process.env.REDIS_TEST_PW
+    password: process.env.REDIS_TEST_PW,
+    options: {
+      connect_timeout: 600
+    }
   });
   const subClient = pubClient.duplicate();
   io.adapter(createAdapter(pubClient, subClient));
@@ -88,18 +91,18 @@ export default (server, app) => {
   io.of('/chat').use(verifyMiddleware);
 
   roomNamespace.on('connection', socket => {
-    console.log('connect room namespace');
-    console.log('user name :', socket.handshake.auth.name);
+    // console.log('connect room namespace');
+    // console.log('user name :', socket.handshake.auth.name);
     socket.on('disconnect', () => {
-      console.log('break connection room namespace');
+      // console.log('break connection room namespace');
     });
   });
 
   chatNamespace.on('connection', async socket => {
     try {
-      console.log('connect chat namespace');
-      console.log('user name :', socket.handshake.auth.name);
-      console.log('socket id', socket.id);
+      // console.log('connect chat namespace');
+      // console.log('user name :', socket.handshake.auth.name);
+      // console.log('socket id', socket.id);
       // socket.join & socket.to(roomId).emit('join', {}) 이벤트를 connection외 다른 곳에서 on이 되도록
       // await socket.join(roomId);
 
@@ -109,11 +112,11 @@ export default (server, app) => {
         const userId = socket.handshake.auth._id;
         const sockets = await chatNamespace.in(roomId).fetchSockets();
         const connectedUser = sockets.map(socket => socket.handshake.auth._id);
-        console.log('connectedUser :', connectedUser);
-        console.log('userId :', userId);
+        // console.log('connectedUser :', connectedUser);
+        // console.log('userId :', userId);
         if (!connectedUser.includes(userId)) {
           await socket.join(roomId);
-          console.log('join roomId :', roomId);
+          //console.log('join roomId :', roomId);
           chatNamespace.to(roomId).emit('join', {
             sender: 'system',
             connect: true,
@@ -125,7 +128,7 @@ export default (server, app) => {
 
       socket.on('room-leave', async msg => {
         roomId = msg.roomId;
-        console.log('leave roomId: ', roomId);
+        // console.log('leave roomId: ', roomId);
 
         chatNamespace.to(roomId).emit('exit', {
           sender: 'system',
@@ -138,12 +141,12 @@ export default (server, app) => {
       });
 
       socket.on('disconnect', async () => {
-        console.log('disconnect roomId: ', roomId);
-        console.log('break connection chat namespace');
+        // console.log('disconnect roomId: ', roomId);
+        // console.log('break connection chat namespace');
         await socket.leave(roomId);
       });
     } catch (err) {
-      console.log(err);
+      console.log('socket Error', err);
     }
   });
 
