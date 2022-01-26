@@ -1,10 +1,11 @@
-# Mauve API Test Server
+<p align="center"><img src="https://user-images.githubusercontent.com/68677647/148726865-01d15dde-e2f4-4325-8672-d400a6744270.png"></p>
+<h1 align="center">Mauve API Server</h1>
 
-test branch를 통해 AWS ECS에 Mauve API Test Server 배포
+🚀 main branch를 통해 AWS ECS에 Mauve API Server 배포
 
 ## Host
 
-http://api-test.mauve.care
+http://api.mauve.care
 
 ### Route
 
@@ -67,3 +68,4 @@ http://api-test.mauve.care
 - git workflow 기반 branch 개발
 - ECS / ECR / Github Action으로 자동화 CI/CD를 처리합니다.
 - api 문서는 postman에 배포합니다.
+- ㅋㅋ
