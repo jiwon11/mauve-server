@@ -1,5 +1,6 @@
 import ChatService from '../services/chat.service';
 import { createNewNotification } from '../queue/notification-queue';
+import { createSlackMessage } from '../queue/slack-queue';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -36,6 +37,8 @@ export const postChat = async (req, res) => {
     if (postChatResult.success) {
       if (senderRole === 'coach') {
         await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatResult.body });
+      } else {
+        await createSlackMessage(postChatResult.body);
       }
       return res.jsonResult(201, postChatResult.body);
     } else {
@@ -63,6 +66,8 @@ export const postMedia = async (req, res) => {
     if (postChatMediaResult.success) {
       if (senderRole === 'coach') {
         await createNewNotification({ senderId, senderRole, chatRoomId: targetRoomId, connectedUser, chatDTO: postChatMediaResult.body });
+      } else {
+        await createSlackMessage(postChatMediaResult.body);
       }
       return res.jsonResult(201, postChatMediaResult.body);
     } else {
