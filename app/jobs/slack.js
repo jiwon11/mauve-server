@@ -67,3 +67,24 @@ export const newChat = async chatDTO => {
     console.log(err);
   }
 };
+
+export const newUser = async userDTO => {
+  try {
+    const url = 'https://hooks.slack.com/services/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';
+    const webhook = new IncomingWebhook(url);
+    await webhook.send({
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: `새로운 사용자가 가입하였습니다 : ${userDTO.name}`,
+            emoji: true
+          }
+        }
+      ]
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};

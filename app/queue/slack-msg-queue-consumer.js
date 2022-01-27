@@ -1,6 +1,6 @@
 import { newChat } from '../jobs/slack';
 
-export const slacksProcess = async function (job, done) {
+export const slacksChatProcess = async function (job, done) {
   try {
     console.log(`Job ${job.id} is ready!`);
     const data = job.data;
