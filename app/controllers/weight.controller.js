@@ -2,6 +2,7 @@ import WeightService from '../services/weight.service';
 import RoomService from '../services/room.service';
 import ChatService from '../services/chat.service';
 import moment from 'moment-timezone';
+import { createSlackMessage } from '../queue/slack-msg-queue';
 
 export const create = async (req, res) => {
   try {
@@ -24,6 +25,9 @@ export const create = async (req, res) => {
       const connectedUser = sockets.map(socket => socket.handshake.auth._id);
       console.log('connectedUser', connectedUser);
       const postChatResult = await ChatService.postChat(io, connectedUser, userId, userRole, targetRoomId, weightCreateResult.body, 'weight');
+      if (process.env.NODE_ENV === 'production') {
+        await createSlackMessage(postChatResult.body);
+      }
       if (!postChatResult.success) {
         errorMsg = { message: 'Chat post weight Service Error', err: postChatResult.body };
       }
