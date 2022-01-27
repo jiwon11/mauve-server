@@ -146,20 +146,24 @@ export default class CoachService {
         if (!periodResult.success) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
         }
-        const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
-        const periodStatisticResult = await PeriodService.statistic(periodResult.body);
-        const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
-        if (!periodPhaseResult.success) {
-          return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+        if (periodResult.body.length === 0) {
+          return { success: true, body: { userInfo: userInfoRecord[0] } };
+        } else {
+          const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
+          const periodStatisticResult = await PeriodService.statistic(periodResult.body);
+          const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
+          if (!periodPhaseResult.success) {
+            return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+          }
+          userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
+          return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
         }
-        userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
-        return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
       } else {
         return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 

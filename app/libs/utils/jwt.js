@@ -39,8 +39,7 @@ export const verify = token => {
     return {
       ok: false,
       token: token,
-      secret: secret,
-      message: err
+      message: err.message
     };
   }
 };
