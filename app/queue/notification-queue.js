@@ -15,7 +15,7 @@ export const createNewNotification = async notification => {
     removeOnComplete: true,
     removeOnFail: true,
     repeat: {
-      every: 1 * 1000,
+      every: 3 * 1000,
       limit: 3
     }
   });
