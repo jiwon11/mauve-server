@@ -2,7 +2,7 @@ import Queue from 'bull';
 import { notificationsProcess, pushNotificationsProcess } from './notifications-queue-consumer';
 
 const notificationsQueue = new Queue('notifications', {
-  redis: { host: process.env.REDIS_PROD_HOST, port: process.env.REDIS_PROD_PORT, password: process.env.REDIS_PROD_PW, db: process.env.REDIS_PROD_DB }
+  redis: { host: process.env.REDIS_TEST_HOST, port: process.env.REDIS_TEST_PORT, password: process.env.REDIS_TEST_PW, db: process.env.REDIS_TEST_DB }
 });
 
 export const createNewNotification = async notification => {
@@ -15,7 +15,7 @@ export const createNewNotification = async notification => {
     removeOnComplete: true,
     removeOnFail: true,
     repeat: {
-      every: 5 * 1000,
+      every: 3 * 1000,
       limit: 3
     }
   });
