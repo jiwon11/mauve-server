@@ -2,7 +2,7 @@ import Queue from 'bull';
 import { slacksUserProcess } from './slack-user-queue-consumer';
 
 const slacksUserQueue = new Queue('slacks-user', {
-  redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT, password: process.env.REDIS_PW, db: parseInt(process.env.REDIS_DB) }
+  redis: { host: process.env.REDIS_TEST_HOST, port: process.env.REDIS_TEST_PORT, password: process.env.REDIS_TEST_PW, db: parseInt(process.env.REDIS_TEST_DB) }
 });
 
 export const createSlackNewUser = async userDTO => {
