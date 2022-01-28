@@ -2,7 +2,7 @@ import Queue from 'bull';
 import { slacksChatProcess } from './slack-msg-queue-consumer';
 
 const slacksQueue = new Queue('slacks', {
-  redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT, password: process.env.REDIS_PW, db: parseInt(process.env.REDIS_DB) }
+  redis: { host: process.env.REDIS_PROD_HOST, port: process.env.REDIS_PROD_PORT, password: process.env.REDIS_PROD_PW, db: process.env.REDIS_PROD_DB }
 });
 
 export const createSlackMessage = async chatDTO => {
