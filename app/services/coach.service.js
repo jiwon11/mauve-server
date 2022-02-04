@@ -143,6 +143,7 @@ export default class CoachService {
       if (userInfoRecord.length > 0) {
         userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
+        console.log('periodResult', periodResult.body);
         if (!periodResult.success) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
         }
@@ -150,8 +151,11 @@ export default class CoachService {
           return { success: true, body: { userInfo: userInfoRecord[0] } };
         } else {
           const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
+          console.log('recentPeriodRecord', recentPeriodRecord);
           const periodStatisticResult = await PeriodService.statistic(periodResult.body);
+          console.log('periodStatisticResult', periodStatisticResult.body);
           const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
+          console.log('periodPhaseResult', periodPhaseResult.body);
           if (!periodPhaseResult.success) {
             return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
           }
