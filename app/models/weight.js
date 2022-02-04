@@ -7,6 +7,10 @@ const WeightSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
     time: { type: String, required: true, enum: ['morning', 'night'] },
+    date: {
+      type: Date,
+      required: true
+    },
     kilograms: { type: Number, required: true }
   },
   {
