@@ -90,6 +90,7 @@ export default class WeightService {
           date: weightDTO.date
         },
         {
+          fields: { kilograms: 1, time: 1, date: 1, created_at: 1, updated_at: 1 },
           new: true
         }
       );
@@ -130,7 +131,13 @@ export default class WeightService {
     try {
       const updateFieldResult = await WeightModel.updateMany({}, [{ $set: { date: { $dateFromString: { dateString: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } } } } } }]);
       const updateChatFieldResult = await ChatModel.updateMany({ tag: 'weight' }, [
-        { $set: { 'body.date': { $dateFromString: { dateString: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } } } } } }
+        {
+          $set: {
+            'body.date': { $dateFromString: { dateString: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } } } },
+            'body.created_at': '$created_at',
+            'body.updated_at': '$created_at'
+          }
+        }
       ]);
       return { success: true, body: updateFieldResult };
     } catch (err) {
