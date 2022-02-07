@@ -94,6 +94,20 @@ export default class WeightService {
           new: true
         }
       );
+      const updateChatFieldResult = await ChatModel.findOneAndUpdate(
+        {
+          'body._id': mongoose.Types.ObjectId(weightId)
+        },
+        {
+          'body.kilograms': weightDTO.kilograms,
+          'body.time': weightDTO.time,
+          'body.date': weightDTO.date
+        },
+        {
+          new: true
+        }
+      );
+      console.log(updateChatFieldResult);
       if (weight) {
         return { success: true, body: weight };
       } else {
