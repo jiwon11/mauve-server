@@ -72,6 +72,7 @@ export const update = async (req, res) => {
     const weightDTO = { user: userId, time: time, kilograms: kilograms, date: date };
     const weightUpdateResult = await WeightService.update(weightId, weightDTO);
     if (weightUpdateResult.success) {
+      /*
       const roomResult = await RoomService.getRoomIdByUserId(userId);
       let errorMsg;
       if (!roomResult.success) {
@@ -89,7 +90,8 @@ export const update = async (req, res) => {
       if (!postChatResult.success) {
         errorMsg = { message: 'Chat post weight Service Error', err: postChatResult.body };
       }
-      return res.jsonResult(200, { body: weightUpdateResult.body, err_message: errorMsg });
+      */
+      return res.jsonResult(200, weightUpdateResult.body);
     } else {
       return res.jsonResult(500, { message: 'Weight Update Service Error', err: weightUpdateResult.body });
     }
