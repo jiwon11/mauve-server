@@ -1,4 +1,5 @@
 import WeightModel from '../models/weight';
+import ChatModel from '../models/chat';
 import mongoose from 'mongoose';
 import moment from 'moment-timezone';
 export default class WeightService {
@@ -27,8 +28,9 @@ export default class WeightService {
             $project: {
               kilograms: 1,
               time: 1,
-              date: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$date' } },
-              created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
+              date: 1,
+              created_at: 1,
+              updated_at: 1
             }
           }
         ]);
@@ -127,6 +129,9 @@ export default class WeightService {
   static async updateField() {
     try {
       const updateFieldResult = await WeightModel.updateMany({}, [{ $set: { date: { $dateFromString: { dateString: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } } } } } }]);
+      const updateChatFieldResult = await ChatModel.updateMany({ tag: 'weight' }, [
+        { $set: { 'body.date': { $dateFromString: { dateString: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } } } } } }
+      ]);
       return { success: true, body: updateFieldResult };
     } catch (err) {
       console.log(err);
