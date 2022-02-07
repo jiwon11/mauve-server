@@ -1,5 +1,6 @@
 import { sign, verify, refreshVerify } from './jwt';
 import UserModel from '../../models/user';
+import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 export default async (req, res) => {
@@ -14,12 +15,12 @@ export default async (req, res) => {
 
       // access token 디코딩하여 user의 정보를 가져옵니다.
       const decoded = jwt.decode(authToken);
-
       // 디코딩 결과가 없으면 권한이 없음을 응답.
       if (decoded === null) {
         return res.jsonResult(404, 'JWT 토큰에 사용자 정보가 없습니다.');
       }
 
+      console.log(authResult);
       /* access token의 decoding 된 값에서
       유저의 id를 가져와 refresh token을 검증합니다. */
       const refreshResult = refreshVerify(refreshToken, decoded.id);
@@ -31,24 +32,26 @@ export default async (req, res) => {
           return res.jsonResult(401, 'No authorized!');
         } else {
           // 2. access token이 만료되고, refresh token은 만료되지 않은 경우 => 새로운 access token을 발급
-          const user = await UserModel.findOne({
-            where: {
-              _id: decoded.id
+          const user = await UserModel.aggregate([
+            {
+              $match: {
+                _id: mongoose.Types.ObjectId(decoded.id)
+              }
             }
-          }).lean();
-          if (!user) {
+          ]);
+          if (user.length === 0) {
             return res.jsonResult(404, '사용자가 존재하지 않습니다.');
           }
           console.log(`user : ${user}`);
           const newAccessToken = sign(user);
-          return res.jsonResult(201, {
+          return res.jsonResult(200, {
             accessToken: newAccessToken,
             refreshToken
           });
         }
       } else {
         // 3. access token이 만료되지 않은경우 => refresh 할 필요가 없습니다.
-        return res.jsonResult(401, 'access token이 만료되지 않아 refresh 할 필요가 없습니다.');
+        return res.jsonResult(403, 'access token이 만료되지 않아 refresh 할 필요가 없습니다.');
       }
     } else {
       // access token 또는 refresh token이 헤더에 없는 경우

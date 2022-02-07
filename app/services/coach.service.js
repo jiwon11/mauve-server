@@ -7,7 +7,10 @@ import { sign, refresh } from '../libs/utils/jwt';
 import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
+import moment from 'moment-timezone';
+import { today } from '../libs/utils/moment';
 import { getUserAge } from '../libs/utils/moment';
+
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -140,16 +143,31 @@ export default class CoachService {
       if (userInfoRecord.length > 0) {
         userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
-        if (!periodResult) {
+        console.log('periodResult', periodResult.body);
+        if (!periodResult.success) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
         }
-        return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
+        if (periodResult.body.length === 0) {
+          return { success: true, body: { userInfo: userInfoRecord[0] } };
+        } else {
+          const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
+          console.log('recentPeriodRecord', recentPeriodRecord);
+          const periodStatisticResult = await PeriodService.statistic(periodResult.body);
+          console.log('periodStatisticResult', periodStatisticResult.body);
+          const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
+          console.log('periodPhaseResult', periodPhaseResult.body);
+          if (!periodPhaseResult.success) {
+            return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+          }
+          userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
+          return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
+        }
       } else {
         return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: { statusCode: 500, err } };
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 
@@ -218,13 +236,21 @@ export default class CoachService {
             body: {
               text: 1,
               time: 1,
+              date: 1,
               kilograms: 1,
               location: 1,
               thumbnail: 1,
               contentType: 1,
               key: 1
             },
-            created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
+            created_at_date: {
+              $cond: [
+                { $eq: ['$tag', 'weight'] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 0] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
+              ]
+            },
+            created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
           }
         },
         {

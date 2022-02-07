@@ -9,5 +9,8 @@ import jwtAuth from '../middlewares/authJWT';
 
 router.post('/', upload.none(), jwtAuth, weightController.create);
 router.get('/', jwtAuth, weightController.getAll);
+router.put('/:id', jwtAuth, weightController.update);
+router.delete('/:id', jwtAuth, weightController.remove);
+router.put('/update/field', weightController.updateField);
 
 export default router;
