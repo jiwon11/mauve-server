@@ -104,13 +104,13 @@ export default class PeriodService {
           const termEnd = moment(periodRecord[i].end);
           const termDiff = moment.duration(termEnd.diff(termStart)).asDays() + 1;
           termSum += termDiff;
-          if (periodRecord[i + 1]) {
-            const thisMonth = moment(periodRecord[i].start);
-            const lastMonth = moment(periodRecord[i + 1].start);
-            const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
-            cycleSum += cycleDiff;
-            cycleLen++;
-          }
+        }
+        if (periodRecord[i + 1]) {
+          const thisMonth = moment(periodRecord[i].start);
+          const lastMonth = moment(periodRecord[i + 1].start);
+          const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
+          cycleSum += cycleDiff;
+          cycleLen++;
         }
       }
       const cycleAvg = parseFloat((cycleSum / cycleLen).toFixed(0));
@@ -132,8 +132,15 @@ export default class PeriodService {
       const duringPeriod = periodRecord;
       duringPeriod.end = periodRecord.end ? periodRecord.end : moment(periodRecord.start).tz('Asia/Seoul').add(statistic.termAvg, 'days').format('YYYY-MM-DD');
       const thisMonthAllPhase = calPhase(duringPeriod, 'this');
-      const predictMonthPhase = calPhase(statistic.predict, 'next');
-      const adjustThisMonthPhase = adjustEffortDate(thisMonthAllPhase, predictMonthPhase);
+      let adjustThisMonthPhase;
+      let predictMonthPhase;
+      if (!isNaN(statistic.cycleAvg)) {
+        predictMonthPhase = calPhase(statistic.predict, 'next');
+        adjustThisMonthPhase = adjustEffortDate(thisMonthAllPhase, predictMonthPhase);
+      } else {
+        predictMonthPhase = [];
+        adjustThisMonthPhase = thisMonthAllPhase;
+      }
       //const phaseInThisMonth = thisMonthPhase.filter(phase => phase.is_between === true);
       //const monthPhase = phaseInThisMonth.length > 0 ? thisMonthPhase : adjustNextMonthPhase;
       if (step === 'current') {

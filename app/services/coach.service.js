@@ -159,19 +159,17 @@ export default class CoachService {
           const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
           console.log('periodPhaseResult', periodPhaseResult.body);
           if (!periodPhaseResult.success) {
-            return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+            return { success: false, body: { message: 'Period Phase Service Error', err: periodPhaseResult.body } };
           }
           userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
-          const allPhase = Object.values(periodPhaseResult.body.this_month_all_phase).concat(Object.values(periodPhaseResult.body.predict_month_all_phase));
+          //const allPhase = Object.values(periodPhaseResult.body.this_month_all_phase).concat(Object.values(periodPhaseResult.body.predict_month_all_phase));
           const renamePeriod = [];
           periodResult.body.forEach(item => {
-            if (allPhase.find(phase => phase.start_date === item.start) === undefined) {
+            if (periodPhaseResult.body.this_month_all_phase.find(phase => phase.start_date === item.start) === undefined) {
               renamePeriod.push({ start_date: item.start, end_date: item.end, phase: 'period' });
             }
           });
-          const periodAndPhaseRecord = renamePeriod
-            .concat(periodPhaseResult.body.this_month_all_phase, periodPhaseResult.body.predict_month_all_phase)
-            .sort((a, b) => (a.start_date > b.start_date && 1) || -1);
+          const periodAndPhaseRecord = renamePeriod.concat(periodPhaseResult.body.this_month_all_phase).sort((a, b) => (a.start_date > b.start_date && 1) || -1);
           return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodAndPhaseRecord } };
         }
       } else {
