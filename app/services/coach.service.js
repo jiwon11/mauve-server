@@ -8,9 +8,10 @@ import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
 import moment from 'moment-timezone';
-import { today } from '../libs/utils/moment';
+//import { today } from '../libs/utils/moment';
 import { getUserAge } from '../libs/utils/moment';
 
+export const today = moment().tz('Asia/Seoul').startOf('day');
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {

@@ -2,7 +2,9 @@ import PeriodService from '../services/period.service';
 import UserService from '../services/user.service';
 import mainPhraseService from '../services/mainPhrase.service';
 import moment from 'moment-timezone';
-import { today } from '../libs/utils/moment';
+//import { today } from '../libs/utils/moment';
+
+export const today = moment().tz('Asia/Seoul').startOf('day');
 
 export const add = async (req, res) => {
   try {
