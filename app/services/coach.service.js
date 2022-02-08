@@ -162,9 +162,12 @@ export default class CoachService {
             return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
           }
           userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
-          periodResult.body.splice(0, 1);
-          const renamePeriod = periodResult.body.map(item => {
-            return { start_date: item.start, end_date: item.end, phase: 'period' };
+          const allPhase = Object.values(periodPhaseResult.body.this_month_all_phase).concat(Object.values(periodPhaseResult.body.predict_month_all_phase));
+          const renamePeriod = [];
+          periodResult.body.forEach(item => {
+            if (allPhase.find(phase => phase.start_date === item.start) === undefined) {
+              renamePeriod.push({ start_date: item.start, end_date: item.end, phase: 'period' });
+            }
           });
           const periodAndPhaseRecord = renamePeriod
             .concat(periodPhaseResult.body.this_month_all_phase, periodPhaseResult.body.predict_month_all_phase)
