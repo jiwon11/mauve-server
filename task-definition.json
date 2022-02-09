@@ -5,7 +5,7 @@
       "name": "xray-daemon",
       "image": "amazon/aws-xray-daemon",
       "cpu": 32,
-      "memoryReservation": 50,
+      "memory": 28,
       "portMappings": [{
         "hostPort": 0,
         "containerPort": 2000,
@@ -46,7 +46,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 450,
+      "memory": 400,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -98,7 +98,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 28,
+      "memory": 50,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -127,7 +127,7 @@
       "name": "reverse-proxy-container"
     }
   ],
-  "memory": "956",
+  "memory": "478",
   "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "family": "mauve-app-task",
   "pidMode": null,
