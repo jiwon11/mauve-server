@@ -5,18 +5,11 @@ import moment from 'moment-timezone';
 export default class WeightService {
   static async create(weightDTO) {
     try {
-      const newWeight = await WeightModel.create(weightDTO);
-      const weightRecord = await WeightModel.aggregate([
+      const weightExistRecord = await WeightModel.aggregate([
         {
           $match: {
-            _id: mongoose.Types.ObjectId(newWeight._id)
-          }
-        },
-        {
-          $project: {
-            kilograms: 1,
-            time: 1,
-            created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
+            time: weightDTO.time,
+            date: moment(moment.utc(weightDTO.date).toDate()).tz('Asia/Seoul').toDate()
           }
         }
       ]);
@@ -45,7 +38,7 @@ export default class WeightService {
       }
     } catch (err) {
       console.log(err);
-      return { success: false, body: err.message };
+      return { success: false, body: { statusCode: 500, err: err.message } };
     }
   }
 
@@ -61,6 +54,7 @@ export default class WeightService {
           $project: {
             kilograms: 1,
             time: 1,
+            date: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$date' } },
             created_at: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }
           }
         },

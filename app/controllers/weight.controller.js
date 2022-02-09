@@ -10,9 +10,11 @@ export const create = async (req, res) => {
     const userRole = req.user.role;
     const kilograms = req.body.kilograms;
     const time = req.body.time;
+    const date = moment(req.body.date).tz('Asia/seoul').format('YYYY-MM-DD');
     //const time = moment().tz('Asia/Seoul').hour() > 12 ? 'night' : 'morning';
-    const weightDTO = { user: userId, time: time, kilograms: kilograms };
+    const weightDTO = { user: userId, time: time, kilograms: kilograms, date: date };
     const weightCreateResult = await WeightService.create(weightDTO);
+    console.log(weightCreateResult.body);
     if (weightCreateResult.success) {
       const roomResult = await RoomService.getRoomIdByUserId(userId);
       let errorMsg;
@@ -33,7 +35,7 @@ export const create = async (req, res) => {
       }
       return res.jsonResult(201, { body: weightCreateResult.body, err_message: errorMsg });
     } else {
-      return res.jsonResult(500, { message: 'Weight Create Service Error', err: weightCreateResult.body });
+      return res.jsonResult(weightCreateResult.body.statusCode, { message: 'Weight Create Service Error', err: weightCreateResult.body.err });
     }
   } catch (err) {
     console.log(err);
@@ -70,7 +72,6 @@ export const update = async (req, res) => {
     const weightDTO = { user: userId, time: time, kilograms: kilograms, date: date };
     const weightUpdateResult = await WeightService.update(weightId, weightDTO);
     if (weightUpdateResult.success) {
-      /*
       const roomResult = await RoomService.getRoomIdByUserId(userId);
       let errorMsg;
       if (!roomResult.success) {
@@ -88,8 +89,7 @@ export const update = async (req, res) => {
       if (!postChatResult.success) {
         errorMsg = { message: 'Chat post weight Service Error', err: postChatResult.body };
       }
-      */
-      return res.jsonResult(200, weightUpdateResult.body);
+      return res.jsonResult(200, { body: weightUpdateResult.body, err_message: errorMsg });
     } else {
       return res.jsonResult(500, { message: 'Weight Update Service Error', err: weightUpdateResult.body });
     }
