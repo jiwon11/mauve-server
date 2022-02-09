@@ -203,16 +203,18 @@ export default class chatService {
           nonReadChatIds.push(chat._id);
         });
       console.log('nonReadChatIds : ', nonReadChatIds);
-      console.time('Update Chat Readers');
-      await ChatModel.updateMany(
-        { _id: { $in: nonReadChatIds }, readers: { $nin: [userId] } },
-        {
-          $push: {
-            readers: { $each: [userId] }
+      if (nonReadChatIds.length > 0) {
+        console.time('Update Chat Readers');
+        await ChatModel.updateMany(
+          { _id: { $in: nonReadChatIds }, readers: { $nin: [userId] } },
+          {
+            $push: {
+              readers: { $each: [userId] }
+            }
           }
-        }
-      );
-      console.timeEnd('Update Chat Readers');
+        );
+        console.timeEnd('Update Chat Readers');
+      }
       /*
       const groupByDateChatRecords = groupBy(returnChatRecords, 'created_at_date');
       const groupByChatRecords = Object.keys(groupByDateChatRecords).map(date => {
