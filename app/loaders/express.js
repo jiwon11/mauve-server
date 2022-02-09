@@ -6,7 +6,13 @@ import compression from 'compression';
 // custom utils And middlewares
 import logger from '../libs/logger/index';
 import jsonResult from '../middlewares/jsonResult';
+import Rollbar from 'rollbar';
 
+const rollbar = new Rollbar({
+  accessToken: '39da91c82c7c45c29b3dc3d612969af1',
+  captureUncaught: true,
+  captureUnhandledRejections: true
+});
 // application Controllers for Routes
 import authRouter from '../routes/auth';
 import userRouter from '../routes/user';
@@ -31,6 +37,7 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
+  rollbar.log(logger.dev);
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
@@ -52,6 +59,7 @@ export default async app => {
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
+  app.use(rollbar.errorHandler());
 
   return app;
 };

@@ -52,6 +52,7 @@
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "request-promise-native": "^1.0.9",
+    "rollbar": "^2.24.0",
     "slack-node": "^0.1.8",
     "socket.io": "^4.4.1",
     "socket.io-redis": "^6.1.1",
