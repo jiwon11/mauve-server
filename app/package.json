@@ -19,7 +19,6 @@
     "@socket.io/redis-emitter": "^4.1.1",
     "@socket.io/sticky": "^1.0.1",
     "aws-sdk": "^2.1061.0",
-    "aws-xray-sdk": "^3.3.4",
     "axios": "^0.25.0",
     "babel-plugin-add-module-exports": "^1.0.4",
     "bull": "^4.2.1",
