@@ -58,7 +58,9 @@
       "interactive": null,
       "healthCheck": null,
       "essential": true,
-      "links": null,
+      "links": [
+        "xray-daemon"
+      ],
       "hostname": null,
       "extraHosts": null,
       "pseudoTerminal": null,
