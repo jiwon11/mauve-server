@@ -25,8 +25,6 @@ logger.token('query', req => req.query);
 logger.token('date', () => moment().tz('Asia/Seoul').format());
 
 const dev = logger((tokens, req, res) => {
-  Sentry.setTag('ip', tokens['remote-ip'](req, res));
-
   return JSON.stringify({
     userIPv4: tokens['remote-ip'](req, res),
     user: tokens.user(req, res),
