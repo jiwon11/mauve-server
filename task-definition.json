@@ -33,7 +33,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 480,
+      "memory": 450,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -85,7 +85,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 32,
+      "memory": 28,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -114,7 +114,7 @@
       "name": "reverse-proxy-container"
     }
   ],
-  "memory": "1024",
+  "memory": "956",
   "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "family": "mauve-app-task",
   "pidMode": null,
