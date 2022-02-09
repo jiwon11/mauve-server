@@ -8,12 +8,13 @@ export default class WeightService {
       const weightExistRecord = await WeightModel.aggregate([
         {
           $match: {
+            user: mongoose.Types.ObjectId(weightDTO.user),
             time: weightDTO.time,
             date: moment(moment.utc(weightDTO.date).toDate()).tz('Asia/Seoul').toDate()
           }
         }
       ]);
-      console.log(weightExistRecord);
+      console.log('weightExistRecord', weightExistRecord);
       if (weightExistRecord.length > 0) {
         return { success: false, body: { statusCode: 403, err: '이미 입력한 날짜와 시간대입니다.' } };
       } else {
