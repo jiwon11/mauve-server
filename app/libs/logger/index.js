@@ -1,6 +1,6 @@
 import logger from 'morgan';
 import moment from 'moment-timezone';
-import * as Sentry from '@sentry/node';
+import AWSXRay from 'aws-xray-sdk';
 
 const stream = {
   // eslint-disable-next-line no-unused-vars
@@ -14,6 +14,7 @@ logger.token('remote-ip', req => req.ip || req.headers['x-real-ip'] || req.heade
 logger.token('host', req => req.hostname);
 logger.token('user', req => {
   if (req.user) {
+    AWSXRay.getSegment().setUser(req.user.ID);
     return req.user;
   }
   return 'no user info';
