@@ -1,10 +1,6 @@
 version: '2'
 
 services:
-  aws-xray:
-    image: amazon/aws-xray-daemon
-    ports:
-      - '2000:2000'
   reverse-proxy-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     build:
@@ -27,6 +23,5 @@ services:
     ports:
       - '3000:3000'
       - '3030:3030'
-      - '2000:2000'
     networks:
       - default
