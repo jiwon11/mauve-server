@@ -56,7 +56,6 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
-  rollbar.log(logger.dev);
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
