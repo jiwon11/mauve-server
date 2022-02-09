@@ -23,7 +23,7 @@ import questionnaireRouter from '../routes/questionnaire';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 export default async app => {
-  AWSXRay.config([AWSXRay.plugins.EC2Plugin]);
+  AWSXRay.config([AWSXRay.plugins.EC2Plugin, AWSXRay.plugins.ECSPlugin]);
   app.set('trust proxy', true);
   app.use(cors({ credentials: true, origin: true, exposedHeaders: ['cookie'] }));
   app.use(AWSXRay.express.openSegment(`mauve-${process.env.NODE_ENV}`));
@@ -34,8 +34,6 @@ export default async app => {
   });
   app.use(compression());
   app.use(logger.dev);
-  AWSXRay.setLogger(logger.dev);
-  AWSXRay.config([AWSXRay.plugins.EC2Plugin]);
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
