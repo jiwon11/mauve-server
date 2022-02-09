@@ -130,6 +130,9 @@ export default class WeightService {
         }
       ]);
       if (weightExistRecord.length > 0) {
+        await ChatModel.delete({
+          'body._id': mongoose.Types.ObjectId(weightId)
+        });
         const weightRecord = await WeightModel.delete({ _id: mongoose.Types.ObjectId(weightId), user: mongoose.Types.ObjectId(userId) });
         return { success: true, body: weightRecord };
       } else {
