@@ -113,6 +113,9 @@ export default class roomService {
                   $expr: {
                     $and: [
                       {
+                        $eq: ['$deleted', false]
+                      },
+                      {
                         $not: {
                           $in: [mongoose.Types.ObjectId(userId), '$readers']
                         }
@@ -147,7 +150,7 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $and: [{ $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_user', null] }]
+                    $and: [{ $eq: ['$deleted', false] }, { $eq: ['$room', '$$roomId'] }, { $gt: ['$sender_user', null] }]
                   }
                 }
               },
@@ -179,7 +182,7 @@ export default class roomService {
               {
                 $match: {
                   $expr: {
-                    $eq: ['$room', '$$roomId']
+                    $and: [{ $eq: ['$deleted', false] }, { $eq: ['$room', '$$roomId'] }]
                   }
                 }
               },
@@ -213,6 +216,7 @@ export default class roomService {
                 $match: {
                   $expr: {
                     $and: [
+                      { $eq: ['$deleted', false] },
                       { $eq: ['$room', '$$roomId'] },
                       {
                         $gte: [
