@@ -188,18 +188,6 @@ export default class roomService {
                     created_at: -1
                   }
                 }
-              },
-              {
-                $project: {
-                  body: { text: 1, time: 1, kilograms: 1, location: 1, thumbnail: 1, contentType: 1, key: 1 },
-                  _id: 0,
-                  tag: 1,
-                  created_at: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$created_at' } }
-                }
-              },
-              {
-                $sort: {
-                  created_at: -1
               ],
               as: 'non_read_chats'
             }
