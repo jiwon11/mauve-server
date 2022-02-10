@@ -19,6 +19,7 @@ import weightRouter from '../routes/weight';
 import mainPhraseRouter from '../routes/mainPhrase';
 import notificationRouter from '../routes/notification';
 import questionnaireRouter from '../routes/questionnaire';
+import adminRouter from '../routes/admin';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 export default async app => {
@@ -49,6 +50,7 @@ export default async app => {
   app.use('/mainPhrase', mainPhraseRouter);
   app.use('/notification', notificationRouter);
   app.use('/questionnaire', questionnaireRouter);
+  app.use('/admin', adminRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
