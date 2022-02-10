@@ -121,8 +121,28 @@ export default class CoachService {
     }
   }
 
-  static async getUserInfo(targetUserId) {
+  static async getUserInfo(targetUserId, userRole) {
     try {
+      let projectPipeline;
+      if (userRole === 'admin') {
+        projectPipeline = {
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      } else {
+        projectPipeline = {
+          name: 1,
+          phone_NO: 1,
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      }
       const userInfoRecord = await UserModel.aggregate([
         {
           $match: {
@@ -130,15 +150,7 @@ export default class CoachService {
           }
         },
         {
-          $project: {
-            name: 1,
-            phone_NO: 1,
-            birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
-            weight: 1,
-            height: 1,
-            next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
-            next_payment: 1
-          }
+          $project: projectPipeline
         }
       ]);
       if (userInfoRecord.length > 0) {
