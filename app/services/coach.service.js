@@ -121,8 +121,28 @@ export default class CoachService {
     }
   }
 
-  static async getUserInfo(targetUserId) {
+  static async getUserInfo(targetUserId, userRole) {
     try {
+      let projectPipeline;
+      if (userRole === 'admin') {
+        projectPipeline = {
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      } else {
+        projectPipeline = {
+          name: 1,
+          phone_NO: 1,
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      }
       const userInfoRecord = await UserModel.aggregate([
         {
           $match: {
@@ -130,20 +150,13 @@ export default class CoachService {
           }
         },
         {
-          $project: {
-            name: 1,
-            phone_NO: 1,
-            birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
-            weight: 1,
-            height: 1,
-            next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
-            next_payment: 1
-          }
+          $project: projectPipeline
         }
       ]);
       if (userInfoRecord.length > 0) {
         userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
+        console.log('periodResult', periodResult.body);
         if (!periodResult.success) {
           return { success: false, body: { err: `Period not founded by User ID : ${targetUserId}` } };
         }
@@ -152,8 +165,11 @@ export default class CoachService {
         } else {
           periodResult.body.forEach(period => console.log(`today: ${today.format('YYYY-MM-DD')}, period: ${moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD')}`));
           const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
+          console.log('recentPeriodRecord', recentPeriodRecord);
           const periodStatisticResult = await PeriodService.statistic(periodResult.body);
+          console.log('periodStatisticResult', periodStatisticResult.body);
           const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
+          console.log('periodPhaseResult', periodPhaseResult.body);
           if (!periodPhaseResult.success) {
             return { success: false, body: { message: 'Period Phase Service Error', err: periodPhaseResult.body } };
           }
