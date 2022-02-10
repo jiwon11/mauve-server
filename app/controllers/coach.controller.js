@@ -105,7 +105,8 @@ export const getUserNote = async (req, res) => {
 export const getUserInfo = async (req, res) => {
   try {
     const targetUserId = req.params.userId;
-    const { success, body } = await coachService.getUserInfo(targetUserId);
+    const userRole = req.user.role;
+    const { success, body } = await coachService.getUserInfo(targetUserId, userRole);
     if (success) {
       return res.jsonResult(200, body);
     } else {
