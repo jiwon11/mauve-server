@@ -1,6 +1,5 @@
 import logger from 'morgan';
 import moment from 'moment-timezone';
-import Rollbar from 'rollbar';
 
 const stream = {
   // eslint-disable-next-line no-unused-vars
@@ -14,13 +13,6 @@ logger.token('remote-ip', req => req.ip || req.headers['x-real-ip'] || req.heade
 logger.token('host', req => req.hostname);
 logger.token('user', req => {
   if (req.user) {
-    Rollbar.configure({
-      payload: {
-        person: {
-          id: req.user.ID // required
-        }
-      }
-    });
     return req.user;
   }
   return 'no user info';
