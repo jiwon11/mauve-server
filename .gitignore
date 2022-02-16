@@ -2,4 +2,6 @@
 .vscode
 /app/.env
 *.log
-.DS_Store
+newrelic_agent.log
+logs
+app/newrelic_agent.log

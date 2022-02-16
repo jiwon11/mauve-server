@@ -12,6 +12,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/runtime": "^7.16.7",
     "@bull-board/express": "^3.9.0",
+    "@newrelic/winston-enricher": "^2.1.0",
     "@slack/webhook": "^6.1.0",
     "@socket.io/admin-ui": "^0.2.0",
     "@socket.io/cluster-adapter": "^0.1.0",
@@ -59,7 +60,9 @@
     "socketio-jwt-auth": "^0.2.1",
     "twilio": "^3.73.0",
     "typedi": "^0.10.0",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "winston": "^3.6.0",
+    "winston-daily-rotate-file": "^4.6.1"
   },
   "main": "app.js",
   "repository": {

@@ -22,7 +22,7 @@ logger.token('body', req => req.body);
 logger.token('query', req => req.query);
 logger.token('date', () => moment().tz('Asia/Seoul').format());
 
-const dev = logger((tokens, req, res) => {
+const dev = function (tokens, req, res) {
   return JSON.stringify({
     userIPv4: tokens['remote-ip'](req, res),
     user: tokens.user(req, res),
@@ -42,6 +42,6 @@ const dev = logger((tokens, req, res) => {
     cookie: tokens.cookie(req),
     'user-agent': tokens['user-agent'](req, res)
   });
-});
+};
 
 export default { stream, dev };
