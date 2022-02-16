@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 /**
  * New Relic agent configuration.
  *
@@ -9,7 +9,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['Mauve'],
+  app_name: [`Mauve-${process.env.NODE_ENV}`],
   /**
    * Your New Relic license key.
    */
@@ -36,6 +36,7 @@ exports.config = {
      * issues with the agent, 'info' and higher will impose the least overhead on
      * production applications.
      */
+    enabled: true,
     level: 'info'
   },
   /**
@@ -66,4 +67,4 @@ exports.config = {
       'response.headers.x*'
     ]
   }
-}
+};
