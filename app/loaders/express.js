@@ -4,7 +4,9 @@ import cors from 'cors';
 import path from 'path';
 import compression from 'compression';
 // custom utils And middlewares
-import logger from '../libs/logger/index';
+import morgan from 'morgan';
+import logger from '../libs/logger/winston';
+import morganFormat from '../libs/logger/index';
 import jsonResult from '../middlewares/jsonResult';
 
 // application Controllers for Routes
@@ -31,7 +33,7 @@ export default async app => {
     next();
   });
   app.use(compression());
-  app.use(logger.dev);
+  app.use(morgan(morganFormat.dev, { stream: logger.stream }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());

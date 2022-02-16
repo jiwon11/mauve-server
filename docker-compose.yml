@@ -1,6 +1,24 @@
 version: '2'
 
 services:
+  agent:
+      container_name: newrelic-infra
+      build:
+        context: ./newrelic-infra-setup
+        dockerfile: ./newrelic-infra.dockerfile
+      cap_add:
+        - SYS_PTRACE
+      network_mode: host
+      pid: host
+      privileged: true
+      environment:
+        NEW_RELIC_NO_CONFIG_FILE : true
+        NEW_RELIC_DISTRIBUTED_TRACING_ENABLED : true
+        NEW_RELIC_LOG: stdout
+      volumes:
+        - "/:/host:ro"
+        - "/var/run/docker.sock:/var/run/docker.sock"
+      restart: unless-stopped
   reverse-proxy-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     build:
