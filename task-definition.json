@@ -24,7 +24,7 @@
       }],
       "command": null,
       "linuxParameters": null,
-      "cpu": 900,
+      "cpu": 890,
       "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
@@ -33,7 +33,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 420,
+      "memory": 410,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -114,7 +114,7 @@
       "name": "reverse-proxy-container"
     }
   ],
-  "memory": "478",
+  "memory": "470",
   "taskRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "family": "mauve-app-task",
   "pidMode": null,
@@ -122,7 +122,7 @@
     "EC2"
   ],
   "networkMode": null,
-  "cpu": "1024",
+  "cpu": "1010",
   "inferenceAccelerators": [],
   "proxyConfiguration": null,
   "volumes": [],
