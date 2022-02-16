@@ -1,4 +1,4 @@
-FROM node:17
+FROM node:16.14.0
 
 # Bundle APP files
 WORKDIR /mauve-server
