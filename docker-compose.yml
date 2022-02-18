@@ -7,7 +7,7 @@ services:
         context: ./newrelic-infra-setup
         dockerfile: ./newrelic-infra.dockerfile
       environment:
-        NEW_RELIC_NO_CONFIG_FILE: true
+        NEW_RELIC_NO_CONFIG_FILE: 'true'
         NEW_RELIC_LOG: stdout
         NEW_RELIC_APP_NAME: Mauve-production
       cap_add:
