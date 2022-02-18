@@ -37,7 +37,7 @@ exports.config = {
      * production applications.
      */
     enabled: true,
-    level: 'info'
+    level: 'trace'
   },
   /**
    * When true, all request headers except for those listed in attributes.exclude
