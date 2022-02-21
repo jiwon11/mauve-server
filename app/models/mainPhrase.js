@@ -10,7 +10,8 @@ const mainPhraseSchema = new Schema(
       {
         title: { type: String, required: true },
         description: { type: String, required: true },
-        image: { type: Schema.Types.Mixed, required: true }
+        image: { type: Schema.Types.Mixed, required: true },
+        link: { type: String, required: true }
       }
     ]
   },

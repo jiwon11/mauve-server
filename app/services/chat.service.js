@@ -45,8 +45,20 @@ const chatAggregatePipeline = (byRoom, matchId, userId, userRole, from, to) => {
       },
       sender: { $ifNull: ['$sender_user', '$sender_coach'] },
       created_at: 1,
-      created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] },
-      created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+      created_at_date: {
+        $cond: [
+          { $eq: ['$tag', 'weight'] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 0] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
+        ]
+      },
+      created_at_time: {
+        $cond: [
+          { $eq: ['$tag', 'weight'] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 1] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+        ]
+      }
     };
   } else {
     projectPipeLine = {
@@ -71,8 +83,20 @@ const chatAggregatePipeline = (byRoom, matchId, userId, userRole, from, to) => {
       nonReadersNum: { $subtract: [2, { $size: '$readers' }] },
       created_at: 1,
       //created_date_time: { $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } },
-      created_at_date: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] },
-      created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+      created_at_date: {
+        $cond: [
+          { $eq: ['$tag', 'weight'] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 0] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
+        ]
+      },
+      created_at_time: {
+        $cond: [
+          { $eq: ['$tag', 'weight'] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 1] },
+          { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+        ]
+      }
     };
   }
   return [
