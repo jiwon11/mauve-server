@@ -67,6 +67,7 @@ export default (server, app) => {
     port: process.env.REDIS_PORT,
     db: process.env.REDIS_DB,
     password: process.env.REDIS_PW,
+    requestsTimeout: 5000,
     options: {
       connect_timeout: 600
     }
