@@ -10,7 +10,8 @@ export const create = async (req, res) => {
     const userRole = req.user.role;
     const kilograms = req.body.kilograms;
     const time = req.body.time;
-    const date = moment(req.body.date).tz('Asia/seoul').format('YYYY-MM-DD');
+    const date = moment(moment.utc(req.body.date).toDate()).tz('Asia/Seoul').toDate();
+    console.log(date);
     //const time = moment().tz('Asia/Seoul').hour() > 12 ? 'night' : 'morning';
     const weightDTO = { user: userId, time: time, kilograms: kilograms, date: date };
     const weightCreateResult = await WeightService.create(weightDTO);
@@ -67,10 +68,10 @@ export const update = async (req, res) => {
     const userRole = req.user.role;
     const kilograms = req.body.kilograms;
     const time = req.body.time;
-    const date = moment(req.body.date).tz('Asia/seoul').format('YYYY-MM-DD');
+    const date = moment(moment.utc(req.body.date).toDate()).tz('Asia/Seoul').toDate();
     //const time = moment().tz('Asia/Seoul').hour() > 12 ? 'night' : 'morning';
     const weightDTO = { user: userId, time: time, kilograms: kilograms, date: date };
-    const weightUpdateResult = await WeightService.update(weightId, weightDTO);
+    const weightUpdateResult = await WeightService.update(weightId, userId, weightDTO);
     if (weightUpdateResult.success) {
       /*
       const roomResult = await RoomService.getRoomIdByUserId(userId);

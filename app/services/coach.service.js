@@ -295,7 +295,13 @@ export default class CoachService {
                 { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
               ]
             },
-            created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+            created_at_time: {
+              $cond: [
+                { $eq: ['$tag', 'weight'] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 1] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+              ]
+            }
           }
         },
         {
