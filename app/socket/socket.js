@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { createAdapter } from '@socket.io/redis-adapter';
-import redis from 'redis';
+import {createClient } from 'redis';
 const { instrument } = require('@socket.io/admin-ui');
 import dotenv from 'dotenv';
 import { verify } from '../libs/utils/jwt.js';
@@ -62,11 +62,12 @@ export default (server, app) => {
     readonly: true
   });
 
-  const pubClient = redis.createClient({
+  const pubClient = createClient({
     host: process.env.REDIS_TEST_HOST,
     port: process.env.REDIS_TEST_PORT,
     db: process.env.REDIS_TEST_DB,
     password: process.env.REDIS_TEST_PW,
+	requestsTimeout: 5000,
     options: {
       connect_timeout: 600
     }

@@ -9,7 +9,7 @@ const ChatSchema = new Schema(
     sender_coach: { type: Schema.Types.ObjectId, ref: 'COACH' },
     //sender: { type: Schema.Types.ObjectId, refPath: 'senderModel' },
     //senderModel: { type: String, required: true, enum: ['USER', 'COACH', 'SYSTEM'] },
-    tag: { type: String, required: true, enum: ['chat', 'picture', 'breakfast', 'lunch', 'dinner', 'snack', 'weight'] },
+    tag: { type: String, required: true, enum: ['chat', 'picture', 'breakfast', 'lunch', 'dinner', 'snack', 'yasik', 'weight'] },
     body: Schema.Types.Mixed,
     //chat: String,
     //media: Schema.Types.Mixed,
