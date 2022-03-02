@@ -112,63 +112,6 @@
       "systemControls": null,
       "privileged": null,
       "name": "reverse-proxy-container"
-    },
-    {
-      "name": "cadvisor",
-      "image": "google/cadvisor",
-      "cpu": 10,
-      "memory": 30,
-      "portMappings": [{
-        "containerPort": 9191,
-        "hostPort": 9191
-      }],
-      "essential": true,
-      "privileged": true,
-      "mountPoints": []
-    },
-    {
-      "portMappings": [{
-        "hostPort": 9100,
-        "containerPort": 9100,
-        "protocol": "tcp"
-      }],
-      "essential": true,
-      "name": "node_exporter",
-      "image": "prom/node-exporter",
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": 150
-    }
-  ],
-  "volumes": [{
-      "name": "rootfs",
-      "host": {
-        "sourcePath": "/"
-      }
-    },
-    {
-      "name": "run",
-      "host": {
-        "sourcePath": "/var/run"
-      }
-    },
-    {
-      "name": "sys",
-      "host": {
-        "sourcePath": "/sys"
-      }
-    },
-    {
-      "name": "docker",
-      "host": {
-        "sourcePath": "/var/lib/docker"
-      }
-    },
-    {
-      "name": "disk",
-      "host": {
-        "sourcePath": "/dev/disk"
-      }
     }
   ],
   "memory": "460",
