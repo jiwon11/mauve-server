@@ -203,7 +203,7 @@
   "requiresCompatibilities": [
     "EC2"
   ],
-  "networkMode": "host",
+  "networkMode": null,
   "cpu": "1024",
   "inferenceAccelerators": [],
   "proxyConfiguration": null,
