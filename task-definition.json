@@ -124,32 +124,20 @@
       }],
       "essential": true,
       "privileged": true,
-      "mountPoints": [{
-          "sourceVolume": "root",
-          "containerPath": "/rootfs",
-          "readOnly": true
-        },
-        {
-          "sourceVolume": "var_run",
-          "containerPath": "/var/run",
-          "readOnly": false
-        },
-        {
-          "sourceVolume": "sys",
-          "containerPath": "/sys",
-          "readOnly": true
-        },
-        {
-          "sourceVolume": "var_lib_docker",
-          "containerPath": "/var/lib/docker",
-          "readOnly": true
-        },
-        {
-          "sourceVolume": "cgroup",
-          "containerPath": "/cgroup",
-          "readOnly": true
-        }
-      ]
+      "mountPoints": []
+    },
+    {
+      "portMappings": [{
+        "hostPort": 9100,
+        "containerPort": 9100,
+        "protocol": "tcp"
+      }],
+      "essential": true,
+      "name": "node_exporter",
+      "image": "prom/node-exporter",
+      "cpu": 0,
+      "privileged": null,
+      "memoryReservation": 150
     }
   ],
   "volumes": [{
@@ -181,19 +169,6 @@
       "host": {
         "sourcePath": "/dev/disk"
       }
-    },
-    {
-      "portMappings": [{
-        "hostPort": 9100,
-        "containerPort": 9100,
-        "protocol": "tcp"
-      }],
-      "essential": true,
-      "name": "node_exporter",
-      "image": "prom/node-exporter",
-      "cpu": 0,
-      "privileged": null,
-      "memoryReservation": 150
     }
   ],
   "memory": null,
