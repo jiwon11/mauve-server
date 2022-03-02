@@ -153,13 +153,13 @@
     }
   ],
   "volumes": [{
-      "name": "root",
+      "name": "rootfs",
       "host": {
         "sourcePath": "/"
       }
     },
     {
-      "name": "var_run",
+      "name": "run",
       "host": {
         "sourcePath": "/var/run"
       }
@@ -171,15 +171,15 @@
       }
     },
     {
-      "name": "var_lib_docker",
+      "name": "docker",
       "host": {
-        "sourcePath": "/var/lib/docker/"
+        "sourcePath": "/var/lib/docker"
       }
     },
     {
-      "name": "cgroup",
+      "name": "disk",
       "host": {
-        "sourcePath": "/cgroup"
+        "sourcePath": "/dev/disk"
       }
     },
     {
