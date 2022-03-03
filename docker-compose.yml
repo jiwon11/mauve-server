@@ -190,7 +190,6 @@ services:
       - TZ=Asia/Seoul
     volumes:
       - ./loki/conf:/etc/promtail
-      - /var/log:/var/log
       - ./app/logs:/var/log
     command: -config.file=/etc/promtail/promtail-config.yaml
     networks:
