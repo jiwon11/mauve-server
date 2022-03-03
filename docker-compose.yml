@@ -162,6 +162,12 @@ services:
       TZ: Asia/Seoul
     links:
       - mauve-app-container
+      - prometheus
+      - alertmanager
+      - nodeexporter
+      - cadvisor
+      - grafana
+      - pushgateway
     depends_on:
       - mauve-app-container
   mauve-app-container:
