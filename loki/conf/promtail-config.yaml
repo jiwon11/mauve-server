@@ -15,7 +15,7 @@ scrape_configs:
           - localhost
         labels:
           job: nginx
-          env: development
+          env: production
           host: nginx
           __path__: /var/log/nginx/*.log
 
@@ -25,7 +25,7 @@ scrape_configs:
           - localhost
         labels:
           job: mauve
-          env: development
+          env: production
           host: mauve
           __path__: /var/log/my-application/*/*.log
 
@@ -35,6 +35,6 @@ scrape_configs:
           - localhost
         labels:
           job: system
-          env: development
+          env: production
           host: system
           __path__: /var/log/*.log
