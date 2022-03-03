@@ -28,6 +28,16 @@
     tls off
 }
 
+:8080 {
+    proxy / cadvisor:8080 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
+
 :1234 {
     proxy / grafana:3000 {
             transparent
