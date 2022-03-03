@@ -1,11 +1,14 @@
+global:
+  # Also possible to place this URL in a file.
+  # Ex: `slack_api_url_file: '/etc/alertmanager/slack_url'`
+  slack_api_url: "https://hooks.slack.com/services/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"
+
 route:
-  receiver: "slack"
+  receiver: "slack-notifications"
+  group_by: [alertname, datacenter, app]
 
 receivers:
-  - name: "slack"
+  - name: "slack-notifications"
     slack_configs:
-      - send_resolved: true
+      - channel: "#server-critical"
         text: "{{ .CommonAnnotations.description }}"
-        username: "Prometheus"
-        channel: "#prometheus"
-        api_url: "https://hooks.slack.com/services/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"

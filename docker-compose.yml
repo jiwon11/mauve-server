@@ -1,8 +1,8 @@
-version: '2'
+version: '3'
 
 networks:
   monitor-net:
-    driver: bridge
+    #driver: bridge
   prometheus-net:
     external: false
 
@@ -78,20 +78,20 @@ services:
   cadvisor:
     image: zcube/cadvisor:latest
     container_name: cadvisor
+    privileged: true
     links:
       - mauve-app-container
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-      - /var/run/docker.sock:/var/run/docker.sock:rw
+      #- /var/run/docker.sock:/var/run/docker.sock:rw
     devices:
       - "/dev/kmsg"
     ports:
         - 8080:8080
+    command: ["--logtostderr=true", "--docker_only=true", "--v=1"]
     restart: unless-stopped
     networks:
         - prometheus-net
@@ -129,25 +129,26 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  caddy:
-    image: stefanprodan/caddy
-    container_name: caddy
-    platform: linux/amd64
-    ports:
-      - "1234:1234"
-      - "9090:9090"
-      - "9093:9093"
-      - "9091:9091"
-    volumes:
-      - ./caddy:/etc/caddy
-    environment:
-      - ADMIN_USER=${ADMIN_USER}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-    restart: unless-stopped
-    networks:
-      - monitor-net
-    labels:
-      org.label-schema.group: "monitoring"
+  #caddy:
+  #  image: stefanprodan/caddy
+  #  container_name: caddy
+  #  platform: linux/amd64
+  #  ports:
+  #    - "1234:1234"
+  #    - "9090:9090"
+  #    - "9093:9093"
+  #    - "8080:8080"
+  #    - "9091:9091"
+  #  volumes:
+  #    - ./caddy:/etc/caddy
+  #  environment:
+  #    - ADMIN_USER=${ADMIN_USER}
+  #    - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+  #  restart: unless-stopped
+  #  networks:
+  #    - monitor-net
+  #  labels:
+  #    org.label-schema.group: "monitoring"
   reverse-proxy-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     build:
@@ -172,3 +173,25 @@ services:
       - '3030:3030'
     networks:
       - default
+  
+  loki:
+    image: grafana/loki:2.2.0
+    volumes:
+      - ./loki/conf:/etc/loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - monitor-net
+
+  promtail:
+    image: grafana/promtail:2.2.0
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - ./loki/conf:/etc/promtail
+      - /var/log:/var/log
+      - ./app/logs:/var/log
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - monitor-net
