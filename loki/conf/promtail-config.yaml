@@ -1,0 +1,40 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+client:
+  url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          env: production
+          host: nginx
+          __path__: /var/log/nginx/*.log
+
+  - job_name: mauve
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: mauve
+          env: production
+          host: mauve
+          __path__: /var/log/my-application/*/*.log
+
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          env: production
+          host: system
+          __path__: /var/log/*.log
