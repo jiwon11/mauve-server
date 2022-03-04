@@ -134,26 +134,6 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  #caddy:
-  #  image: stefanprodan/caddy
-  #  container_name: caddy
-  #  platform: linux/amd64
-  #  ports:
-  #    - "1234:1234"
-  #    - "9090:9090"
-  #    - "9093:9093"
-  #    - "8080:8080"
-  #    - "9091:9091"
-  #  volumes:
-  #    - ./caddy:/etc/caddy
-  #  environment:
-  #    - ADMIN_USER=${ADMIN_USER}
-  #    - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-  #  restart: unless-stopped
-  #  networks:
-  #    - monitor-net
-  #  labels:
-  #    org.label-schema.group: "monitoring"
   reverse-proxy-container:
     image: 447993352427.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     build:
