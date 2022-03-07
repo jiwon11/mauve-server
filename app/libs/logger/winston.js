@@ -1,13 +1,11 @@
 import winston, { createLogger, format, transports } from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
 const { combine, timestamp, printf, colorize, label, prettyPrint, json } = format;
-import 'newrelic';
-const newrelicFormatter = require('@newrelic/winston-enricher');
 
 const logDir = 'logs'; // logs 디렉토리 하위에 로그 파일 저장
 
 const logFormat = printf(info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`;
+  return info.message;
 });
 /*
  * Log Level
@@ -20,7 +18,6 @@ const logger = winston.createLogger({
     }),
     label({ label: process.env.NODE_ENV }),
     logFormat,
-    newrelicFormatter(),
     json(),
     prettyPrint()
   ),
@@ -66,10 +63,6 @@ logger.add(
   new winston.transports.Console({
     format: combine(
       colorize({ all: true }), // console 에 출력할 로그 컬러 설정 적용함
-      timestamp({
-        format: 'YYYY-MM-DD HH:mm:ss'
-      }),
-      label({ label: process.env.NODE_ENV }),
       logFormat
     )
   })
