@@ -6,70 +6,59 @@ const Schema = mongoose.Schema;
 const QuestionnaireSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'USER' },
-    additional_weight: {
-      avg_over_last_5y: { type: Number },
-      min_since_age20: { type: Number }
+    weight: {
+      avg_over_last_5y: { type: Number }, // 최근 5년동안의 평균 체중
+      min_since_age20: { type: Number } // 20살 이후 최저 체중
     },
-    goal: [{ type: String, enum: ['건강관리', '체중관리', '월경관리'] }],
-    menstrual_cycle: { type: String, enum: ['주기가 일정한 편이에요. (1-2일 차이)', '주기가 종종 바뀌어요. (3일 이상 차이)', '주기의 편차가 심해요. (5일 이상 차이)'] },
+    goal: [{ type: Number, enum: [0, 1, 2, 3] }], // 목표
+    menstrual_cycle: { type: Number, enum: [0, 1, 2] }, // 월경 주기
     childbirth: {
-      has: { type: Boolean },
-      last_year: { type: Number }
+      // 출산 경험
+      has: { type: Boolean }, // 여부
+      last_year: { type: Number } // 최근 연도
     },
-    during_pregnancy: { type: Boolean },
+    during_pregnancy: { type: Boolean }, // 현재 임신 여부
     lifestyle: {
-      type: String,
-      enum: [
-        '식습관이 규칙적이며 주기적인 운동을 하고 활동적인 편이에요.',
-        '식습관은 규칙적이지만 활동량은 부족한 편이에요.',
-        '식습관은 불규칙하지만 주기적인 운동을 하고 활동적인 편이에요.',
-        '식습관이 불규칙하고 활동량도 부족한 편이에요.',
-        '식사량과 식사 시간이 매우 불규칙하고 활동량도 거의 없어요.'
-      ]
+      // 식습관과 생활습관
+      type: Number,
+      enum: [0, 1, 2, 3, 4]
     },
     eating_category: {
-      type: String,
-      enum: [
-        '주로 ‘밥’ 위주 식사를 해요. 밥 없인 못살아요!',
-        '주로 밀가루 위주 식사를 해요. 밀가루 없인 못살아요!',
-        '밥, 밀가루 골고루 식사를 해요.',
-        '밥, 밀가루, 등 탄수화물보다는 다른 영양소 위주 식사를 해요.'
-      ]
+      // 일주일 중 가장 많이 찾고, 자주 섭취하는 식사의 형태
+      type: Number,
+      enum: [0, 1, 2, 3, 4]
     },
     eating_habits: [
+      // 식사 습관
       {
-        type: String,
-        enum: [
-          '밥 보다는 반찬위주로 식사를 하는 편이에요.',
-          '반찬 보다는 밥양을 많이 먹는 편이에요.',
-          '식사 외 간식이나 단 음료를 자주 먹는 편이에요.',
-          '맵고 짜고 자극적인 음식을 제일 좋아해요.',
-          '담백한 음식을 좋아하고 간을 싱겁게 먹는 편이에요.'
-        ]
+        type: Number,
+        enum: [0, 1, 2, 3]
       }
     ],
-    number_of_eating: {
-      type: String,
-      enum: [
-        '하루 3끼 이상 식사해요. (계속 배가 고파요)',
-        '3끼 (아침, 점심, 저녁)를 정해진 시간에 식사하고 그 외 군것질은 안 하는 편이에요.',
-        '하루 3끼와 중간에 간식도 종종 먹어요.',
-        '아침, 점심, 저녁 중 하루 2끼 식사를 해요.',
-        '하루 2끼와 중간에 간식도 종종 먹어요.',
-        '아침, 점심, 저녁 중 하루 1끼 식사를 해요.',
-        '하루 1끼와 중간에 간식도 종종 먹어요.'
-      ]
+    breakfast: {
+      // 아침 식사
+      type: Number,
+      enum: [0, 1, 2, 3]
     },
-    number_of_coffee: {
-      type: String,
-      enum: ['하루 한잔은 꼭 마셔요.', '하루 2잔 이상 마셔요.', '일주일에 4-5잔 정도 마셔요.', '일주일에 2-3잔 정도 마셔요.', '아주 가끔 마셔요. (일주일에 1잔 정도)', '아예 안 마셔요.']
+    launch: {
+      // 점심 식사
+      type: Number,
+      enum: [0, 1, 2, 3, 4]
     },
-    diseases: [
-      {
-        type: String,
-        enum: ['만성질환 및 대사성 질환', '호르몬관련 질환', '정신 질환', '암', '알러지', '기타', '해당없음']
-      }
-    ]
+    dinner: {
+      // 저녁 식사
+      type: Number,
+      enum: [0, 1, 2, 3, 4]
+    },
+    drinking: {
+      // 음주 빈도
+      type: String,
+      enum: [0, 1, 2, 3, 4]
+    },
+    diseases: {
+      // 질병, 알러지
+      type: String
+    }
   },
   {
     collection: 'QUESTIONNAIRE',
