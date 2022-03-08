@@ -7,17 +7,27 @@ export const create = async (req, res) => {
   try {
     const userId = req.user.ID;
     const questionnaireDTO = { user: userId, ...req.body };
-    const questionnaireCreateResult = await QuestionnaireService.create(questionnaireDTO);
-    if (questionnaireCreateResult.success) {
-      // 추후 결제 후 로직으로 이동
-      const coach = await CoachService.findOne();
-      await roomService.create(req, { title: `${userId} CHAT ROOM`, user: userId, coach: coach.body._id });
-      if (process.env.NODE_ENV === 'production') {
-        await createSlackNewUser({ userId: userId });
+    const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(userId);
+    if (getQuestionnaireByUserIdResult.body) {
+      const updateQuestionnaireResult = await QuestionnaireService.update(userId, getQuestionnaireByUserIdResult.body._id, questionnaireDTO);
+      if (updateQuestionnaireResult.success) {
+        return res.jsonResult(200, updateQuestionnaireResult.body);
+      } else {
+        return res.jsonResult(500, { message: 'Questionnaire Update Service Error', err: updateQuestionnaireResult.body });
       }
-      return res.jsonResult(201, questionnaireCreateResult.body);
     } else {
-      return res.jsonResult(questionnaireCreateResult.body.statusCode, { message: 'Questionnaire Service Error', err: questionnaireCreateResult.body.err });
+      const questionnaireCreateResult = await QuestionnaireService.create(questionnaireDTO);
+      if (questionnaireCreateResult.success) {
+        // 추후 결제 후 로직으로 이동
+        const coach = await CoachService.findOne();
+        await roomService.create(req, { title: `${userId} CHAT ROOM`, user: userId, coach: coach.body._id });
+        if (process.env.NODE_ENV === 'production') {
+          await createSlackNewUser({ userId: userId });
+        }
+        return res.jsonResult(201, questionnaireCreateResult.body);
+      } else {
+        return res.jsonResult(questionnaireCreateResult.body.statusCode, { message: 'Questionnaire Service Error', err: questionnaireCreateResult.body.err });
+      }
     }
   } catch (err) {
     console.log(err);
@@ -51,11 +61,11 @@ export const update = async (req, res) => {
     const questionnaireId = req.params.id;
     const userId = req.user.ID;
     const questionnaireDTO = { user: userId, ...req.body };
-    const getQuestionnaireByUserIdResult = await QuestionnaireService.update(userId, questionnaireId, questionnaireDTO);
-    if (getQuestionnaireByUserIdResult.success) {
-      return res.jsonResult(200, getQuestionnaireByUserIdResult.body);
+    const updateQuestionnaireResult = await QuestionnaireService.update(userId, questionnaireId, questionnaireDTO);
+    if (updateQuestionnaireResult.success) {
+      return res.jsonResult(200, updateQuestionnaireResult.body);
     } else {
-      return res.jsonResult(500, { message: 'Questionnaire Create Service Error', err: getQuestionnaireByUserIdResult.body });
+      return res.jsonResult(500, { message: 'Questionnaire Update Service Error', err: updateQuestionnaireResult.body });
     }
   } catch (err) {
     console.log(err);
