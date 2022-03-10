@@ -312,11 +312,13 @@ export default class CoachService {
       ]);
       if (userLogRecord) {
         const groupByUserLogRecord = groupBy(userLogRecord, 'created_at_date');
-        const groupByTag = Object.keys(groupByUserLogRecord).map(date => {
-          const result = {};
-          result[date] = groupByOnce(groupByUserLogRecord[date], 'tag');
-          return result;
-        });
+        const groupByTag = Object.keys(groupByUserLogRecord)
+          .sort()
+          .map(date => {
+            const result = {};
+            result[date] = groupByOnce(groupByUserLogRecord[date], 'tag');
+            return result;
+          });
         return { success: true, body: { userLogRecord: groupByTag } };
       } else {
         return { success: false, body: { err: `Coach not founded by ID : ${ID}` } };
