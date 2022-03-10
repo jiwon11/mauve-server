@@ -1,7 +1,6 @@
 import loaders from './loaders';
 import webSocket from './socket/socket';
 import express from 'express';
-import 'newrelic';
 
 async function startServer() {
   try {
