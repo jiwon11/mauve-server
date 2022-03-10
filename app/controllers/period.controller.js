@@ -2,7 +2,9 @@ import PeriodService from '../services/period.service';
 import UserService from '../services/user.service';
 import mainPhraseService from '../services/mainPhrase.service';
 import moment from 'moment-timezone';
-import { today } from '../libs/utils/moment';
+//import { today } from '../libs/utils/moment';
+
+//export const today = moment().tz('Asia/Seoul').startOf('day');
 
 export const add = async (req, res) => {
   try {
@@ -86,6 +88,7 @@ export const phase = async (req, res) => {
   try {
     const userId = req.user.ID;
     const step = req.params.step;
+    const today = moment().tz('Asia/Seoul').startOf('day');
     if (['current', 'all'].indexOf(step) !== -1) {
       const periodResult = await PeriodService.getAll(userId);
       if (!periodResult.success) {

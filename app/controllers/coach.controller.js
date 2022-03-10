@@ -42,6 +42,32 @@ export const login = async (req, res) => {
   }
 };
 
+export const update = async (req, res) => {
+  try {
+    const coachDTO = req.body;
+    const profileImgDTO = req.file;
+    const coachId = req.user.ID;
+    if (profileImgDTO) {
+      ['encoding', 'acl', 'contentDisposition', 'storageClass', 'serverSideEncryption', 'metadata', 'etag', 'versionId'].forEach(key => delete profileImgDTO[key]);
+      profileImgDTO.thumbnail = `${process.env.CLOUD_FRONT_URL}/${profileImgDTO.key}?f=png&q=100`;
+    }
+    if (Object.keys(coachDTO).includes('possible_time')) {
+      coachDTO.possible_time = JSON.parse(coachDTO.possible_time);
+    }
+    console.log('coachData', coachDTO);
+    console.log('userProfileImgData', profileImgDTO);
+    const { success, body } = await coachService.update(coachId, coachDTO, profileImgDTO);
+    if (success) {
+      return res.jsonResult(201, body);
+    } else {
+      return res.jsonResult(body.statusCode, body.err);
+    }
+  } catch (err) {
+    console.log(err);
+    return res.jsonResult(500, { message: 'Coach Controller Error', err });
+  }
+};
+
 export const getUserLog = async (req, res) => {
   try {
     const targetUserId = req.params.userId;
@@ -105,7 +131,8 @@ export const getUserNote = async (req, res) => {
 export const getUserInfo = async (req, res) => {
   try {
     const targetUserId = req.params.userId;
-    const { success, body } = await coachService.getUserInfo(targetUserId);
+    const userRole = req.user.role;
+    const { success, body } = await coachService.getUserInfo(targetUserId, userRole);
     if (success) {
       return res.jsonResult(200, body);
     } else {

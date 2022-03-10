@@ -5,15 +5,19 @@ import moment from 'moment-timezone';
 export default class WeightService {
   static async create(weightDTO) {
     try {
+      const onlyDate = weightDTO.date.toISOString().split('T')[0];
       const weightExistRecord = await WeightModel.aggregate([
         {
           $match: {
+            user: mongoose.Types.ObjectId(weightDTO.user),
             time: weightDTO.time,
-            date: moment(moment.utc(weightDTO.date).toDate()).tz('Asia/Seoul').toDate()
+            $expr: {
+              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }]
+            }
           }
         }
       ]);
-      console.log(weightExistRecord);
+      console.log('weightExistRecord', weightExistRecord);
       if (weightExistRecord.length > 0) {
         return { success: false, body: { statusCode: 403, err: '이미 입력한 날짜와 시간대입니다.' } };
       } else {
@@ -78,11 +82,12 @@ export default class WeightService {
     }
   }
 
-  static async update(weightId, weightDTO) {
+  static async update(weightId, userId, weightDTO) {
     try {
       const weight = await WeightModel.findOneAndUpdate(
         {
-          _id: weightId
+          _id: mongoose.Types.ObjectId(weightId),
+          user: mongoose.Types.ObjectId(userId)
         },
         {
           kilograms: weightDTO.kilograms,
@@ -130,6 +135,9 @@ export default class WeightService {
         }
       ]);
       if (weightExistRecord.length > 0) {
+        await ChatModel.delete({
+          'body._id': mongoose.Types.ObjectId(weightId)
+        });
         const weightRecord = await WeightModel.delete({ _id: mongoose.Types.ObjectId(weightId), user: mongoose.Types.ObjectId(userId) });
         return { success: true, body: weightRecord };
       } else {

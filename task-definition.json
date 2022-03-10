@@ -2,25 +2,6 @@
   "ipcMode": null,
   "executionRoleArn": "arn:aws:iam::447993352427:role/ecsTaskExecutionRole",
   "containerDefinitions": [{
-      "name": "xray-daemon",
-      "image": "amazon/aws-xray-daemon",
-      "cpu": 32,
-      "memoryReservation": 50,
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "secretOptions": null,
-        "options": {
-          "awslogs-group": "/ecs/mauve-app-task",
-          "awslogs-region": "ap-northeast-2",
-          "awslogs-stream-prefix": "ecs"
-        }
-      },
-      "portMappings": [{
-        "hostPort": 0,
-        "containerPort": 2000,
-        "protocol": "udp"
-      }]
-    }, {
       "dnsSearchDomains": null,
       "environmentFiles": [{
         "value": "arn:aws:s3:::mauve-app-config/config.env",
@@ -43,11 +24,8 @@
       }],
       "command": null,
       "linuxParameters": null,
-      "cpu": 1024,
-      "environment": [{
-        "name": "AWS_XRAY_DAEMON_ADDRESS",
-        "value": "xray-daemon:2000"
-      }],
+      "cpu": 800,
+      "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
       "dnsServers": null,
@@ -55,7 +33,7 @@
       "workingDirectory": null,
       "secrets": null,
       "dockerSecurityOptions": null,
-      "memory": 850,
+      "memory": 450,
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
@@ -67,7 +45,7 @@
       "interactive": null,
       "healthCheck": null,
       "essential": true,
-      "links": ["xray-daemon"],
+      "links": [],
       "hostname": null,
       "extraHosts": null,
       "pseudoTerminal": null,
@@ -98,7 +76,7 @@
       }],
       "command": null,
       "linuxParameters": null,
-      "cpu": 900,
+      "cpu": 192,
       "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
@@ -144,7 +122,7 @@
     "EC2"
   ],
   "networkMode": null,
-  "cpu": "2048",
+  "cpu": "1024",
   "inferenceAccelerators": [],
   "proxyConfiguration": null,
   "volumes": [],

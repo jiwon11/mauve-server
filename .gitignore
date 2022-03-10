@@ -1,3 +1,7 @@
 /app/node_modules
 .vscode
 /app/.env
+*.log
+newrelic_agent.log
+logs
+app/newrelic_agent.log

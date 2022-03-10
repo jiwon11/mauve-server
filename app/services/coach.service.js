@@ -8,9 +8,10 @@ import { groupBy, groupByOnce } from '../libs/utils/conjugation';
 import redisClient from '../libs/utils/redis';
 import PeriodService from './period.service';
 import moment from 'moment-timezone';
-import { today } from '../libs/utils/moment';
+//import { today } from '../libs/utils/moment';
 import { getUserAge } from '../libs/utils/moment';
 
+export const today = moment().tz('Asia/Seoul').startOf('day');
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -20,6 +21,29 @@ export default class CoachService {
       coachRecord = saveCoach;
       created = true;
       return { success: true, body: { pass_code: coachRecord.pass_code, created } };
+    } catch (err) {
+      console.log(err);
+      if (err.name === 'ValidationError') {
+        let errors = {};
+
+        Object.keys(err.errors).forEach(key => {
+          errors[key] = err.errors[key].message;
+        });
+
+        return { success: false, body: { statusCode: 400, err: errors } };
+      }
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
+  static async update(Id, coachDTO, profileImgDTO) {
+    try {
+      const coachRecord = await CoachModel.findByIdAndUpdate(Id, { ...coachDTO, ...{ profile_img: profileImgDTO } }, { new: true });
+      if (coachRecord) {
+        return { success: true, body: coachRecord };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by ID : ${Id}` } };
+      }
     } catch (err) {
       console.log(err);
       if (err.name === 'ValidationError') {
@@ -120,8 +144,28 @@ export default class CoachService {
     }
   }
 
-  static async getUserInfo(targetUserId) {
+  static async getUserInfo(targetUserId, userRole) {
     try {
+      let projectPipeline;
+      if (userRole === 'admin') {
+        projectPipeline = {
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      } else {
+        projectPipeline = {
+          name: 1,
+          phone_NO: 1,
+          birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
+          weight: 1,
+          height: 1,
+          next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
+          next_payment: 1
+        };
+      }
       const userInfoRecord = await UserModel.aggregate([
         {
           $match: {
@@ -129,15 +173,7 @@ export default class CoachService {
           }
         },
         {
-          $project: {
-            name: 1,
-            phone_NO: 1,
-            birthdate: { $dateToString: { format: '%Y-%m-%d', date: '$birthdate' } },
-            weight: 1,
-            height: 1,
-            next_payment_d_day: { $toInt: { $divide: [{ $subtract: [new Date(), '$next_payment'] }, 24 * 60 * 60 * 1000] } },
-            next_payment: 1
-          }
+          $project: projectPipeline
         }
       ]);
       if (userInfoRecord.length > 0) {
@@ -150,6 +186,7 @@ export default class CoachService {
         if (periodResult.body.length === 0) {
           return { success: true, body: { userInfo: userInfoRecord[0] } };
         } else {
+          periodResult.body.forEach(period => console.log(`today: ${today.format('YYYY-MM-DD')}, period: ${moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD')}`));
           const recentPeriodRecord = periodResult.body.filter(period => !moment(today.format('YYYY-MM-DD')).isBefore(moment(period.start).tz('Asia/Seoul').format('YYYY-MM-DD'), 'day'))[0];
           console.log('recentPeriodRecord', recentPeriodRecord);
           const periodStatisticResult = await PeriodService.statistic(periodResult.body);
@@ -157,10 +194,18 @@ export default class CoachService {
           const periodPhaseResult = await PeriodService.phase(recentPeriodRecord, periodStatisticResult.body, 'current');
           console.log('periodPhaseResult', periodPhaseResult.body);
           if (!periodPhaseResult.success) {
-            return res.jsonResult(500, { message: 'Period Phase Service Error', err: periodPhaseResult.body });
+            return { success: false, body: { message: 'Period Phase Service Error', err: periodPhaseResult.body } };
           }
           userInfoRecord[0].currentPhase = periodPhaseResult.body.current_phase;
-          return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodResult.body } };
+          //const allPhase = Object.values(periodPhaseResult.body.this_month_all_phase).concat(Object.values(periodPhaseResult.body.predict_month_all_phase));
+          const renamePeriod = [];
+          periodResult.body.forEach(item => {
+            if (periodPhaseResult.body.this_month_all_phase.find(phase => phase.start_date === item.start) === undefined) {
+              renamePeriod.push({ start_date: item.start, end_date: item.end, phase: 'period' });
+            }
+          });
+          const periodAndPhaseRecord = renamePeriod.concat(periodPhaseResult.body.this_month_all_phase).sort((a, b) => (a.start_date > b.start_date && 1) || -1);
+          return { success: true, body: { userInfo: userInfoRecord[0], periodRecord: periodAndPhaseRecord } };
         }
       } else {
         return { success: false, body: { err: `User not founded by User ID : ${targetUserId}` } };
@@ -250,7 +295,13 @@ export default class CoachService {
                 { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }
               ]
             },
-            created_at_time: { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+            created_at_time: {
+              $cond: [
+                { $eq: ['$tag', 'weight'] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$body.date' } }, ' '] }, 1] },
+                { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 1] }
+              ]
+            }
           }
         },
         {
@@ -261,11 +312,13 @@ export default class CoachService {
       ]);
       if (userLogRecord) {
         const groupByUserLogRecord = groupBy(userLogRecord, 'created_at_date');
-        const groupByTag = Object.keys(groupByUserLogRecord).map(date => {
-          const result = {};
-          result[date] = groupByOnce(groupByUserLogRecord[date], 'tag');
-          return result;
-        });
+        const groupByTag = Object.keys(groupByUserLogRecord)
+          .sort()
+          .map(date => {
+            const result = {};
+            result[date] = groupByOnce(groupByUserLogRecord[date], 'tag');
+            return result;
+          });
         return { success: true, body: { userLogRecord: groupByTag } };
       } else {
         return { success: false, body: { err: `Coach not founded by ID : ${ID}` } };

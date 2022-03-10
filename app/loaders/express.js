@@ -3,9 +3,10 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import compression from 'compression';
-
 // custom utils And middlewares
-import logger from '../libs/logger/index';
+import morgan from 'morgan';
+import logger from '../libs/logger/winston';
+import morganFormat from '../libs/logger/index';
 import jsonResult from '../middlewares/jsonResult';
 
 // application Controllers for Routes
@@ -20,6 +21,7 @@ import weightRouter from '../routes/weight';
 import mainPhraseRouter from '../routes/mainPhrase';
 import notificationRouter from '../routes/notification';
 import questionnaireRouter from '../routes/questionnaire';
+import adminRouter from '../routes/admin';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 export default async app => {
@@ -31,8 +33,7 @@ export default async app => {
     next();
   });
   app.use(compression());
-  app.use(logger.dev);
-
+  app.use(morgan(morganFormat.dev, { stream: logger.stream }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
@@ -51,6 +52,7 @@ export default async app => {
   app.use('/mainPhrase', mainPhraseRouter);
   app.use('/notification', notificationRouter);
   app.use('/questionnaire', questionnaireRouter);
+  app.use('/admin', adminRouter);
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
