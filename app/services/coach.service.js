@@ -36,6 +36,29 @@ export default class CoachService {
     }
   }
 
+  static async update(Id, coachDTO, profileImgDTO) {
+    try {
+      const coachRecord = await CoachModel.findByIdAndUpdate(Id, { ...coachDTO, ...{ profile_img: profileImgDTO } }, { new: true });
+      if (coachRecord) {
+        return { success: true, body: coachRecord };
+      } else {
+        return { success: false, body: { statusCode: 404, err: `User not founded by ID : ${Id}` } };
+      }
+    } catch (err) {
+      console.log(err);
+      if (err.name === 'ValidationError') {
+        let errors = {};
+
+        Object.keys(err.errors).forEach(key => {
+          errors[key] = err.errors[key].message;
+        });
+
+        return { success: false, body: { statusCode: 400, err: errors } };
+      }
+      return { success: false, body: { statusCode: 500, err } };
+    }
+  }
+
   static async findOne() {
     try {
       const coachRecord = await CoachModel.aggregate([
