@@ -154,9 +154,9 @@ export default class UserService {
     }
   }
 
-  static async update(ID, userDTO, profileImgDTO) {
+  static async update(Id, userDTO, profileImgDTO) {
     try {
-      const userRecord = await UserModel.findByIdAndUpdate(ID, { ...userDTO, ...{ profile_img: profileImgDTO } }, { new: true });
+      const userRecord = await UserModel.findByIdAndUpdate(Id, { ...userDTO, ...{ profile_img: profileImgDTO } }, { new: true });
       if (userRecord) {
         return { success: true, body: userRecord };
       } else {
