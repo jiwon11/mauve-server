@@ -10,7 +10,9 @@ export default class WeightService {
           $match: {
             user: mongoose.Types.ObjectId(weightDTO.user),
             time: weightDTO.time,
-            date: moment(moment.utc(weightDTO.date).toDate()).tz('Asia/Seoul').toDate()
+            $expr: {
+              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$date' } }, ' '] }, 0] }]
+            }
           }
         }
       ]);
