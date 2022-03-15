@@ -40,7 +40,7 @@ const QuestionnaireSchema = new Schema(
       type: Number,
       enum: [0, 1, 2, 3]
     },
-    launch: {
+    lunch: {
       // 점심 식사
       type: Number,
       enum: [0, 1, 2, 3, 4]
