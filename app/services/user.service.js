@@ -25,7 +25,9 @@ export default class UserService {
           if (existUser.deleted) {
             //const restoredUser = await UserModel.restore({ _id: existUser._id });
             const restoreUser = await UserModel.restore({ _id: existUser._id });
+            const restoreChatRoom = await ChatRoomModel.restore({ user: existUser._id });
             console.log(restoreUser);
+            console.log(restoreChatRoom);
             if (restoreUser.modifiedCount > 0) {
               userRecord = existUser;
               created = false;
