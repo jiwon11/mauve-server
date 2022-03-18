@@ -7,7 +7,7 @@ export const create = async (req, res) => {
   try {
     const userId = req.user.ID;
     const questionnaireDTO = { user: userId, ...req.body };
-    const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(userId);
+    const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(userId, true);
     if (getQuestionnaireByUserIdResult.body) {
       const updateQuestionnaireResult = await QuestionnaireService.update(userId, getQuestionnaireByUserIdResult.body._id, questionnaireDTO);
       if (updateQuestionnaireResult.success) {
@@ -41,7 +41,7 @@ export const getByUserId = async (req, res) => {
     const userId = req.user.ID;
     const userRole = req.user.role;
     if (userId === targetUserId || userRole === 'coach') {
-      const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(targetUserId);
+      const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(targetUserId, false);
       if (getQuestionnaireByUserIdResult.success) {
         return res.jsonResult(200, getQuestionnaireByUserIdResult.body);
       } else {
