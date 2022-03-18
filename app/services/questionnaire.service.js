@@ -12,7 +12,7 @@ export default class QuestionnaireService {
     }
   }
 
-  static async getByUserId(userId) {
+  static async getByUserId(userId, withDeleted) {
     try {
       const pipeline = [
         {
@@ -21,7 +21,12 @@ export default class QuestionnaireService {
           }
         }
       ];
-      const questionnaireRecord = await QuestionnaireModel.aggregate(pipeline);
+      let questionnaireRecord;
+      if (withDeleted) {
+        questionnaireRecord = await QuestionnaireModel.aggregateWithDeleted(pipeline);
+      } else {
+        questionnaireRecord = await QuestionnaireModel.aggregate(pipeline);
+      }
       return { success: true, body: questionnaireRecord[0] };
     } catch (err) {
       console.log(err);
@@ -31,6 +36,16 @@ export default class QuestionnaireService {
 
   static async update(userId, questionnaireId, questionnaireDTO) {
     try {
+      const existQuestionnaireRecord = await QuestionnaireModel.aggregateWithDeleted([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(questionnaireId)
+          }
+        }
+      ]);
+      if (existQuestionnaireRecord[0].deleted) {
+        await QuestionnaireModel.restore({ _id: existQuestionnaireRecord[0]._id });
+      }
       const updatedQuestionnaireRecord = await QuestionnaireModel.findByIdAndUpdate({ _id: questionnaireId, user: userId }, questionnaireDTO, { new: true });
       if (updatedQuestionnaireRecord) {
         return { success: true, body: updatedQuestionnaireRecord };
