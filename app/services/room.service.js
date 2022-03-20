@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 const createGreetingMessage = roomRecord => {
   const userName = roomRecord.user.name;
   const coachName = roomRecord.coach.name;
-  return `안녕하세요, ${userName}님! 모브 ${coachName} 코치입니다. 
+  return `안녕하세요, ${userName}님! 모브 ${coachName}입니다.
 
 모브 1일차에는 응답해주신 문진표를 기반으로 ${userName} 님께 맞는 ‘1주일 추천 식단'과 맞춤 플랜 방향을 미리 안내해드리겠습니다. 자동화된 식단이 아닌 개개인별 상황에 맞게 맞춤형 식단으로 제공이 되기 때문에 시간이 다소 소요될 수 있으며, 당일 내로 식단표를 제공해드리겠습니다. (실제 식단관리 및 피드백은 내일부터 진행이 됩니다.)
 
