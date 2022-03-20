@@ -28,7 +28,7 @@ export default class mainPhraseService {
     try {
       const allPhraseRecord = await MainPhraseModel.aggregate([
         { $match: { phase: phaseName } },
-        { $project: { _id: 0, phrases: { title: 1, description: 1, image: { location: 1, thumbnail: 1 } } } }
+        { $project: { _id: 0, phrases: { title: 1, link: 1, description: 1, image: { location: 1, thumbnail: 1 } } } }
       ]);
       return { success: true, body: allPhraseRecord[0] };
     } catch (err) {
