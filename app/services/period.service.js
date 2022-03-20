@@ -104,13 +104,13 @@ export default class PeriodService {
           const termEnd = moment(periodRecord[i].end);
           const termDiff = moment.duration(termEnd.diff(termStart)).asDays() + 1;
           termSum += termDiff;
-        }
-        if (periodRecord[i + 1]) {
-          const thisMonth = moment(periodRecord[i].start);
-          const lastMonth = moment(periodRecord[i + 1].start);
-          const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
-          cycleSum += cycleDiff;
-          cycleLen++;
+          if (periodRecord[i + 1]) {
+            const thisMonth = moment(periodRecord[i].start);
+            const lastMonth = moment(periodRecord[i + 1].start);
+            const cycleDiff = moment.duration(thisMonth.diff(lastMonth)).asDays();
+            cycleSum += cycleDiff;
+            cycleLen++;
+          }
         }
       }
       const cycleAvg = parseFloat((cycleSum / cycleLen).toFixed(0));
