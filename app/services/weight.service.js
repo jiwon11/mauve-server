@@ -5,13 +5,14 @@ import moment from 'moment-timezone';
 export default class WeightService {
   static async create(weightDTO) {
     try {
+      const onlyDate = weightDTO.date.toISOString().split('T')[0];
       const weightExistRecord = await WeightModel.aggregate([
         {
           $match: {
             user: mongoose.Types.ObjectId(weightDTO.user),
             time: weightDTO.time,
             $expr: {
-              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$date' } }, ' '] }, 0] }]
+              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }]
             }
           }
         }
@@ -81,11 +82,12 @@ export default class WeightService {
     }
   }
 
-  static async update(weightId, weightDTO) {
+  static async update(weightId, userId, weightDTO) {
     try {
       const weight = await WeightModel.findOneAndUpdate(
         {
-          _id: weightId
+          _id: mongoose.Types.ObjectId(weightId),
+          user: mongoose.Types.ObjectId(userId)
         },
         {
           kilograms: weightDTO.kilograms,
