@@ -13,6 +13,8 @@
     "@babel/runtime": "^7.16.7",
     "@bull-board/express": "^3.9.0",
     "@newrelic/winston-enricher": "^2.1.0",
+    "@sentry/node": "^6.18.2",
+    "@sentry/tracing": "^6.18.2",
     "@slack/webhook": "^6.1.0",
     "@sentry/node": "^6.17.2",
     "@sentry/tracing": "^6.17.2",

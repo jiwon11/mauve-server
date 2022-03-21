@@ -3,6 +3,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import compression from 'compression';
+import * as Sentry from '@sentry/node';
+const SentryTracing = require('@sentry/tracing');
+
 // custom utils And middlewares
 import morgan from 'morgan';
 import logger from '../libs/logger/winston';
@@ -25,6 +28,34 @@ import adminRouter from '../routes/admin';
 import { pageNotFoundError, respondInternalError } from '../controllers/errorController';
 
 export default async app => {
+  Sentry.init({
+    dsn: 'https://61a0a40ab4344cb99f697de1678f16be@o1173468.ingest.sentry.io/6268550',
+    debug: true,
+    environment: process.env.NODE_ENV,
+    release: 'mauve@' + process.env.NODE_ENV,
+    autoSessionTracking: false,
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new SentryTracing.Integrations.Express({
+        // to trace all requests to the default router
+        app
+        // alternatively, you can specify the routes you want to trace:
+        // router: someRouter,
+      }),
+      new SentryTracing.Integrations.Mongo({
+        useMongoose: true // Default: false
+      })
+    ],
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0
+  });
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+
   app.set('trust proxy', true);
   app.use(cors({ credentials: true, origin: true, exposedHeaders: ['cookie'] }));
   app.all('/*', function (req, res, next) {
@@ -56,6 +87,17 @@ export default async app => {
   // custom Error controllers
   app.use(pageNotFoundError);
   app.use(respondInternalError);
-
+  app.use(Sentry.Handlers.errorHandler());
+  app.use(
+    Sentry.Handlers.errorHandler({
+      shouldHandleError(error) {
+        // Capture all 404 and 500 errors
+        if (error.status === 404 || error.status === 500) {
+          return true;
+        }
+        return false;
+      }
+    })
+  );
   return app;
 };
