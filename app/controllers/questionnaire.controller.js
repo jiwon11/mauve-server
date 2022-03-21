@@ -2,32 +2,34 @@ import QuestionnaireService from '../services/questionnaire.service';
 import roomService from '../services/room.service';
 import CoachService from '../services/coach.service';
 import { createSlackNewUser } from '../queue/slack-user-queue';
+import { createGreetingMessage } from '../libs/utils/greetingMessage';
 
 export const create = async (req, res) => {
   try {
     const userId = req.user.ID;
     const questionnaireDTO = { user: userId, ...req.body };
     const getQuestionnaireByUserIdResult = await QuestionnaireService.getByUserId(userId, true);
+    let questionnaireCreateResult;
+    let statusCode;
     if (getQuestionnaireByUserIdResult.body) {
-      const updateQuestionnaireResult = await QuestionnaireService.update(userId, getQuestionnaireByUserIdResult.body._id, questionnaireDTO);
-      if (updateQuestionnaireResult.success) {
-        return res.jsonResult(200, updateQuestionnaireResult.body);
-      } else {
-        return res.jsonResult(500, { message: 'Questionnaire Update Service Error', err: updateQuestionnaireResult.body });
-      }
+      questionnaireCreateResult = await QuestionnaireService.update(userId, getQuestionnaireByUserIdResult.body._id, questionnaireDTO);
+      statusCode = 200;
     } else {
-      const questionnaireCreateResult = await QuestionnaireService.create(questionnaireDTO);
-      if (questionnaireCreateResult.success) {
-        // 추후 결제 후 로직으로 이동
-        const coach = await CoachService.findOne();
-        await roomService.create(req, { title: `${userId} CHAT ROOM`, user: userId, coach: coach.body._id });
-        if (process.env.NODE_ENV === 'production') {
-          await createSlackNewUser({ userId: userId });
-        }
-        return res.jsonResult(201, questionnaireCreateResult.body);
-      } else {
-        return res.jsonResult(questionnaireCreateResult.body.statusCode, { message: 'Questionnaire Service Error', err: questionnaireCreateResult.body.err });
+      questionnaireCreateResult = await QuestionnaireService.create(questionnaireDTO);
+      statusCode = 201;
+    }
+    if (questionnaireCreateResult.success) {
+      // 추후 결제 후 로직으로 이동
+      const coach = await CoachService.findOne();
+      const roomCreateResult = await roomService.create({ title: `${userId} CHAT ROOM`, user: userId, coach: coach.body._id });
+      console.log(roomCreateResult.body);
+      await createGreetingMessage(req, roomCreateResult.body);
+      if (process.env.NODE_ENV === 'production') {
+        await createSlackNewUser({ userId: userId });
       }
+      return res.jsonResult(201, questionnaireCreateResult.body);
+    } else {
+      return res.jsonResult(questionnaireCreateResult.body.statusCode, { message: 'Questionnaire Service Error', err: questionnaireCreateResult.body.err });
     }
   } catch (err) {
     console.log(err);
