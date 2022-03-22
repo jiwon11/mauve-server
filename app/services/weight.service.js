@@ -12,7 +12,7 @@ export default class WeightService {
             user: mongoose.Types.ObjectId(weightDTO.user),
             time: weightDTO.time,
             $expr: {
-              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$created_at' } }, ' '] }, 0] }]
+              $eq: [onlyDate, { $arrayElemAt: [{ $split: [{ $dateToString: { format: '%Y-%m-%d %H:%M', date: '$date' } }, ' '] }, 0] }]
             }
           }
         }
