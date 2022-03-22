@@ -33,7 +33,7 @@ export default class roomService {
     }
   }
 
-  static async findAll(userId, userRole, limit = 20, offset = 0) {
+  static async findAll(userId, userRole, limit = 100, offset = 0) {
     try {
       let roomAggregatePipeLine;
       if (userRole === 'admin') {
