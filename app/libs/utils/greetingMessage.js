@@ -15,7 +15,7 @@ export const createGreetingMessage = async (req, roomRecord) => {
 
   const io = req.app.get('io');
   const sockets = await io.of('/chat').in(roomRecord._id.toString()).fetchSockets();
-  const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+  const connectedUser = Array.from(new Set(sockets.map(socket => socket.handshake.auth._id)));
   connectedUser.push(mongoose.Types.ObjectId(roomRecord.coach._id));
   const chatResult = await chatService.postChat(io, connectedUser, roomRecord.coach._id, 'coach', roomRecord._id.toString(), { text: message });
   await createNewNotification({ senderId: roomRecord.coach._id, senderRole: 'coach', chatRoomId: roomRecord._id.toString(), connectedUser, chatDTO: chatResult.body });
