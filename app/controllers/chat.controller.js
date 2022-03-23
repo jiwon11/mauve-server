@@ -31,7 +31,7 @@ export const postChat = async (req, res) => {
     const senderRole = req.user.role;
     const io = await req.app.get('io');
     const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-    const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+    const connectedUser = Array.from(new Set(sockets.map(socket => socket.handshake.auth._id)));
     console.log('connectedUser', connectedUser);
     const postChatResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, { text: chatBody });
     if (postChatResult.success) {
@@ -62,7 +62,7 @@ export const postMedia = async (req, res) => {
     const senderRole = req.user.role;
     const io = await req.app.get('io');
     const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-    const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+    const connectedUser = Array.from(new Set(sockets.map(socket => socket.handshake.auth._id)));
     console.log('connectedUser', connectedUser);
     const postChatMediaResult = await ChatService.postChat(io, connectedUser, senderId, senderRole, targetRoomId, chatMediaDTO, media_tag);
     if (postChatMediaResult.success) {

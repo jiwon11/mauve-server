@@ -25,7 +25,7 @@ export const create = async (req, res) => {
       const targetRoomId = roomResult.body._id.toString();
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+      const connectedUser = Array.from(new Set(sockets.map(socket => socket.handshake.auth._id)));
       console.log('connectedUser', connectedUser);
       const postChatResult = await ChatService.postChat(io, connectedUser, userId, userRole, targetRoomId, weightCreateResult.body, 'weight');
       if (process.env.NODE_ENV === 'production') {
@@ -82,7 +82,7 @@ export const update = async (req, res) => {
       const targetRoomId = roomResult.body._id.toString();
       const io = await req.app.get('io');
       const sockets = await io.of('/chat').in(targetRoomId).fetchSockets();
-      const connectedUser = sockets.map(socket => socket.handshake.auth._id);
+      const connectedUser = Array.from(new Set(sockets.map(socket => socket.handshake.auth._id)));
       console.log('connectedUser', connectedUser);
       const postChatResult = await ChatService.postChat(io, connectedUser, userId, userRole, targetRoomId, weightUpdateResult.body, 'weight');
       if (process.env.NODE_ENV === 'production') {
