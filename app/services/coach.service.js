@@ -11,7 +11,6 @@ import moment from 'moment-timezone';
 //import { today } from '../libs/utils/moment';
 import { getUserAge } from '../libs/utils/moment';
 
-export const today = moment().tz('Asia/Seoul').startOf('day');
 export default class CoachService {
   static async sign(coachDTO, profileImgDTO) {
     try {
@@ -177,6 +176,7 @@ export default class CoachService {
         }
       ]);
       if (userInfoRecord.length > 0) {
+        const today = moment().tz('Asia/Seoul').startOf('day');
         userInfoRecord[0].age = getUserAge(userInfoRecord[0].birthdate);
         const periodResult = await PeriodService.getAll(targetUserId);
         console.log('periodResult', periodResult.body);
